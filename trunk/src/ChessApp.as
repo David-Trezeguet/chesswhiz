@@ -151,9 +151,10 @@
 			return this.sessionId;
 		}
 
+		// Clear the main window canvas
 		public function clearView() : void {
-			for (var i:int = 0; i < this.mainWindow.numChildren; i++) {
-				this.mainWindow.removeChildAt(i);
+			while (this.mainWindow.numChildren > 0) {
+				this.mainWindow.removeChildAt(0);
 			}
 		}
 
