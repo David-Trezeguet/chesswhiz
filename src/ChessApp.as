@@ -10,6 +10,7 @@
 	import mx.containers.ControlBar;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
+	import mx.containers.HBox;
 	import mx.containers.Panel;
 	import mx.controls.Button;
 	import mx.controls.Spacer;
@@ -18,7 +19,7 @@
 	
 	import views.*;
 
-	public class ChessApp  {
+	public class ChessApp {
 
 		public var version:String;
 		public var playerId:String;
@@ -38,17 +39,17 @@
 		public var preferences:Object;
 		public var cookie:SharedObject;
 		public var mainWindow:UIComponent;
-		public var mainToolBar:UIComponent;
+		public var mainToolBar:HBox;
 		public var baseURI:String;
 
-		public function ChessApp(toolbar:UIComponent, window:UIComponent) {
+		public function ChessApp(toolbar:HBox, window:UIComponent) {
 			mainToolBar = toolbar;
 			mainWindow = window;
 			baseURI = "http://www.playxiangqi.com/flex/";
 		}
 		
 
-		public function init() {
+		public function init() : void {
 			version = "FLASHCHESS-0.6.0.2";
 			playerId = "";
 			sessionId = "";
@@ -73,11 +74,11 @@
 			initAppMenu();
 			loadCookie();
 		}
-		public function initAppMenu() {
+		public function initAppMenu() : void {
 			menu = new AppMenu(this.mainToolBar, 20, 4, 40, 810);
 		}
 
-		public function loadCookie() {
+		public function loadCookie() : void {
 			cookie = SharedObject.getLocal("flashchess");
 			if (cookie && cookie.data && cookie.data.persist == 0xFFDDFF) {
 				preferences["pieceskinindex"] = cookie.data.pieceskinindex;
@@ -86,7 +87,7 @@
 				preferences["sound"] = cookie.data.sound;
 			}
 		}
-		public function saveCookie() {
+		public function saveCookie() : void {
 			if (!cookie) {
 				cookie = SharedObject.getLocal("flashchess");
 			}
@@ -104,8 +105,8 @@
         	    }
 			}
 		}
-		public function initLanguageSettings():void {
-			var locale = "en_US";
+		public function initLanguageSettings() : void {
+			var locale:String = "en_US";
 			if (urlParams["locale"] != null && urlParams["locale"] != "") {
 				locale = urlParams["locale"];
 			}
@@ -120,14 +121,14 @@
 			session.connect();
 		}
 
-		public function processSocketConnectEvent() {
+		public function processSocketConnectEvent() : void {
 			initLanguageSettings();
 			menu.showStartMenu();
 		}
 
-		public function stopApp() {
+		public function stopApp() : void {
 			session.closeSocket();
-			for (var key in this.tableObjects) {
+			for (var key:String in this.tableObjects) {
 				if (key && this.tableObjects[key]) {
 					delete this.tableObjects[key];
 				}
@@ -138,8 +139,8 @@
 			clearView();
 		}
 
-		public function doGuestLogin() {
-			var rand_no = Math.ceil( 9999*Math.random() );
+		public function doGuestLogin() : void {
+			var rand_no:Number = Math.ceil( 9999*Math.random() );
 			var uname:String  = 'Guest#fl' + rand_no;
 			Global.vars.app.doLogin(uname, '');
 		}
@@ -150,13 +151,13 @@
 			return this.sessionId;
 		}
 
-		public function clearView() {
+		public function clearView() : void {
 			for (var i:int = 0; i < this.mainWindow.numChildren; i++) {
 				this.mainWindow.removeChildAt(i);
 			}
 		}
 
-		public function initLoginPanel() {
+		public function initLoginPanel() : void {
 			var loginPanel:Panel = new Panel();
 			loginPanel.title = "Login";
 			loginPanel.id = "loginPanel";
@@ -179,26 +180,26 @@
 			cbLogin.addChild(spacer);
 			var loginBttn:Button = new Button();
 			loginBttn.label = LocaleMgr.instance().getResourceId("ID_LOGIN");
-			loginBttn.addEventListener("click", function(event:Event) {
+			loginBttn.addEventListener("click", function(event:Event) : void {
 				doLogin(tiUname.text, tiPasswd.text);
 			});
 			cbLogin.addChild(loginBttn);
 			var guestLoginBttn:Button = new Button();
 			guestLoginBttn.label = LocaleMgr.instance().getResourceId("ID_GUESTLOGIN");
-			guestLoginBttn.addEventListener("click", function(event:Event) {
+			guestLoginBttn.addEventListener("click", function(event:Event) : void {
 				doGuestLogin();
 			});
 			cbLogin.addChild(guestLoginBttn);
 			loginPanel.addChild(cbLogin);			
 		}
-		public function initViewTablesPanel(tableList:Object) {
+		public function initViewTablesPanel(tableList:Object) : void {
 			clearView();
 			var view:TableListView = new TableListView(this.mainWindow);
 			view.display(tableList);
 		}
 
-		public function displayVersion(mc) {
-		}
+		//public function displayVersion(mc) : void {
+		//}
 
 		public function doLogin(uname:String, passwd:String):void {
 			this.playerId = uname;
@@ -209,64 +210,64 @@
 			stopApp();
 			startApp();
 		}
-		public function doViewTables() {
+		public function doViewTables() : void {
 			session.sendTableListRequest(playerId, sessionId);
 		}
-		public function doNewTable() {
+		public function doNewTable() : void {
 			session.sendNewTableRequest(playerId, sessionId, "Red");
 		}
 		
-		public function doJoinTable(tid) {
+		public function doJoinTable(tid:String) : void {
 			session.sendJoinRequest(playerId, sessionId, tid, "None", "0");
 		}
-		public function doCloseTable() {
+		public function doCloseTable() : void {
 			session.sendLeaveRequest(playerId, sessionId, currentTableId);
 		}
-		public function doResignTable() {
+		public function doResignTable() : void {
 			session.sendResignRequest(playerId, sessionId, currentTableId);
 		}
-		public function doDrawTable() {
+		public function doDrawTable() : void {
 			session.sendDrawRequest(playerId, sessionId, currentTableId);
 		}
-		public function doTableChat(msg) {
+		public function doTableChat(msg:String) : void {
 			session.sendChatRequest(playerId, sessionId, currentTableId, msg);
 		}
-		public function showTableMenu(showSettings, showPref) {
+		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
 			if (menu) {
 				menu.showTableMenu(showSettings, showPref);
 			}
 		}
-		public function showObserverMenu(color, tid) {
+		public function showObserverMenu(color:String, tid:String) : void {
 			if (menu) {
 				menu.showObserverMenu(color, tid);
 			}
 		}
-		public function showGameMenu() {
+		public function showGameMenu() : void {
 			if (menu) {
 				menu.showGameMenu();
 			}
 		}
-		public function changeTableSettings() {
+		public function changeTableSettings() : void {
 			if (!(this.mainWindow.getChildByName("tableSettingsPanel"))) {
-				var tableSettingsDialog = new TableSettingsDialog(this.mainWindow, currentTableId);
+				var tableSettingsDialog:TableSettingsDialog = new TableSettingsDialog(this.mainWindow, currentTableId);
 				tableSettingsDialog.display();
 			}
 		}
-		public function changeTablePref() {
+		public function changeTablePref() : void {
 			if (!(this.mainWindow.getChildByName("tablePrefPanel"))) {
-				var tablePrefDialog = new TablePrefDialog(this.mainWindow, currentTableId, preferences);
+				var tablePrefDialog:TablePrefDialog = new TablePrefDialog(this.mainWindow, currentTableId, preferences);
 				tablePrefDialog.display();
 			}
 		}
-		public function updatePref(pref) {
+		public function updatePref(pref:Object) : void {
 			if (pref) {
-				for (var key in pref) {
+				for (var key:String in pref) {
 					this.preferences[key] = pref[key];
 				}
 				this.saveCookie();
 			}
 		}
-		public function handleServerEvent(event:DataEvent):void {
+		public function handleServerEvent(event:DataEvent) : void {
 			var eventData:String = event.data;
 			// There can be multiple messages/events in the response body
 			if (eventData === "Not yet authenticated\n") {
@@ -322,7 +323,7 @@
 			}
 		}
 
-		public function processResponse_LOGIN(response:Message) {
+		public function processResponse_LOGIN(response:Message) : void {
 			var loginData:LoginInfo = null;
 			if (response.optype === "LOGIN") {
 				if (!this.login && response.getCode() === "0") {
@@ -343,7 +344,7 @@
 				}
 			}
 		}
-		public function processResponse_LOGOUT(response:Message) {
+		public function processResponse_LOGOUT(response:Message) : void {
 			if (!this.login && response.getCode() === "0") {
 				if (response.getContent() == this.playerId) {
 		        	this.stopApp();
@@ -351,7 +352,7 @@
 			}
         }
 
-		public function processResponse_LIST(response) {
+		public function processResponse_LIST(response:Message) : void {
 			var tableList:Array = response.parseListResponse();
 			if (this.tableEntries.length > 0) {
 				this.tableEntries.splice(0, this.tableEntries.length);
@@ -359,7 +360,7 @@
 			this.tableEntries = tableList;
 			this.initViewTablesPanel(this.tableEntries);
 		}
-		public function processResponse_ITABLE(response) {
+		public function processResponse_ITABLE(response:Message) : void {
 			var tableData:TableInfo = response.parseTableResponse();
 			var tableId:String = tableData.getID();
 			var tableObj:Table = this.getTable(tableId);
@@ -371,20 +372,20 @@
 			tableObj.newTable(tableData);
 		}
 
-		public function getTable(tableId):Table 
+		public function getTable(tableId:String) : Table 
 		{
 			trace("tableid: " + tableId);
 			return this.tableObjects[tableId]; 
 		}
-		public function playGame(tableId, color):void {
+		public function playGame(tableId:String, color:String) : void {
 	        session.sendJoinRequest(this.getPlayerID(), this.getSessionID(), tableId, color, '0');
     	}
-		public function process_E_JOIN(event):void {
+		public function process_E_JOIN(event:Message) : void {
 			if (event.getCode() === "0") {
-				var joinData = new JoinInfo();
+				var joinData:JoinInfo = new JoinInfo();
 				joinData.parse(event.getContent());
-				var tableId = joinData.getTableID();
-				var tableObj = this.getTable(tableId);
+				var tableId:String = joinData.getTableID();
+				var tableObj:Table = this.getTable(tableId);
 				if (tableObj == null) {
 					tableObj = new Table(tableId, preferences);
 					this.tableObjects[tableId] = tableObj;
@@ -394,10 +395,10 @@
 			}
 	    }
 		
-		public function process_MOVE(event) {
-			var tableObj = null;
+		public function process_MOVE(event:Message) : void {
+			var tableObj:Table = null;
 			if (event.getCode() === "0") {
-				var moveData = new MoveInfo();
+				var moveData:MoveInfo = new MoveInfo();
 				moveData.parse(event.getContent());
 				tableObj = this.getTable( moveData.getTableID());
 				if (tableObj) {
@@ -411,32 +412,32 @@
 				}
 			}
 	    }
-		public function sendMoveRequest(player, piece, curPos, newPos, tid) {
+		public function sendMoveRequest(player:PlayerInfo, piece:Piece, curPos:Position, newPos:Position, tid:String) : void {
 			session.sendMoveRequest(this.getPlayerID(), this.getSessionID(), curPos, newPos, '1500', tid);
 		}
 		
-		public function resignGame(tableId) {
+		public function resignGame(tableId:String) : void {
 			this.session.sendResignRequest(this.getPlayerID(), this.getSessionID(), tableId);
 		}
 	
-		public function drawGame(tableId) {
+		public function drawGame(tableId:String) : void {
 			this.session.sendDrawRequest(this.getPlayerID(), this.getSessionID(), tableId);
 		}
 
-		public function processEvent_I_MOVES(event) {
-			var moveList = new MoveListInfo();
+		public function processEvent_I_MOVES(event:Message) : void {
+			var moveList:MoveListInfo = new MoveListInfo();
 			moveList.parse(event.getContent());
-			var tableObj = this.getTable( moveList.getTableID());
+			var tableObj:Table = this.getTable( moveList.getTableID());
 			if (tableObj) {
 				tableObj.playMoveList(moveList);
 			}
 		}
 	
-		public function processEvent_LEAVE(event) {
-			var fields = event.getContent().split(';');
-			var tid = fields[0];
-			var pid = fields[1];
-			var tableObj = this.getTable(tid);
+		public function processEvent_LEAVE(event:Message) : void {
+			var fields:Array = event.getContent().split(';');
+			var tid:String = fields[0];
+			var pid:String = fields[1];
+			var tableObj:Table = this.getTable(tid);
 			if (tableObj) {
 				tableObj.leaveTable(pid);
 				if (pid == this.playerId) {
@@ -448,11 +449,11 @@
 			}
 		}
 	
-		public function processEvent_E_END(event) {
+		public function processEvent_E_END(event:Message) : void {
 			//op=E_END&code=0&content=2;black_win;Player resigned
 			if (event.getCode() === "0") {
-				var endEvent = new EndEvent(event.getContent());
-				var tableObj = this.getTable(endEvent.getTableID());
+				var endEvent:EndEvent = new EndEvent(event.getContent());
+				var tableObj:Table = this.getTable(endEvent.getTableID());
 				if (tableObj) {
 					tableObj.stopGame(endEvent.reason, endEvent.winner);
 	
@@ -460,66 +461,66 @@
 			}
 		}
 	
-		public function processEvent_DRAW(event) {
+		public function processEvent_DRAW(event:Message) : void {
 			//op=E_END&code=0&content=2;black_win;Player resigned
 			if (event.getCode() === "0") {
-				var drawEvent = new DrawEvent(event.getContent());
-				var tableObj = this.getTable(drawEvent.getTableID());
+				var drawEvent:DrawEvent = new DrawEvent(event.getContent());
+				var tableObj:Table = this.getTable(drawEvent.getTableID());
 				if (tableObj) {
 					tableObj.drawGame(drawEvent.getPlayerID());
 				}
 			}
 		}
-		public function processEvent_MSG(event) {
+		public function processEvent_MSG(event:Message) : void {
 			// op=MSG&code=0&tid=4&content=Guest#hox1454;hello
-			var tableId = event.getTableId();
-			var fields = event.getContent().split(';');
-			var pid = fields[0];
-			var chatMsg = fields[1];
+			var tableId:String = event.getTableId();
+			var fields:Array = event.getContent().split(';');
+			var pid:String = fields[0];
+			var chatMsg:String = fields[1];
 			if (event.getCode() === "0") {
-				var tableObj = this.getTable(tableId);
+				var tableObj:Table = this.getTable(tableId);
 				if (tableObj) {
 					tableObj.displayChatMessage(pid, chatMsg);
 				}
 			}
 		}
 		
-		public function sendUpdateRequest(tableId, times, r) {
-			var msg = new Message();
+		public function sendUpdateRequest(tableId:String, times:String, r:Boolean) : void {
+			var msg:Message = new Message();
 			msg.optype = "UPDATE";
 			msg.params = {tid: tableId, pid: this.playerId, rated: (r) ? 1 : 0, itimes: times}
 			this.session.sendRequest(msg);
 		}
-		public function processEvent_UPDATE(event) {
+		public function processEvent_UPDATE(event:Message) : void {
 			// op=UPDATE&code=0&content=1;Guest#hox8233;1;600/240/5
-			var fields = event.getContent().split(';');
-			var tableId = fields[0];
-			var pid = fields[1];
-			var times = fields[3];
+			var fields:Array = event.getContent().split(';');
+			var tableId:String = fields[0];
+			var pid:String = fields[1];
+			var times:String = fields[3];
 			if (event.getCode() === "0") {
-				var tableObj = this.getTable(tableId);
+				var tableObj:Table = this.getTable(tableId);
 				if (tableObj) {
 					tableObj.updateGameTimes(pid, times);
 				}
 			}			
 		}
 
-		public function processSocketCloseEvent() {
+		public function processSocketCloseEvent() : void {
 			//Util.createMessageBox(this, "Connection to server lost! Closing the application.", Global.vars.app.closeApp);
 		}
 
-		public function closeApp() {
+		public function closeApp() : void {
 			this.stopApp();
 			this.startApp();
 		}
-		public function removeTable(tableId) { 
-			var tableObj = this.tableObjects[tableId];
+		public function removeTable(tableId:String) : void { 
+			var tableObj:Table = this.tableObjects[tableId];
 			if (tableObj) {
 				this.tableObjects[tableId] = null;
 			}
 			this.currentTableId = "";
 		}
-		public function playMoveSound() {
+		public function playMoveSound() : void {
 			if (this.preferences["sound"]) {
 				moveSound.play();
 			}

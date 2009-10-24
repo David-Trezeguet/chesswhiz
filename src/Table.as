@@ -3,7 +3,9 @@
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	
 	import hoxserver.*;
+	
 	import views.*;
 	
 	public class Table {
@@ -118,7 +120,7 @@
 				this.sides.bottom.color = "Red";
 			}
 		}
-		public function getTimers(color:String) {
+		public function getTimers(color:String) : GameTimers {
 			return new GameTimers(this.tableData.getTime(color));			
 		}
 		public function getJoinColor():String {
@@ -133,7 +135,7 @@
 			}
 			return joinColor;
 		}
-		public function newTable(tableData):void {
+		public function newTable(tableData:TableInfo):void {
 			if ( tableData.getRedPlayer() != null ||
 				 tableData.getRedPlayer().getPlayerID() != "" ) {
 				this.setRedPlayer(tableData.getRedPlayer());
@@ -152,7 +154,7 @@
 			this.view.display();
 		}
 
-		public function reviewMove(cmd):void {
+		public function reviewMove(cmd:String) : void {
 			if (tableState != "MOVEREVIEW_STATE") {
 				if (moveList.length > 0 && cmd != "end" && cmd != "forward") {
 					curMoveIndex = moveList.length;
@@ -177,7 +179,7 @@
 			}
 		}
 		
-		public function createObserveTableView(joinColor) {
+		public function createObserveTableView(joinColor:String) : void {
 			if (this.view === null) {
 				this.createView();
 			}
@@ -193,7 +195,7 @@
 			Global.vars.app.showObserverMenu(joinColor, this.tableId);
 		}
 
-		public function displayChatMessage(pid, chatMsg) {
+		public function displayChatMessage(pid:String, chatMsg:String) : void {
 			this.view.displayChatMessage(pid, chatMsg);
 		}
 		public function getMoveListInfo():String {
@@ -227,7 +229,7 @@
 			}
 		}
 
-		public function startGame() {
+		public function startGame() : void {
 			if ( (this.redPlayer !== null && this.redPlayer.getPlayerID() !== "") &&
 				 (this.blackPlayer !== null && this.blackPlayer.getPlayerID() !== "") ) {
 				if (this.redPlayer.getPlayerID() === Global.vars.app.playerId) {
@@ -245,7 +247,7 @@
 			}
 		}
 
-		public function resumeGame() {
+		public function resumeGame() : void {
 			if(this.game) {
 				this.game.start();
 			}
@@ -254,7 +256,7 @@
 			}
 		}
 		
-		public function stopGame(reason, winner) {
+		public function stopGame(reason:String, winner:String) : void {
 			if (this.game) {
 				this.view.board.disableEvents(this.game.getLocalPlayer().getColor());
 				this.game = null;
@@ -265,19 +267,19 @@
 			this.processTableEvent("RESIGNGAME_EVENT", null);
 		}
 		
-		public function drawGame(pid) {
+		public function drawGame(pid:String) : void {
 			this.view.displayMessage("" + pid + " offering draw");
 		}
 		
-		public function updateGameTimes(pid, times)
+		public function updateGameTimes(pid:String, times:String) : void
 		{
 			if (this.moveList.length == 0) {
-				var timer = null;
+				var timer:GameTimers = null;
 				this.tableData.updateTimes(times);
 				timer = new GameTimers(times);
 				this.view.updateTimers(getTopSideColor(), timer);
 				this.view.updateTimers(getBottomSideColor(), timer);
-				var fields = times.split("/");
+				var fields:Array = times.split("/");
 				this.settings["gametime"] = fields[0];
 				this.settings["movetime"] = fields[1];
 				this.settings["extratime"] = fields[2];
@@ -285,7 +287,7 @@
 			}
 		}
 	
-		public function startTimer() {
+		public function startTimer() : void {
 			this.redTimes = new GameTimers(this.tableData.getRedTime());
 			this.redTimer = new Timer(1000, this.redTimes.gameTime);
 			this.redTimer.addEventListener(TimerEvent.TIMER, this.timerHandler);
@@ -293,7 +295,7 @@
 			this.blackTimes = new GameTimers(this.tableData.getBlackTime());
 			this.blackTimer = new Timer(1000, this.blackTimes.gameTime);
 			this.blackTimer.addEventListener(TimerEvent.TIMER, this.timerHandler);
-			var color = this.getMoveColor();
+			var color:String = this.getMoveColor();
 			if (color == "Red") {
 				this.redTimer.start();
 			} else {
@@ -302,7 +304,7 @@
 		}
 
 		public function getMoveColor():String {
-			var color = "";
+			var color:String = "";
 			if (game != null) {
 				if (this.game.waitingForMyMove()) {
 					color = this.game.getLocalPlayer().getColor();
@@ -313,16 +315,16 @@
 			}
 			else {
 				if (this.moveList.length > 0) {
-					var lastMove = this.moveList[this.moveList.length - 1];
+					var lastMove:String = this.moveList[this.moveList.length - 1];
 					if (lastMove != "") {
-						var fields = lastMove.split(":");
+						var fields:Array = lastMove.split(":");
 						color = (fields[0] == "Red") ? "Black" : "Red";
 					}
 				}
 			}
 			return color;
 		}
-		public function stopTimer() {
+		public function stopTimer() : void {
 			if (this.redTimer) {
 				this.redTimer.stop();
 			}
@@ -330,8 +332,8 @@
 				this.blackTimer.stop();
 			}
 		}
-		public function resetTimer() {
-			var color = this.getMoveColor();
+		public function resetTimer() : void {
+			var color:String = this.getMoveColor();
 			if (color === "Red") {
 				this.blackTimes.resetMoveTime();
 				this.blackTimer.stop();
@@ -344,8 +346,8 @@
 			}
 		}
 
-		public function timerHandler(event:Event) {
-			var color = this.getMoveColor();
+		public function timerHandler(event:Event) : void {
+			var color:String = this.getMoveColor();
 			if (color === "Red") {
 				if (this.redTimes) {
 					this.redTimes.gameTime--;
@@ -380,52 +382,52 @@
 			}
 		}
 
-		public function moveTimeout(color) {
+		public function moveTimeout(color:String) : void {
 			this.view.displayMessage(color + " move timeout");
 			this.processTableEvent("MOVETIMEOUT_EVENT", color);
 		}
-		public function gameTimeout(color) {
+		public function gameTimeout(color:String) : void {
 			this.view.displayMessage(color + " game timeout");
 			this.processTableEvent("GAMETIMEOUT_EVENT", color);
 		}
 
-		public function closeTable() {
+		public function closeTable() : void {
 		    this.stopTimer();
 		}
-		public function playMoveList(moveList) {
-			for (var i = 0; i < moveList.moves.length; i++) {
-				var curPos = new Position(parseInt(moveList.moves[i].charAt(1)), parseInt(moveList.moves[i].charAt(0)));
-				var newPos = new Position(parseInt(moveList.moves[i].charAt(3)), parseInt(moveList.moves[i].charAt(2)));
-				var piece = this.view.board.getPieceByPos(curPos);
+		public function playMoveList(moveList:MoveListInfo) : void {
+			for (var i:int = 0; i < moveList.moves.length; i++) {
+				var curPos:Position = new Position(parseInt(moveList.moves[i].charAt(1)), parseInt(moveList.moves[i].charAt(0)));
+				var newPos:Position = new Position(parseInt(moveList.moves[i].charAt(3)), parseInt(moveList.moves[i].charAt(2)));
+				var piece:Piece = this.view.board.getPieceByPos(curPos);
 				if (piece) {
 					this.processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
 				}
 			}
 		};
 		
-		public function playMove(moveData) {
+		public function playMove(moveData:MoveInfo) : void {
 			Global.vars.app.playMoveSound();
-			var curPos = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
-			var newPos = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
-			var piece = this.view.board.getPieceByPos(curPos);
+			var curPos:Position = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
+			var newPos:Position = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
+			var piece:Piece = this.view.board.getPieceByPos(curPos);
 			if (piece) {
 				this.processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
 			}
 		}
 		
-		public function rewindLastMove() {
+		public function rewindLastMove() : void {
 			if (this.moveList.length > 0) {
-				var lastMove = this.moveList[this.moveList.length - 1];
+				var lastMove:String = this.moveList[this.moveList.length - 1];
 				if (lastMove != "") {
-					var fields = lastMove.split(":");
-					var piece = this..view.board.getPieceByIndex(fields[0], fields[1]);
-					var move = fields[2];
-					var capturePiece = null;
+					var fields:Array = lastMove.split(":");
+					var piece:Piece = this..view.board.getPieceByIndex(fields[0], fields[1]);
+					var move:String = fields[2];
+					var capturePiece:Piece = null;
 					if (fields[3] !== "") {
 						capturePiece = this.view.board.getPieceByIndex((fields[0] === "Red") ? "Black" : "Red", fields[3]);
 					}
-					var prevPos = new Position(parseInt(move.charAt(0)), parseInt(move.charAt(1)));
-					var curPos = new Position(parseInt(move.charAt(2)), parseInt(move.charAt(3)));
+					var prevPos:Position = new Position(parseInt(move.charAt(0)), parseInt(move.charAt(1)));
+					var curPos:Position = new Position(parseInt(move.charAt(2)), parseInt(move.charAt(3)));
 					this.view.board.rewindPieceByPos(piece, curPos, prevPos, capturePiece);
 					this.view.grid.dataProvider.removeItemAt(this.moveList.length - 1);
 					this.moveList.splice(this.moveList.length - 1, 1);
@@ -441,7 +443,7 @@
 			}
 		}
 
-		public function processWrongMove(error) {
+		public function processWrongMove(error:String) : void {
 			rewindLastMove();
 			this.view.displayMessage("Server rejected the move. " + error);
 			if (this.game) {
@@ -449,18 +451,18 @@
 			}
 		}
 
-		public function parseMove(moveData) {
-			var fields = moveData.split(":");
-			var piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
-			var move = fields[2];
-			var capturePiece = null;
+		public function parseMove(moveData:String) : Array {
+			var fields:Array = moveData.split(":");
+			var piece:Piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
+			var move:String = fields[2];
+			var capturePiece:Piece = null;
 			if (fields[3] !== "") {
 				capturePiece = this.view.board.getPieceByIndex((fields[0] === "Red") ? "Black" : "Red", fields[3]);
 			}
 			return [piece, move, capturePiece];
 		}
 
-		public function moveLocalPiece(piece, curPos, newPos) {
+		public function moveLocalPiece(piece:Piece, curPos:Position, newPos:Position) : void {
 			if (tableState == "MOVEREVIEW_STATE" && curMoveIndex != moveList.length) {
 				this.view.displayMessage("In review mode");
 				piece.moveImage();
@@ -475,7 +477,7 @@
 				piece.moveImage();
 				return;
 			}
-			var resultObj = this.game.validateMove(this.view.board, newPos, piece);
+			var resultObj:Array = this.game.validateMove(this.view.board, newPos, piece);
 			if (resultObj[0] !== 1) {
 				this.view.displayMessage("Invalid move. " + resultObj[1]);
 				piece.moveImage();
@@ -497,11 +499,11 @@
 			}
 		}
 
-		public function movePiece(moveData) {
+		public function movePiece(moveData:MoveInfo) : void {
 			Global.vars.app.playMoveSound();
-			var curPos = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
-			var newPos = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
-			var piece = this.view.board.getPieceByPos(curPos);
+			var curPos:Position = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
+			var newPos:Position = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
+			var piece:Piece = this.view.board.getPieceByPos(curPos);
 			if (piece) {
 				this.processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
 			}
@@ -516,8 +518,8 @@
 				}
 			}
 		}
-		public function updateMove(piece, curPos, newPos) {
-			var curPiece = this.view.board.getPieceByPos(newPos);
+		public function updateMove(piece:Piece, curPos:Position, newPos:Position) : void {
+			var curPiece:Piece = this.view.board.getPieceByPos(newPos);
 			var mov:String = "" + piece.getColor() + ":" + piece.getIndex() + ":" + curPos.row + curPos.column + newPos.row + newPos.column + ":" + ((curPiece != null) ? curPiece.getIndex() : "");
 			this.moveList[this.moveList.length] = mov;
 			var i:int = 0;
@@ -540,10 +542,10 @@
 			if (this.moveList.length == 1) {
 				Global.vars.app.showTableMenu(false, true);
 			}
-    		this.view.displayMoveData(mov, this.moveList);
+    		this.view.displayMoveData(mov, this.moveList.length);
 		}
 
-		public function processReviewMove(cmd) {
+		public function processReviewMove(cmd:String) : void {
 			if (moveList.length == 0) {
 				return;
 			}
@@ -560,7 +562,7 @@
 			} else {
 				moveIndex = curMoveIndex + 1;
 				if (moveIndex > moveList.length) {
-					return 0;
+					return;
 				}
 			}
 			
@@ -574,19 +576,19 @@
 			applyChangeSet(moveIndex);
 		}
 
-		public function applyChangeSet(moveIndex) {
+		public function applyChangeSet(moveIndex:int) : void {
 			var i:int = 0;
 			var changeSet:Array = new Array();
 			var focusPiece:Piece = null;
-			var mov = "";
-			var fields = null;
-			var color = "";
-			var pieceIndex = "";
-			var oldRow = "";
-			var oldCol = "";
-			var newRow = "";
-			var newCol = "";
-			var capturedIndex = "";
+			var mov:String = "";
+			var fields:Array = null;
+			var color:String = "";
+			var pieceIndex:String = "";
+			var oldRow:int = 0;
+			var oldCol:int = 0;
+			var newRow:int = 0;
+			var newCol:int = 0;
+			var capturedIndex:String = "";
 			if (moveIndex < curMoveIndex) {
 				for (i = curMoveIndex - 1; i >= moveIndex; i--) {
 					mov = moveList[i];
@@ -657,12 +659,12 @@
 			}
 			this.view.board.reDraw(changeSet, focusPiece);
 		}
-		public function stopReview() {
+		public function stopReview() : void {
 			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
 				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
 				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
 			}
-			var moveIndex = moveList.length;
+			var moveIndex:int = moveList.length;
 			if (curMoveIndex == moveIndex ) {
 				return;
 			}
@@ -674,11 +676,11 @@
 			curMoveIndex = -1;
 		}
 		
-		public function handleDebugCmd(cmd) {
+		public function handleDebugCmd(cmd:String) : void {
 			var prefix:String = "/debug ";
-			var arg = cmd.substring(prefix.length);
+			var arg:String = cmd.substring(prefix.length);
 			var result:String = "" + arg + ":\n";
-			var player = null;
+			var player:PlayerInfo = null;
 			if (arg == "gamestate") {
 				if (this.game) {
 					result += this.game.state;
@@ -741,7 +743,7 @@
 			this.view.displayMessage(result);
 		}
 
-		public function joinTable(player):void {
+		public function joinTable(player:PlayerInfo):void {
 			if (player.getColor() === "Black") {
 				this.setBlackPlayer(player);
 			}
@@ -755,19 +757,19 @@
 			this.view.displayMessage("" + player.getPlayerID() + " joined");
 		}
 
-		public function isPlaying(pid):Boolean {
+		public function isPlaying(pid:String):Boolean {
 			if ((this.redPlayer && this.redPlayer.getPlayerID() == pid) ||
 				(this.blackPlayer && this.blackPlayer.getPlayerID() == pid)) {
 				return true;
 			}
 			return false;
 		}
-		public function leaveTable(pid) {
+		public function leaveTable(pid:String): void {
 			this.processTableEvent("LEAVETABLE_EVENT", pid);
 			this.view.displayMessage("" + pid + " left");
 		}
 
-		public function processEvent_LEAVE(pid) {
+		public function processEvent_LEAVE(pid:String) : void {
 			if (pid === Global.vars.app.getPlayerID()) {
 				this.closeTable();
 			}
@@ -784,7 +786,13 @@
 			}
 		}
 
-		public function processTableEvent(type, data) {
+		/**
+		 * @TODO: The 'data' parameter 'data' has type = "*" 
+		 *         - meaning "untyped" under ActionScript 3.
+		 *           This is a not a good practice and should be fixed
+		 *           as soon as possbile.
+		 */
+		public function processTableEvent(type:String, data:*) : void {
 			if (this.tableState === "IDLE_STATE") {
 				if (type === "JOINTABLE_EVENT") {
 					if (data.getPlayerID() === Global.vars.app.getPlayerID()) {
@@ -794,7 +802,7 @@
 							this.tableState = "NEWTABLE_STATE";
 						}
 						else {
-							var joinColor = this.getJoinColor();
+							var joinColor:String = this.getJoinColor();
 							this.setSideColors(joinColor);
 							this.createObserveTableView(joinColor);
 							if (joinColor === "") {
@@ -874,7 +882,7 @@
 			}
 			else if (this.tableState === "OBSERVER_STATE") {
 				if (type === "MOVEPIECE_EVENT") {
-					var piece = data[0];
+					var piece:Piece = data[0];
 					this.updateMove(piece, data[1], data[2]);
 					if (this.view !== null) {
 						this.view.board.movePieceByPos(piece, data[2], (this.view === null) ? false : true);
@@ -983,25 +991,25 @@
 			}
 		}
 
-		public function getSettings() {
+		public function getSettings() : Object {
 			return this.settings;
 		}
-		public function getPreferences() {
+		public function getPreferences() : Object {
 			return this.curPref;
 		}
-		public function getMoveList() {
+		public function getMoveList() : Array {
 			return this.moveList;
 		}
-		public function updateSettings(newSettings) {
-			var bUpdated = false;
-			var times = newSettings["gametime"] + "/" + newSettings["movetime"] + "/" + newSettings["extratime"];
+		public function updateSettings(newSettings:Object) : void {
+			var bUpdated:Boolean = false;
+			var times:String = newSettings["gametime"] + "/" + newSettings["movetime"] + "/" + newSettings["extratime"];
 			if (settings["gametime"] != newSettings["gametime"] ||
 				settings["movetime"] != newSettings["movetime"] ||
 				settings["extratime"] != newSettings["extratime"]) {
 				bUpdated = true;
 			}
 			if (settings["rated"] != newSettings["rated"]) {
-				var msg = "Game type changed to ";
+				var msg:String = "Game type changed to ";
 				msg += (newSettings["rated"] == true)? "Rated" : "Nonrated";
 				this.view.displayMessage(msg);
 				bUpdated = true;
@@ -1011,8 +1019,7 @@
 				Global.vars.app.sendUpdateRequest(this.tableId, times, settings["rated"]);
 			}
 		}
-		public function updatePref(newPref) {
-			var piece = null;
+		public function updatePref(newPref:Object) : void {
 			if (curPref["boardcolor"] != newPref["boardcolor"]) {
 				this.view.redrawBoard(newPref["boardcolor"], this.curPref["linecolor"], newPref["pieceskinindex"]);
 			}

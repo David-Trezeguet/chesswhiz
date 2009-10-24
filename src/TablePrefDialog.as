@@ -7,16 +7,18 @@
 	import mx.containers.HBox;
 	import mx.containers.Panel;
 	import mx.containers.VBox;
+	import mx.controls.Button;
 	import mx.controls.ColorPicker;
 	import mx.controls.Image;
 	import mx.controls.RadioButton;
+	import mx.core.UIComponent;
 	import mx.events.ColorPickerEvent;
 
 	public class TablePrefDialog extends Panel {
 		public var tableId:String;
-		public var mcParent;
-		public var dWidth;
-		public var dHeight;
+		public var mcParent:UIComponent;
+		//public var dWidth;
+		//public var dHeight;
 		public var rbgSound:Array;
 		public var rbgPieces:Array;
 		public var curPref:Object;
@@ -24,7 +26,7 @@
 		public var colorPicker:ColorPicker;
 		public var preview:Panel;
 		public var selectedPieceSet:int;
-		public function TablePrefDialog(mc, tid, pref) {
+		public function TablePrefDialog(mc:UIComponent, tid:String, pref:Object) {
 			this.mcParent = mc;
 			this.name = "tablePrefPanel";
 			this.tableId = tid;
@@ -35,8 +37,8 @@
 			this.selectedPieceSet = 1;
 			mc.addChild(this);
 		}
-		public function display() {
-			var hBox = new HBox();
+		public function display() : void {
+			var hBox:HBox = new HBox();
 			this.addChild(hBox);
 
 			var p1:Panel = new Panel();
@@ -53,7 +55,7 @@
             img.source = Global.vars.app.baseURI + "images/player_volume.png";
             hb1.addChild(img);
 			
-			var hb2 = new HBox();
+			var hb2:HBox = new HBox();
 			p1.addChild(hb2);
 			rb = Util.createRadioButton(hb2, "Off", "sound", 0, 0);
             rb.value = 1;
@@ -67,11 +69,11 @@
 				this.rbgSound[1].selected = true;
 			}
 
-			var p2 = new Panel();
+			var p2:Panel = new Panel();
 			hBox.addChild(p2);
 			p2.title = "Pieces";
 			this.rbgPieces = new Array();
-			var hb3 = new HBox();
+			var hb3:HBox = new HBox();
 			p2.addChild(hb3);
 			rb = Util.createRadioButton(hb3, "", "pieceset", 0, 0);
             rb.value = 1;
@@ -80,7 +82,7 @@
             img.source = Global.vars.app.baseURI + "images/pieces/1/rking.png";
             hb3.addChild(img);
 			
-			var hb4 = new HBox();
+			var hb4:HBox = new HBox();
 			p2.addChild(hb4);
 			rb = Util.createRadioButton(hb4, "", "pieceset", 0, 0);
             rb.value = 2;
@@ -89,7 +91,7 @@
             img.source = Global.vars.app.baseURI + "images/pieces/2/rking.png";
             hb4.addChild(img);
 
-			var hb5 = new HBox();
+			var hb5:HBox = new HBox();
 			p2.addChild(hb5);
 			rb = Util.createRadioButton(hb5, "", "pieceset", 0, 0);
             rb.value = 3;
@@ -100,9 +102,9 @@
             selectedPieceSet = this.curPref["pieceskinindex"];
             this.rbgPieces[selectedPieceSet - 1].selected = true;
 
-			var vBox = new VBox();
+			var vBox:VBox = new VBox();
 			hBox.addChild(vBox);
-			var p3 = new Panel();
+			var p3:Panel = new Panel();
 			vBox.addChild(p3);
 			p3.title = "Board Color";
 			colorPicker = new ColorPicker();
@@ -119,9 +121,9 @@
 			vBox.addChild(this.preview);
 			displayPreview(0, 0, this.curPref["boardcolor"]);
 
-			var hBox2 = new HBox();
+			var hBox2:HBox = new HBox();
 			this.addChild(hBox2);
-			var btn = Util.createButton(hBox2, "ok", LocaleMgr.instance().getResourceId("ID_OK"), 0, 0, 20, 50, true, handlerOK);
+			var btn:Button = Util.createButton(hBox2, "ok", LocaleMgr.instance().getResourceId("ID_OK"), 0, 0, 20, 50, true, handlerOK);
 			Util.createButton(hBox2, "cancel", LocaleMgr.instance().getResourceId("ID_CANCEL"), btn.x + btn.width, 0, 20, 80, true, handlerCANCEL);
 
 			for (var i:int = 0; i < this.rbgPieces.length; i++) {
@@ -130,22 +132,22 @@
 			this.colorPicker.addEventListener(ColorPickerEvent.CHANGE, handleChangePreview);
 		}
 
-		public function handleChangePieceSet(event:Event) {
+		public function handleChangePieceSet(event:Event) : void {
 			this.selectedPieceSet = (RadioButton)(event.target).value;
 			trace("selected piece index: " + this.selectedPieceSet);
 			this.displayPreview(this.preview.x, this.preview.y, this.colorPicker.selectedColor);
 		}
 
-		public function handleChangePreview(event:Event) {
+		public function handleChangePreview(event:Event) : void {
 			this.displayPreview(this.preview.x, this.preview.y, this.colorPicker.selectedColor);
 		}
-		public function displayPreview(x, y, color) {
+		public function displayPreview(x:Number, y:Number, color:uint) : void {
 			if (this.preview) {
 				while(this.preview.numChildren) {
 					this.preview.removeChildAt(0);
 				}
 			}
-			var canvas = new Canvas();
+			var canvas:Canvas = new Canvas();
 			this.preview.addChild(canvas);
 			canvas.graphics.beginFill(color);
 			canvas.graphics.drawRect(canvas.x, canvas.y, 80,80);
@@ -159,7 +161,7 @@
 			canvas.graphics.endFill();
 		}
 
-		public function handlerOK(event:Event) {
+		public function handlerOK(event:Event) : void {
 			var pref:Object = {};
 			if (rbgSound[0].selected) {
 				pref["sound"] = true;
@@ -169,13 +171,13 @@
 			pref["pieceskinindex"] = this.selectedPieceSet;
 			pref["boardcolor"] = this.colorPicker.selectedColor;
 			mcParent.removeChild(mcParent.getChildByName("tablePrefPanel"));
-			var tableObj = Global.vars.app.getTable(this.tableId);
+			var tableObj:Table = Global.vars.app.getTable(this.tableId);
 			if (tableObj) {
 				tableObj.updatePref(pref);
 			}
 			Global.vars.app.updatePref(pref);
 		}
-		public function handlerCANCEL(event:Event) {
+		public function handlerCANCEL(event:Event) : void {
 			mcParent.removeChild(mcParent.getChildByName("tablePrefPanel"));
 		}
 	}

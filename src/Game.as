@@ -1,14 +1,15 @@
 ﻿package {
 	import hoxserver.*;
+	
 	import views.*;
 
 	public class Game
 	{
-		public var tableObj;
-		public var localPlayer;
-		public var oppPlayer;
-		public var state;
-		public function Game(tableObj)
+		public var tableObj:Table;
+		public var localPlayer:PlayerInfo;
+		public var oppPlayer:PlayerInfo;
+		public var state:String;
+		public function Game(tableObj:Table)
 		{
 			this.tableObj = tableObj;
 			this.localPlayer = null;
@@ -16,33 +17,33 @@
 			this.state = "idle";
 		}
 		
-		public function setLocalPlayer(player) {
+		public function setLocalPlayer(player:PlayerInfo) : void {
 			this.localPlayer = player.clone();
 		}
 		
-		public function getLocalPlayer() {
+		public function getLocalPlayer() : PlayerInfo {
 			return this.localPlayer;
 		}
 		
-		public function setOppPlayer(player) {
+		public function setOppPlayer(player:PlayerInfo) : void {
 			this.oppPlayer = player.clone();
 		}
 		
-		public function getOppPlayer() {
+		public function getOppPlayer() : PlayerInfo {
 			return this.oppPlayer;
 		}
 		
-		public function capturePiece() {
+		public function capturePiece() : void {
 		}
 		
-		public function waitingForMyMove() {
+		public function waitingForMyMove() : Boolean {
 	    	if (this.state === "localmove") {
     	    	return true;
     		}
     		return false;
 		}
 
-		public function processEvent(event) {
+		public function processEvent(event:String) : void {
 			if (this.state === "idle") {
 				if (event === "start") {
 					this.start();
@@ -66,24 +67,24 @@
 			}
 		}
 		
-		public function start() {
+		public function start() : void {
 			this.tableObj.view.board.enableEvents(this.localPlayer.getColor());
 		}
 		
-		public function end() {
+		public function end() : void {
 		}
-		public function getMyPiece(type) {
+		public function getMyPiece(type:String) : Array {
 			return this.tableObj.view.board.getPiece(this.localPlayer.getColor(), type);
 		}
 
-		public function getOppPieces(type) {
+		public function getOppPieces(type:String) : Array {
 			if (this.localPlayer.getColor() === "Black") {
 				return this.tableObj.view.board.getPiece("Red", type);
 			}
 			return this.tableObj.view.board.getPiece("Black", type);
 		}
 		
-		public function isInsideFort(color, newPos) {
+		public function isInsideFort(color:String, newPos:Position) : Boolean {
 			if (color == "Black") {
 				if ((newPos.column <= 5 && newPos.column >= 3) && (newPos.row <= 2 && newPos.row >= 0)) {
 					return true;
@@ -99,7 +100,7 @@
 		public function validateMove(board:Board, newPos:Position, piece:Piece):Array
 		{
 			var result:Array = new Array();
-			var reason = "";
+			var reason:String = "";
 			var curPiece:Piece = board.getPieceByPos(newPos);
 			if (curPiece && (curPiece.getColor() === piece.getColor())) {
 				// Invalid move
@@ -149,7 +150,7 @@
 				horizontalDir = 0; // no movement in horizontal direction
 			}
 		
-			var move = 0;
+			var move:int = 0;
 			if (rowDiff > 0) {
 				if (colDiff > 0) {
 					if ((rowDiff === 1 && colDiff === 2) || (rowDiff === 2 && colDiff === 1)) {
@@ -166,7 +167,7 @@
 			} else {
 				move = 0; // Horizontal move
 			}
-			var curPos = new Position(curRow, curCol);
+			var curPos:Position = new Position(curRow, curCol);
 			var interveningPieces:int = board.getInterveningPiece(curPos, newPos);
 			var validMove:int = 0;
 			if (piece.getType() === "king") {
@@ -231,24 +232,21 @@
 			result[1] = reason;
 			return result;
 		}
-		public function isCheckMate(piece) {
-			var checkMate = false;
-			var resultObj = null;
-			var myKing = this.getMyPiece("king");
-			var myKingPos = myKing[0].getPosition();
+		public function isCheckMate(piece:Piece) : Boolean {
+			var resultObj:Array = null;
+			var myKing:Array = this.getMyPiece("king");
+			var myKingPos:Position = myKing[0].getPosition();
 			if (piece) {
 				resultObj = this.validateMove(this.tableObj.view.board, myKingPos, piece);
 				if (resultObj[0]) {
 					return true;
 				}
 			}
-			var types = ["cannon", "horse", "chariot", "king"];
-			var j;
-			for (j = 0; j < types.length; j++) {
-				var pieces = this.getOppPieces(types[j]);
-				var i = 0;
-				for (i = 0; i < pieces.length; i++) {
-					var oPiece = pieces[i];
+			var types:Array = ["cannon", "horse", "chariot", "king"];
+			for (var j:int = 0; j < types.length; j++) {
+				var pieces:Array = this.getOppPieces(types[j]);
+				for (var i:int = 0; i < pieces.length; i++) {
+					var oPiece:Piece = pieces[i];
 					if (oPiece && !oPiece.isCaptured()) {
 						resultObj = this.validateMove(this.tableObj.view.board, myKingPos, oPiece);
 						if (resultObj[0]) {

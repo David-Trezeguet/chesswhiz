@@ -1,12 +1,12 @@
 ﻿package {
 	import flash.events.Event;
- 	import flash.net.URLRequest;
- 	import flash.net.URLLoader;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
 	import flash.system.Security;
 
 	public class LocaleMgr {
 		private static var _instance:LocaleMgr = null;
-		private var _locale;
+		private var _locale:String;
 		private var _languages:Array;
 		private var _defResources:Object;
 
@@ -21,13 +21,13 @@
 			}
 			return _instance;
 		}
-		public function setLocale(locale) {
+		public function setLocale(locale:String) : void {
 			_locale = locale;
 		}
-		public function getLocale() {
+		public function getLocale() : String {
 			return _locale;
 		}
-		public function setLanguage(lang, res) {
+		public function setLanguage(lang:String, res:Array ) : void {
 			this._locale = lang;
 			trace("_locale: " + _locale);
 			this._languages[lang] = res;
@@ -36,7 +36,7 @@
 			}
 			Global.vars.app.initLoginPanel();
 		}
-		public function getResourceId(id:String) {
+		public function getResourceId(id:String) :String {
 			var label:String = "";
 			label = _languages[_locale][id];
 			if (label == null || label == "") {
@@ -49,7 +49,7 @@
 			}
 			return label;
 		}
-		public function loadTextXML() {
+		public function loadTextXML() : void {
 			var xmlData:String = '<?xml version="1.0" encoding="utf-8"?>' + 
 								 '<language id="en_US" description="English">' +  
 								 '<resource id="ID_VIEWTABLES">View Tables</resource>' + 
@@ -72,7 +72,7 @@
 			this.parseXMLData(xmlData);
 		}
 
-		public function loadLocaleFile(locale:String) {
+		public function loadLocaleFile(locale:String) : void {
 			var localeResFile:String = "http://www.playxiangqi.com/flash/" + locale + ".xml";
 			trace("locale file: " + localeResFile);
 			Security.allowDomain("www.playxiangqi.com");
@@ -80,15 +80,15 @@
 			xmlLoader.addEventListener(Event.COMPLETE, this.loadXML);  
 			xmlLoader.load(new URLRequest(localeResFile));  
 		}
-		public function loadXML(evt:Event) {
+		public function loadXML(evt:Event) : void {
 			this.parseXMLData(evt.target.data);
 		}
 		
-		public function parseXMLData(xmlData) {
+		public function parseXMLData(xmlData:String) : void {
 			var resources:Array = new Array();
 			var xmlDoc:XML = new XML(xmlData);
 			trace("locale: " + xmlDoc.@id);
-			var ids = xmlDoc.resource;
+			var ids:XMLList = xmlDoc.resource;
 			trace("number of resources: " + ids.length());
 			for (var i:int = 0; i < ids.length(); i++) {
 				trace(ids[i].@id + " = " + ids[i]);

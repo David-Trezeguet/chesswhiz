@@ -5,6 +5,8 @@ package views
 	import flash.events.KeyboardEvent;
 	import flash.ui.Keyboard;
 	
+	import hoxserver.*;
+	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.containers.Panel;
@@ -12,11 +14,10 @@ package views
 	import mx.controls.Button;
 	import mx.controls.DataGrid;
 	import mx.controls.Image;
-	import mx.controls.List;
+	import mx.controls.Label;
 	import mx.controls.TextArea;
 	import mx.controls.dataGridClasses.DataGridColumn;
-	import hoxserver.*;
-	import views.*;
+	import mx.core.UIComponent;
 	
 	public class TableView extends Panel
 	{
@@ -39,7 +40,7 @@ package views
 		private var blackPlayerIcon:String;
 		private var dpMoves:ArrayCollection;
 		public var grid:DataGrid;
-		private var tableObj;
+		private var tableObj:Table;
 		public var board:Board;
 		private var boardPanelWidth:int;
 		private var boardPanelHeight:int;
@@ -48,7 +49,7 @@ package views
 		private var topMargin:int;
 		private var leftMargin:int;
 
-		public function TableView(parent, tObj)
+		public function TableView(parent:UIComponent, tObj:Table)
 		{
 			this.layout = "absolute";
 			this.id = "tablePanel";
@@ -67,7 +68,7 @@ package views
 			this.board = new Board(this.boardHeight, this.boardWidth, this.tableObj);
 		}
 
-		public function display()
+		public function display() : void
 		{
 			this.displayTopPanel();
 			this.displayBoard();
@@ -111,7 +112,7 @@ package views
 			this.mcBottomPanel.addChild(this.mcBottomTimers);
 		}
 
-		public function displayPlayerData(player):void {
+		public function displayPlayerData(player:PlayerInfo):void {
 			if (this.mcTopPanel == null || this.mcBottomPanel == null || player == null) {
 				return;
 			}
@@ -156,7 +157,7 @@ package views
 			}
 		}
 
-		public function displayTimers(color, timer) {
+		public function displayTimers(color:String, timer:GameTimers) : void {
 			var mcPlayer:HBox = (color === this.tableObj.getTopSideColor()) ? this.mcTopPlayer : this.mcBottomPlayer;
 			var mcTimers:HBox = (color === this.tableObj.getTopSideColor()) ? this.mcTopTimers : this.mcBottomTimers;
 			while (mcTimers.numChildren > 0) {
@@ -164,13 +165,13 @@ package views
 			}
 			var bounds:Object = mcTopPanel.getBounds(this);
 			trace("x: " + bounds.x + " y: " + bounds.y + " w: " + bounds.width + " h: " + bounds.height);
-			var mcTimeImage = new Image();
+			var mcTimeImage:Image = new Image();
 			mcTimeImage.y = 5;
 			mcTimeImage.x = 4;
 			mcTimeImage.source = Global.vars.app.baseURI + this.timerIcon;
 			mcTimeImage.width = 20;
 			mcTimers.addChild(mcTimeImage);
-			var tfTime = Util.createTextField(mcTimers, timer.getTimer("game"), 30, 5, false, 0xa09e9e, "Verdana", 12);
+			var tfTime:Label = Util.createTextField(mcTimers, timer.getTimer("game"), 30, 5, false, 0xa09e9e, "Verdana", 12);
 			tfTime.name = color + "game";
 			tfTime = Util.createTextField(mcTimers, timer.getTimer("move"), 70, 5, false, 0xa09e9e, "Verdana", 12);
 			tfTime.name = color + "move";
@@ -180,20 +181,20 @@ package views
 			trace("timer clip wifth: " + mcTimers.width + "bounds width: " + mcTimerBounds.width);
 			mcTimers.x = bounds.x + bounds.width - 180;
 		}
-		public function updateTimers(color, timer) {
+		public function updateTimers(color:String, timer:GameTimers) : void {
 			var mcTimers:HBox = (color === this.tableObj.getTopSideColor()) ? this.mcTopTimers : this.mcBottomTimers;
 			if (mcTimers == null || mcTimers.numChildren == 0) {
 				return;
 			}
-			var tfTime = mcTimers.getChildByName(color + "game");
+			var tfTime:Label = mcTimers.getChildByName(color + "game") as Label;
 			if (tfTime) {
 				tfTime.text = timer.getTimer("game");
 			}
-			tfTime = mcTimers.getChildByName(color + "move");
+			tfTime = mcTimers.getChildByName(color + "move") as Label;
 			if (tfTime) {
 				tfTime.text = timer.getTimer("move");
 			}
-			tfTime = mcTimers.getChildByName(color + "extra");
+			tfTime = mcTimers.getChildByName(color + "extra") as Label;
 			if (tfTime) {
 				tfTime.text = timer.getTimer("extra");
 			}
@@ -206,7 +207,7 @@ package views
 			this.taMessages = Util.createTextArea(this.mcMessages, "", 0, 0, 150, 200, true, 0x0000ff, 0x5b5d5b, "Verdana", 10, false, 1);
 			this.rightPanel.addChild(this.mcMessages);
 		}
-		public function displayMessage(msg):void {
+		public function displayMessage(msg:String):void {
 			this.taMessages.text += msg + "\n";
 		}
 
@@ -237,7 +238,7 @@ package views
 			// add move data
 			dpMoves = new ArrayCollection();
 			var moveInfo:Object = {}
-			var moveList = this.tableObj.getMoveList();
+			var moveList:Array = this.tableObj.getMoveList();
 			if (moveList.length > 0) {
 				for (var i:int = 0; i < moveList.length; i++) {
 					displayMoveData(moveList[i], moveList.length);
@@ -254,15 +255,15 @@ package views
 			Util.createButton(this.mcMoves, "end", ">|", grid.x + 150, grid.height + 2, 20, 40, false, this.reviewMove);
 		}
 		
-		public function enableReviewButtons() {
-			for (var i = 0; i < this.mcMoves.numChildren; i++) {
+		public function enableReviewButtons() : void {
+			for (var i:int = 0; i < this.mcMoves.numChildren; i++) {
 				if (this.mcMoves.getChildAt(i) is Button) {
-					var button = (Button)(this.mcMoves.getChildAt(i));
+					var button:Button = (Button)(this.mcMoves.getChildAt(i));
 					button.enabled = true;
 				}
 			}
 		}
-		public function displayMoveData(mov:String, moveList:Array):void {
+		public function displayMoveData(mov:String, moveIndex:int) : void {
 			var moveInfo:Object = {};
 			var fields:Array = mov.split(":");
 			moveInfo["piece"] = fields[0] + " " + this.board.getPieceByIndex(fields[0], fields[1]).getType();
@@ -272,7 +273,7 @@ package views
 			}
 			moveInfo["selected"] = false;
 			dpMoves.addItem(moveInfo);
-			grid.scrollToIndex(moveList.length - 1);
+			grid.scrollToIndex(moveIndex - 1);
 		}
 		public function reviewMove(event:Event):void {
 			var button:Button = Button(event.target);
@@ -289,7 +290,7 @@ package views
 			this.taChatInput.addEventListener(KeyboardEvent.KEY_UP , postChatMessage);
 			this.rightPanel.addChild(this.mcChat);
 		}
-		public function displayChatMessage(pid, chatMsg) {
+		public function displayChatMessage(pid:String, chatMsg:String) : void {
 			this.taChat.text  += "[" + pid + "] " + chatMsg + "\n";
 		}
         public function postChatMessage(event:KeyboardEvent):void
@@ -319,24 +320,24 @@ package views
         }
 
 		public function displayBoard():void {
-			var pref = this.tableObj.getPreferences();
+			var pref:Object = this.tableObj.getPreferences();
 			this.board.createBoard(this, pref["boardcolor"], pref["linecolor"], pref["pieceskinindex"], this.leftMargin, this.topMargin + this.boardPanelHeight);
 		}
 		public function getBoard():Board {
 			return this.board;
 		}
-		public function redrawBoard(boardColor, lineColor, pieceSkin) {
+		public function redrawBoard(boardColor:uint, lineColor:uint, pieceSkin:int) : void {
 			this.board.drawBoard(this, boardColor, lineColor, pieceSkin, this.leftMargin, this.topMargin + this.boardPanelHeight);
 			this.board.changePiecesSkin(pieceSkin);
-			var piece = this.board.getFocusPiece();
+			var piece:Piece = this.board.getFocusPiece();
 			if (piece) {
 				piece.setFocus();
 			}
 		}
 		
-		public function changePieceSkin(pieceSkin) {
+		public function changePieceSkin(pieceSkin:int) : void {
 			this.board.changePiecesSkin(pieceSkin);
-			var piece = this.board.getFocusPiece();
+			var piece:Piece = this.board.getFocusPiece();
 			if (piece) {
 				piece.setFocus();
 			}

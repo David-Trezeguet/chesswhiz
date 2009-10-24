@@ -1,32 +1,33 @@
 package views
 {
-	import mx.containers.HBox;
-	import mx.core.IUIComponent;
-	import mx.containers.Panel;
 	import flash.events.Event;
-	import mx.controls.DataGrid;
-	import mx.controls.dataGridClasses.DataGridColumn;
+	
+	import hoxserver.*;
+	
 	import mx.collections.ArrayCollection;
 	import mx.containers.ControlBar;
+	import mx.containers.HBox;
+	import mx.containers.Panel;
 	import mx.controls.Button;
-	import hoxserver.*;
-	import views.*;
+	import mx.controls.DataGrid;
+	import mx.controls.dataGridClasses.DataGridColumn;
+	import mx.core.UIComponent;
 
 	public class TableListView  extends Panel
 	{
-		public function TableListView(parent)
+		public function TableListView(parent:UIComponent)
 		{
 			this.title = "Current Tables";
 			this.id = "viewTablesPanel";
 			parent.addChild(this);
 		}
 
-		public function display(tableList:Object) {
+		public function display(tableList:Object) : void {
 			this.horizontalScrollPolicy = "on";
 			this.verticalScrollPolicy = "on";
 
 			var grid:DataGrid = new DataGrid();
-			var t = new TableInfo();
+			var t:TableInfo = new TableInfo();
 
 			// add Table header column names
 			var colNames:Array = [
@@ -42,7 +43,7 @@ package views
 			"blackscore"];
 			var columnName:DataGridColumn;
             var cols:Array = null;
-			for (var j in colNames) {
+			for (var j:String in colNames) {
 				trace(colNames[j]);
 				columnName = new DataGridColumn(colNames[j]);
 				if (colNames[j] == "tid") {
@@ -96,7 +97,7 @@ package views
 				grid.dataProvider = dp;
 				grid.rowCount = dp.length;
 				trace("table list length: " + grid.rowCount );
-				grid.addEventListener("change", function(event) {
+				grid.addEventListener("change", function(event:Event) : void {
 					var obj:DataGrid = DataGrid(event.target);
 					trace("selected tid: " +  obj.selectedItem.tid);
 				});
@@ -112,15 +113,15 @@ package views
 			}
 			this.addChild(grid);
 
-			var controlBar = new ControlBar();
+			var controlBar:ControlBar = new ControlBar();
 			this.addChild(controlBar);
-			var hBox = new HBox();
+			var hBox:HBox = new HBox();
 			controlBar.addChild(hBox);
 			if (tableList.length > 0) {
 				var joinTableBtn:Button = new Button();
 				hBox.addChild(joinTableBtn);
 				joinTableBtn.label = LocaleMgr.instance().getResourceId("ID_JOINTABLE");
-				joinTableBtn.addEventListener("click", function(event:Event) {
+				joinTableBtn.addEventListener("click", function(event:Event) : void {
 					if (grid.selectedItem) {
 						trace("selected tid: " + grid.selectedItem.tid);
 						Global.vars.app.doJoinTable(grid.selectedItem.tid);
@@ -130,18 +131,18 @@ package views
 			var refreshBtn:Button = new Button();
 			refreshBtn.label = LocaleMgr.instance().getResourceId("ID_REFRESH");
 			hBox.addChild(refreshBtn);
-			refreshBtn.addEventListener("click", function(event:Event) {
+			refreshBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doViewTables();
 				});
 			Global.vars.app.menu.showNavMenu();
 		}
-        public function sortTid(obj1:Object, obj2:Object) {
+        public function sortTid(obj1:Object, obj2:Object) : int {
             return Util.sortNumeric(obj1, obj2, "tid");
         }
-        public function sortRedScore(obj1:Object, obj2:Object) {
+        public function sortRedScore(obj1:Object, obj2:Object) : int {
             return Util.sortNumeric(obj1, obj2, "redscore");
         }
-        public function sortBlackScore(obj1:Object, obj2:Object) {
+        public function sortBlackScore(obj1:Object, obj2:Object) : int {
             return Util.sortNumeric(obj1, obj2, "blackscore");
         }
 	}

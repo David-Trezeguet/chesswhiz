@@ -4,22 +4,21 @@
 	
 	import mx.containers.HBox;
 	import mx.controls.Button;
-	import mx.containers.HBox;
 
 	public class AppMenu  {
 
 		public var toolBar:HBox;
-		public var name;
-		public var x;
-		public var y;
-		public function AppMenu(tb, x, y, h, w) {
+		public var name:String;
+		public var x:int;
+		public var y:int;
+		public function AppMenu(tb:HBox, x:int, y:int, h:int, w:int) : void {
 			this.toolBar = tb;
 			name = "Menu";
 			this.x = x;
 			this.y = y;
 		}
 
-		public function showTitle() {
+		public function showTitle() : void {
 			Util.createTextField(this.toolBar, "PlayXiangqi", 20, 10, false, 0xFFFFFF, "Verdana", 18);
 			Util.createTextField(this.toolBar, Global.vars.app.getPlayerID(), 580, 12, false, 0xa09e9e, "Verdana", 12);
 
@@ -29,18 +28,18 @@
 			logoutBtn.y = 10;
 			this.toolBar.addChild(logoutBtn);
 
-			function logoutBtnClickHandler(event:Event) {
+			function logoutBtnClickHandler(event:Event) : void {
 				Global.vars.app.doLogout();
 			}
 			logoutBtn.addEventListener("click", logoutBtnClickHandler);
 		}
-		public function showStartMenu() {
+		public function showStartMenu() : void {
 			while (this.toolBar.numChildren > 0) {
 				this.toolBar.removeChildAt(0);
 			}
 			Util.createTextField(this.toolBar, "PlayXiangqi", 20, 10, false, 0xFFFFFF, "Verdana", 18);
 		}
-		public function showNavMenu() {
+		public function showNavMenu() : void {
 			while (this.toolBar.numChildren > 0) {
 				this.toolBar.removeChildAt(0);
 			}
@@ -50,7 +49,7 @@
 			viewTablesBtn.x = 200;
 			viewTablesBtn.y = 10;
 			this.toolBar.addChild(viewTablesBtn);
-			viewTablesBtn.addEventListener("click", function(event:Event) {
+			viewTablesBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doViewTables();
 				});
 			var NewTableBtn:Button = new Button();
@@ -58,11 +57,11 @@
 			NewTableBtn.x = 320;
 			NewTableBtn.y = 10;
 			this.toolBar.addChild(NewTableBtn);
-			NewTableBtn.addEventListener("click", function(event:Event) {
+			NewTableBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doNewTable();
 				});
 		}
-		public function showTableMenu(showSettings, showPref) {
+		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
 			while (this.toolBar.numChildren > 0) {
 				this.toolBar.removeChildAt(0);
 			}
@@ -73,7 +72,7 @@
 				tableSettingsBtn.x = 200;
 				tableSettingsBtn.y = 10;
 				this.toolBar.addChild(tableSettingsBtn);
-				tableSettingsBtn.addEventListener("click", function(event:Event) {
+				tableSettingsBtn.addEventListener("click", function(event:Event) : void {
 					Global.vars.app.changeTableSettings();
 					});
 			}
@@ -83,7 +82,7 @@
 				tablePrefBtn.x = 320;
 				tablePrefBtn.y = 10;
 				this.toolBar.addChild(tablePrefBtn);
-				tablePrefBtn.addEventListener("click", function(event:Event) {
+				tablePrefBtn.addEventListener("click", function(event:Event) : void {
 					Global.vars.app.changeTablePref();
 					});
 			}
@@ -92,11 +91,11 @@
 			closeTableBtn.x = 440;
 			closeTableBtn.y = 10;
 			this.toolBar.addChild(closeTableBtn);
-			closeTableBtn.addEventListener("click", function(event:Event) {
+			closeTableBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doCloseTable();
 				});
 		}
-		public function showObserverMenu(color, tableId) {
+		public function showObserverMenu(color:String, tableId:String) : void {
 			while (this.toolBar.numChildren > 0) {
 				this.toolBar.removeChildAt(0);
 			}
@@ -109,7 +108,7 @@
 				playBtn.y = 10;
 				this.toolBar.addChild(playBtn);
 				var tid:String = tableId;
-				playBtn.addEventListener("click", function(event:Event) {
+				playBtn.addEventListener("click", function(event:Event) : void {
 					trace("selected tid: " + tid + " color: " + color);
 					Global.vars.app.playGame(tid, color);
 					});
@@ -120,11 +119,11 @@
 			closeTableBtn.x = 460;
 			closeTableBtn.y = 10;
 			this.toolBar.addChild(closeTableBtn);
-			closeTableBtn.addEventListener("click", function(event:Event) {
+			closeTableBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doCloseTable();
 				});
 		}
-		public function showGameMenu() {
+		public function showGameMenu() : void {
 			while (this.toolBar.numChildren > 0) {
 				this.toolBar.removeChildAt(0);
 			}
@@ -134,7 +133,7 @@
 			tablePrefBtn.x = 200;
 			tablePrefBtn.y = 10;
 			this.toolBar.addChild(tablePrefBtn);
-			tablePrefBtn.addEventListener("click", function(event:Event) {
+			tablePrefBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.changeTablePref();
 				});
 			var resignTableBtn:Button = new Button();
@@ -142,7 +141,7 @@
 			resignTableBtn.x = 320;
 			resignTableBtn.y = 10;
 			this.toolBar.addChild(resignTableBtn);
-			resignTableBtn.addEventListener("click", function(event:Event) {
+			resignTableBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doResignTable();
 				});
 			var drawTableBtn:Button = new Button();
@@ -150,7 +149,7 @@
 			drawTableBtn.x = 440;
 			drawTableBtn.y = 10;
 			this.toolBar.addChild(drawTableBtn);
-			drawTableBtn.addEventListener("click", function(event:Event) {
+			drawTableBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doDrawTable();
 				});
 		}

@@ -1,9 +1,9 @@
 ﻿package {
 
 	import flash.events.MouseEvent;
-	import flash.events.Event;
-	import mx.controls.Image;
+	
 	import mx.containers.Canvas;
+	import mx.controls.Image;
 
 	public class Piece
 	{
@@ -28,7 +28,7 @@
 		private var _centerX:int;
 		private var _centerY:int;
 		
-		public function Piece(id, type, row, column, src, imgLabel, color, board):void {
+		public function Piece(id:int, type:String, row:int, column:int, src:String, imgLabel:String, color:String, board:Board):void {
 			_id = id;
 			_type = type;
 			_row = _curRow = row;
@@ -44,8 +44,8 @@
 			_enabled = false;
 		}
 
-		public function clone() {
-			var piece = new Piece("", "", 0, 0, "", "", "", null);
+		public function clone() : Piece {
+			var piece:Piece = new Piece(0, "", 0, 0, "", "", "", null);
 			piece._id = this._id;
 			piece._type = this._type;
 			piece._row = this._row;
@@ -78,7 +78,7 @@
 			return _color;
 		}
 
-		public function isEventsEnabled() {
+		public function isEventsEnabled() : Boolean {
 			return _enabled;
 		}
 
@@ -102,18 +102,18 @@
 		    return new Position(_row,_column);
 		}
 		
-		public function getImageHolder() {
+		public function getImageHolder() : Image {
 			return _mImageHolder;
 		}
-		public function setImageHolder(imgHolder) {
+		public function setImageHolder(imgHolder:Image) : void {
 			_mImageHolder = imgHolder;
 		}
 
-		public function setImageCenter(x, y) {
+		public function setImageCenter(x:int, y:int) : void {
 			this._centerX = x;
 			this._centerY = y;
 		}
-		public function draw(parentClip, offset, width, height, pieceSkinIndex):void
+		public function draw(parentClip:Canvas, offset:int, width:int, height:int, pieceSkinIndex:int):void
 		{
 			_parentClip = parentClip;
 			var viewPos:Position = _board.getViewPosition(getPosition());
@@ -125,7 +125,7 @@
 			parentClip.addChild(_mImageHolder);
 		}
 
-		public function enableEvents() {
+		public function enableEvents(): void {
 			if (_mImageHolder != null) {
 				_mImageHolder.addEventListener(MouseEvent.MOUSE_DOWN, startDragHandler);
 				//mImageHolder.addEventListener(MouseEvent.MOUSE_MOVE, moveHandler);
@@ -134,7 +134,7 @@
 			}
 		}
 
-		public function disableEvents() {
+		public function disableEvents() : void {
 			if (_mImageHolder != null) {
 				_mImageHolder.removeEventListener(MouseEvent.MOUSE_DOWN, startDragHandler);
 				//mImageHolder.addEventListener(MouseEvent.MOUSE_MOVE, moveHandler);
@@ -145,7 +145,7 @@
 
 		public function startDragHandler(evt:MouseEvent):void 
 		{
-			var maxDepth = _parentClip.numChildren - 1;
+			var maxDepth:int = _parentClip.numChildren - 1;
 			_parentClip.setChildIndex(_mImageHolder, maxDepth);
 			_mImageHolder.startDrag();
 		}
@@ -171,13 +171,13 @@
 			return _captured;
 		}
 		
-		public function setFocus() {
+		public function setFocus() : void {
 			_inFocus = true;
 			if (_mImageHolder != null) {
 				_mImageHolder.filters = [Util.createGlowFilter()];
 			}
 		}
-		public function clearFocus() {
+		public function clearFocus() : void {
 			_inFocus = false;
 			if (_mImageHolder != null) {
 				_mImageHolder.filters = [];
@@ -196,7 +196,7 @@
 				_mImageHolder = null;
 			}
 		}
-		public function moveImage() {
+		public function moveImage() : void {
 			var viewPos:Position = _board.getViewPosition(getPosition());
 			if (_mImageHolder != null) {
 				_mImageHolder.x = _board.getX(viewPos.column) - _imageRadius;
