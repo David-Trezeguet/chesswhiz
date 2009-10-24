@@ -111,8 +111,8 @@
 				locale = urlParams["locale"];
 			}
             trace("loading language settings");
-			localeMgr.loadTextXML();
-//			localeMgr.loadLocaleFile(locale);
+			//localeMgr.loadTextXML();
+			localeMgr.loadLocaleFile(locale);
 		}
 
 		public function startApp():void {

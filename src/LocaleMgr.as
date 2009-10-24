@@ -73,7 +73,7 @@
 		}
 
 		public function loadLocaleFile(locale:String) : void {
-			var localeResFile:String = "http://www.playxiangqi.com/flash/" + locale + ".xml";
+			var localeResFile:String = "http://www.playxiangqi.com/flex/locales/" + locale + ".xml";
 			trace("locale file: " + localeResFile);
 			Security.allowDomain("www.playxiangqi.com");
 			var xmlLoader:URLLoader = new URLLoader();  

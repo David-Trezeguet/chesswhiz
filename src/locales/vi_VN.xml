@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language id="vi_VN" description="Vietnamese">
+<resource id="ID_VIEWTABLES">Xem Bàn</resource>
+<resource id="ID_NEWTABLE">Tạo Bàn Mói</resource>
+<resource id="ID_LOGIN">Nhập</resource>
+<resource id="ID_GUESTLOGIN">Thử vào Mạng</resource>
+<resource id="ID_LOGOUT">Thoát</resource>
+<resource id="ID_REFRESH">Lấy lại</resource>
+<resource id="ID_JOINTABLE">Nhập Bàn</resource>
+<resource id="ID_PLAYRED">Play Red</resource>
+<resource id="ID_PLAYBLACK">Play Black</resource>
+<resource id="ID_CLOSE">Đóng Bàn</resource>
+<resource id="ID_RESIGN">Thua</resource>
+<resource id="ID_DRAW">Xin Huề</resource>
+<resource id="ID_SETTINGS">Cài đặt</resource>
+<resource id="ID_OK">Ok</resource>
+<resource id="ID_CANCEL">Hủy bỏ</resource>
+<resource id="ID_PREFERENCES">Tùy chọn</resource>
+</language>
