@@ -1,50 +1,50 @@
 ﻿package hoxserver {
 	public class GameTimers {
 		public var initialTimes:String;
-		public var gameTime;
-		public var moveTime;
-		public var extraTime;
+		public var gameTime:int;
+		public var moveTime:int;
+		public var extraTime:int;
 
-		public function GameTimers(time):void {
+		public function GameTimers(time:String):void {
 			this.initialTimes = time;
 			if (time !== "") {
-				var timers = time.split("/");
+				var timers:Array = time.split("/");
 				this.gameTime = parseInt(timers[0]);
 				this.moveTime = parseInt(timers[1]);
 				this.extraTime = parseInt(timers[2]);
 			}
 		}
 		
-		public function setTime(time) {
+		public function setTime(time:String) : void {
 			if (time !== "") {
-				var timers = time.split("/");
+				var timers:Array = time.split("/");
 				this.gameTime = parseInt(timers[0]);
 				this.moveTime = parseInt(timers[1]);
 				this.extraTime = parseInt(timers[2]);
 			}
 		}
 		
-		public function resetMoveTime() {
-			var timers = this.initialTimes.split("/");
+		public function resetMoveTime() : void {
+			var timers:Array = this.initialTimes.split("/");
 			this.moveTime = parseInt(timers[1]);
 		}
 		
-		public function getGameTime() {
+		public function getGameTime() :int {
 			return this.gameTime;
 		}
 		
-		public function getMoveTime() {
+		public function getMoveTime() : int {
 			return this.moveTime;
 		}
 		
-		public function getExtraTime() {
+		public function getExtraTime() : int {
 			return this.extraTime;
 		}
 		
-		public function formatTime(seconds) {
-			var time = "";
-			var min = 0;
-			var sec = seconds;
+		public function formatTime(seconds:int) : String {
+			var time:String = "";
+			var min:int = 0;
+			var sec:int = seconds;
 			if (seconds >= 60) {
 				min = (seconds/60)|0;
 				sec = seconds % 60;
@@ -71,7 +71,7 @@
 			return time;
 		}
 		
-		public function getTimer(type) {
+		public function getTimer(type:String) : String {
 			if (type === "game") {
 				return this.formatTime(this.gameTime);
 			}
@@ -81,6 +81,7 @@
 			else if (type === "extra") {
 				return this.formatTime(this.extraTime);
 			}
+			return "";
 		}
 	}
 }

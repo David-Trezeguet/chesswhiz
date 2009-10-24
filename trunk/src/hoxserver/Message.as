@@ -54,7 +54,7 @@
 				tid: tid
 			}
 		}
-		public function createMoveRequest(pid, sid, time, move, tableId):void {
+		public function createMoveRequest(pid:String, sid:String, time:String, move:String, tableId:String):void {
 			this.optype = "MOVE";
 			this.params = {
 				pid: pid,
@@ -66,7 +66,7 @@
 			};
 		}
 	
-		public function createRegisterRequest(uname, passwd):void {
+		public function createRegisterRequest(uname:String, passwd:String):void {
 			this.optype = "REGISTER";
 			this.params = {
 				pid: uname,
@@ -74,7 +74,7 @@
 			};
 		}
 		
-		public function createLoginRequest(uname, passwd, version):void {
+		public function createLoginRequest(uname:String, passwd:String, version:String):void {
 			this.optype = "LOGIN";
 			this.params = {
 				pid: uname,
@@ -83,7 +83,7 @@
 			};
 		}
 		
-		public function createPollRequest(pid, sid):void {
+		public function createPollRequest(pid:String, sid:String):void {
 			this.optype = "POLL";
 			this.params = {
 				pid: pid,
@@ -91,7 +91,7 @@
 			};
 		}
 		
-		public function createLogoutRequest(pid, sid):void {
+		public function createLogoutRequest(pid:String, sid:String):void {
 			this.optype = "LOGOUT";
 			this.params = {
 				pid: pid,
@@ -99,7 +99,7 @@
 			};
 		}
 			
-		public function createNewTableRequest(pid, sid, color):void {
+		public function createNewTableRequest(pid:String, sid:String, color:String):void {
 			this.optype = "NEW";
 			this.params = {
 				pid: pid,
@@ -109,7 +109,7 @@
 			};
 		}
 			
-		public function createDrawRequest(pid, sid, tableId):void {
+		public function createDrawRequest(pid:String, sid:String, tableId:String):void {
 			this.optype = "DRAW";
 			this.params = {
 				pid: pid,
@@ -119,7 +119,7 @@
 			};
 		}
 
-		public function createChatRequest(pid, sid, tableId, msg):void {
+		public function createChatRequest(pid:String, sid:String, tableId:String, msg:String):void {
 			this.optype = "MSG";
 			this.params = {
 				pid: pid,
@@ -129,7 +129,7 @@
 			};
 		}
 
-		public function createLeaveRequest(pid, sid, tableId):void {
+		public function createLeaveRequest(pid:String, sid:String, tableId:String):void {
 			this.optype = "LEAVE";
 			this.params = {
 				pid: pid,
@@ -138,7 +138,7 @@
 			};
 		}
 		
-		public function createEndRequest(pid, sid, tableId):void {
+		public function createEndRequest(pid:String, sid:String, tableId:String):void {
 			this.optype = "E_END";
 			this.params = {
 				pid: pid,
@@ -147,7 +147,7 @@
 			};
 		}
 		
-		public function createResignRequest(pid, sid, tableId):void {
+		public function createResignRequest(pid:String, sid:String, tableId:String):void {
 			this.optype = "RESIGN";
 			this.params = {
 				pid: pid,
@@ -156,7 +156,7 @@
 			};
 		}
 		
-		public function createScoreRequest(pid, sid, tableId, score):void {
+		public function createScoreRequest(pid:String, sid:String, tableId:String, score:String):void {
 			this.optype = "E_SCORE";
 			this.params = {
 				pid: pid,
@@ -178,11 +178,11 @@
 			return str;
 		}
 		
-		public function parseMessage(str) {
-			var kvlist = str.split('&');
-			for (var i = 0; i < kvlist.length; i++) {
-				var kv = kvlist[i];
-				var pair = kv.split('=');
+		public function parseMessage(str:String) : void {
+			var kvlist:Array = str.split('&');
+			for (var i:int = 0; i < kvlist.length; i++) {
+				var kv:String = kvlist[i];
+				var pair:Array = kv.split('=');
 				if (pair[0] == 'op') {
 					this.optype = pair[1];
 				}
@@ -195,18 +195,18 @@
 			}
 		}
 		
-		public function parse(content) {
+		public function parse(content:String) : void {
 			this.parseMessage(content);
 		}
 		
-		public function parseListResponse() {
-			var entries = this.params.content.split('\n');
-			var tables = [];
-			for (var i = 0; i < entries.length; i++) {
-				var entry = entries[i];
+		public function parseListResponse() : Array {
+			var entries:Array = this.params.content.split('\n');
+			var tables:Array = [];
+			for (var i:int = 0; i < entries.length; i++) {
+				var entry:String = entries[i];
 				if (entry !== "") {
 				    trace("table entry: " + entries[i]);
-					var table = new TableInfo();
+					var table:TableInfo = new TableInfo();
 					table.parse(entry);
 					tables[table.getID()] = table;
 				}
@@ -214,8 +214,8 @@
 			return tables;
 		}
 		
-		public function parseTableResponse() {
-			var table = new TableInfo();
+		public function parseTableResponse() : TableInfo {
+			var table:TableInfo = new TableInfo();
 			table.parse(this.params.content);
 			return table;
 		}

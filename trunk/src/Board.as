@@ -1,13 +1,8 @@
 ﻿package {
 	import flash.display.Sprite;
-	import flash.display.LineScaleMode;
-	import flash.display.CapsStyle;
-	import flash.display.JointStyle;
-	import flash.display.Shape;
-	import mx.containers.Panel;
+	
 	import mx.containers.Canvas;
-	import mx.containers.HBox;
-	import mx.containers.Box;
+	import mx.containers.Panel;
 	
 	public class Board extends Sprite 
 	{
@@ -16,7 +11,7 @@
 		private	var  margin:int;
 		private var cellWidth:int;
 		private var cellHeight:int;
-		private var panel;
+		private var panel:Canvas;
 		private var offset:int;
 		private var redPieces:Array = null;
 		private var blackPieces:Array = null;
@@ -24,13 +19,12 @@
 		private var blackPieceHash:Array = null;		
 		private var pieceMap:Array = null;
 		private var game:Game = null;
-		private var parentClip = null;
-		private var mcBoard = null;
+		private var parentClip:Panel = null;
 		private var tableObj:Table;
 		private var lastPieceInFocus:Piece = null;
 		private var pieceSkinIndex:int = 1;
-		private var bgColor;
-		private var lineColor;
+		private var bgColor:uint;
+		private var lineColor:uint;
 		public function Board(width:int, height:int, table:Table)
 		{
 			mWidth = width;
@@ -146,7 +140,7 @@
 			this.redPieceHash["cannon"][0] = this.redPieces[9];
 			this.redPieceHash["cannon"][1] = this.redPieces[10];
 			this.redPieceHash["pawn"] = [];
-			for (var i = 0; i < 5; i++) {
+			for (var i:int = 0; i < 5; i++) {
 				this.redPieceHash["pawn"][i] = this.redPieces[11 + i];
 			}
 			this.blackPieceHash["king"] = [];
@@ -172,13 +166,13 @@
 			}
 
 		}
-		public function createBoard(parentClip:Panel, bgColor, lineColor, pieceSkinIndex:int, leftMargin:int, topMargin:int):void
+		public function createBoard(parentClip:Panel, bgColor:uint, lineColor:uint, pieceSkinIndex:int, leftMargin:int, topMargin:int):void
 		{
 			drawBoard(parentClip, bgColor, lineColor, pieceSkinIndex, leftMargin, topMargin);
 			displayPieces();
 		}
 
-		public function drawBoard(parentClip:Panel, bgColor, lineColor, pieceSkinIndex:int, leftMargin:int, topMargin:int):void
+		public function drawBoard(parentClip:Panel, bgColor:uint, lineColor:uint, pieceSkinIndex:int, leftMargin:int, topMargin:int):void
 		{
 			this.pieceSkinIndex = pieceSkinIndex;
 			this.parentClip = parentClip;
@@ -215,10 +209,10 @@
 			drawLine(panel, offset + 3*cellWidth, offset + 7 * cellHeight, offset + 5*cellWidth, offset + cellHeight * 9);
 			drawLine(panel, offset + 5*cellWidth, offset + 7 * cellHeight, offset + 3*cellWidth, offset + cellHeight * 9);
 
-			var offsetLeft = offset;
-	        var offsetTop = offset;
+			var offsetLeft:int = offset;
+	        var offsetTop:int = offset;
 			// draw row headers
-			var order = "ascending";
+			var order:String = "ascending";
 			if (this.tableObj.getTopSideColor() == "Red") {
 				order = "descending";
 			}
@@ -228,7 +222,7 @@
 			this.drawHeader("column", offsetLeft, offsetTop + (10 * cellHeight) + 10, 9, order);
 		}
 
-		public function displayPieces() {
+		public function displayPieces() : void {
 			var i:int = 0;
 			for (i = 0; i < 16; i++) {
 				redPieces[i].draw(panel, offset, cellWidth, cellHeight, pieceSkinIndex);
@@ -243,15 +237,15 @@
 			panel.graphics.moveTo(startX, startY);
 			panel.graphics.lineTo(endX, endY);
 		}
-		public function drawHeader(type, offsetLeft, offsetTop, numCells, order) {
-			var start = 0;
+		public function drawHeader(type:String, offsetLeft:int, offsetTop:int, numCells:int, order:String) : void {
+			var start:int = 0;
 			if (order == "descending") {
 				start = numCells - 1;
 			}
-			var left = offsetLeft - 40;
-			var top = 0;
+			var left:int = offsetLeft - 40;
+			var top:int = 0;
 			if (type == "row") {
-				for (var i = 0; i < numCells; i++) {
+				for (var i:int = 0; i < numCells; i++) {
 					top = offsetTop + (i * cellHeight) - 6; 
 					Util.createTextField(this.panel, "" + start, left, top, false, lineColor, "Verdana", 12);
 					if (order == "descending") {
@@ -264,7 +258,7 @@
 			}
 			else {
 				top =  offsetTop - 40;
-				for (var j = 0; j < numCells; j++) {
+				for (var j:int = 0; j < numCells; j++) {
 					left = offsetLeft + (j * cellWidth) - 6;
 					Util.createTextField(this.panel, String.fromCharCode(97 + start), left, top, false, lineColor, "Verdana", 12);
 					if (order == "descending") {
@@ -321,21 +315,21 @@
 			return pos;
 		}
 
-		public function getX(column:int) {
+		public function getX(column:int) : int {
 			return offset + column * cellWidth;
 		}
 
-		public function getY(row:int) {
+		public function getY(row:int) : int {
 			return offset + row * cellHeight;
 		}
 		public function getPieceByPos(pos:Position):Piece
 		{
 			return pieceMap[pos.row][pos.column];
 		}
-		public function getPiece(color, type) {
+		public function getPiece(color:String, type:String) : Array {
 			return (color == "Red") ? this.redPieceHash[type] : this.blackPieceHash[type];
 		}
-		public function getPieceByIndex(color, index) {
+		public function getPieceByIndex(color:String, index:String) : Piece {
 			if (color === "Red") {
 				return this.redPieces[index];
 			}
@@ -350,7 +344,7 @@
 			return this.tableObj;
 		}
 
-		public function getInterveningPiece(curPos:Position, newPos:Position)
+		public function getInterveningPiece(curPos:Position, newPos:Position) : int
 		{
 			var numPieces:int = 0;
 			var newRow:int = newPos.row;
@@ -375,15 +369,15 @@
 			} else {
 				move = 0; // Horizontal move
 			}
-			var startCol = curCol;
+			var startCol:int = curCol;
 			if (curCol > newCol) {
 				startCol = newCol;
 			}
-			var startRow = curRow;
+			var startRow:int = curRow;
 			if (curRow > newRow) {
 				startRow = newRow;
 			}
-			var i = 0;
+			var i:int = 0;
 			if (move === 0) {
 				for (i = 1; i < colDiff; i++) {
 					if (this.pieceMap[curRow][startCol + i] !== null) {
@@ -445,8 +439,8 @@
 					}
 				}
 			}
-			return numPieces;
 
+			return numPieces;
 		}		
 		
 		public function isMySide(color:String, pos:Position):Boolean
@@ -464,13 +458,13 @@
 			return false;
 		}
 		
-		public function updatePieceMapState(piece, oldPos:Position, newPos:Position)
+		public function updatePieceMapState(piece:Piece, oldPos:Position, newPos:Position) : void
 		{
 			pieceMap[newPos.row][newPos.column] = piece;
 			pieceMap[oldPos.row][oldPos.column] = null;
 		}
 
-		public function updatePieceMap(newPos:Position, piece:Piece)
+		public function updatePieceMap(newPos:Position, piece:Piece) : void
 		{
 			var curPiece:Piece = pieceMap[newPos.row][newPos.column];
 			var oldPos:Position = piece.getPosition();
@@ -482,7 +476,7 @@
 			}
 			piece.setPosition(newPos);
 		}
-		public function setFocus(piece) {
+		public function setFocus(piece:Piece) : void {
 			if (this.lastPieceInFocus) {
 				this.lastPieceInFocus.clearFocus();
 				this.lastPieceInFocus = null;
@@ -493,7 +487,7 @@
 			}
 		}
 
-		public function movePieceByPos(piece, newPos, moveImage) {
+		public function movePieceByPos(piece:Piece, newPos:Position, moveImage:Boolean) : void {
 			updatePieceMap(newPos, piece);
 			if (moveImage) {
 				piece.moveImage();
@@ -504,7 +498,7 @@
 			}
 			this.lastPieceInFocus = piece;
 		}
-		public function rewindPieceByPos(piece, curPos, prevPos, capturedPiece) {
+		public function rewindPieceByPos(piece:Piece, curPos:Position, prevPos:Position, capturedPiece:Piece) : void {
 			pieceMap[prevPos.row][prevPos.column] = piece;
 			pieceMap[curPos.row][curPos.column] = capturedPiece;
 			if (this.lastPieceInFocus) {
@@ -513,7 +507,7 @@
 			piece.setPosition(prevPos);
 			piece.moveImage();
 			if (capturedPiece) {
-				capturedPiece.setCapture(0);
+				capturedPiece.setCapture(false);
 				capturedPiece.setPosition(curPos);
 				capturedPiece.draw(panel, offset, cellWidth, cellHeight, pieceSkinIndex);
 				capturedPiece.setFocus();
@@ -524,35 +518,35 @@
 				this.lastPieceInFocus = piece;
 			}
 		}
-		public function isNormalView() {
+		public function isNormalView() : Boolean {
 			if (this.tableObj.getBottomSideColor() === "Black") {
 				return true;
 			}
 			return false;
 		}
 		
-		public function getViewPosition(pos) {
+		public function getViewPosition(pos:Position) : Position {
 			if (this.isNormalView()) {
-				var tRow = Math.abs(pos.row - 9);
-				var tColumn = Math.abs(pos.column - 8);
+				var tRow:int = Math.abs(pos.row - 9);
+				var tColumn:int = Math.abs(pos.column - 8);
 				return new Position(tRow, tColumn);
 			}
 			return new Position(pos.row, pos.column);
 		}
-		public function getAbsolutePosition(pos) {
+		public function getAbsolutePosition(pos:Position) : Position {
 			if (this.isNormalView()) {
-				var tRow = Math.abs(pos.row - 9);
-				var tColumn = Math.abs(pos.column - 8);
+				var tRow:int = Math.abs(pos.row - 9);
+				var tColumn:int = Math.abs(pos.column - 8);
 				return new Position(tRow, tColumn);
 			}
 			return new Position(pos.row, pos.column);
 		}
 
-		public function displayStatus(status) {
+		public function displayStatus(status:String) : void {
 			Util.createTextField(this.panel, status, this.getX(1), this.getY(4) + 10, false, 0x33CCFF, "Verdana", 18);
 		}
 
-		public function enableEvents(color) {
+		public function enableEvents(color:String) : void {
 			var i:int;
 			if (color == "Red") {
 				for (i = 0; i < 16; i++) {
@@ -566,7 +560,7 @@
 			}
 		}
 
-		public function disableEvents(color) {
+		public function disableEvents(color:String) : void {
 			var i:int;
 			if (color == "Red") {
 				for (i = 0; i < 16; i++) {
@@ -579,27 +573,27 @@
 				}
 			}			
 		}
-		public function getRedPieces() {
-			var pieces = new Array();
+		public function getRedPieces() : Array {
+			var pieces:Array = new Array();
 			for (var i:int = 0; i < this.redPieces.length; i++) {
 				pieces[i] = this.redPieces[i].clone();
 			}
 			return pieces;
 		}
-		public function getBlackPieces() {
-			var pieces = new Array();
+		public function getBlackPieces() : Array {
+			var pieces:Array = new Array();
 			for (var i:int = 0; i < this.blackPieces.length; i++) {
 				pieces[i] = this.blackPieces[i].clone();
 			}
 			return pieces;
 		}
-		public function reDraw(changeSet, focusPiece) {
+		public function reDraw(changeSet:Array, focusPiece:Piece) : void {
 			if (changeSet == null || changeSet.length == 0) {
 				return;
 			}
 			var i:int = 0;
 			var piece:Piece = null;
-			var captured = false;
+			var captured:Boolean = false;
 			var pos1:Position = null;
 			var pos2:Position = null;
 			var color:String = "";
@@ -651,7 +645,7 @@
 				lastPieceInFocus = focusPiece;
 			}
 		}
-		public function restoreState() {
+		public function restoreState() : void {
 			var i:int = 0;
 			var piece:Piece = null;
 			var pos1:Position = null;
@@ -684,7 +678,7 @@
 			}
 		}
 		
-		public function getPieceMapInfo() {
+		public function getPieceMapInfo() : String {
 			var result:String = "piecemap: \n";
 			var line:String = "";
 			var piece:Piece = null;
@@ -706,7 +700,7 @@
 			return result;
 		}
 		
-		public function getRedPiecesInfo() {
+		public function getRedPiecesInfo() : String {
 			var result:String = "redpieces: \n";
 			var line:String = "";
 			var piece:Piece = null;
@@ -719,7 +713,7 @@
 			}
 			return result;
 		}
-		public function getBlackPiecesInfo() {
+		public function getBlackPiecesInfo() : String {
 			var result:String = "blackpieces: \n";
 			var line:String = "";
 			var piece:Piece = null;
@@ -733,8 +727,8 @@
 			return result;
 		}
 		
-		public function changePiecesSkin(skinIndex) {
-			var piece = null;
+		public function changePiecesSkin(skinIndex:int) : void {
+			var piece:Piece = null;
 			var i:int = 0;
 			for (i = 0; i < 16; i++) {
 				piece = redPieces[i];
@@ -769,7 +763,7 @@
 			pieceSkinIndex = skinIndex;
 		}
 		
-		public function getFocusPiece() {
+		public function getFocusPiece() : Piece {
 			return this.lastPieceInFocus;
 		}
 	}

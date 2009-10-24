@@ -4,7 +4,6 @@
 	import flash.external.*;
 	import flash.filters.BitmapFilterQuality;
 	import flash.filters.GlowFilter;
-	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	
 	import mx.containers.Panel;
@@ -18,10 +17,11 @@
 	import mx.controls.TextArea;
 	import mx.controls.TextInput;
 	import mx.core.ScrollPolicy;
+	import mx.core.UIComponent;
 
 	public class Util {
 
-		public static function createButton(panel, name, label, x, y, h, w, enabled, handler) 
+		public static function createButton(panel:UIComponent, name:String, label:String, x:Number, y:Number, h:Number, w:Number, enabled:Boolean, handler:Function) : Button
 		{
 			var button:Button = new Button();
 			button.label = label;
@@ -32,13 +32,13 @@
 			button.height = h;
 			button.enabled = enabled;
 			panel.addChild(button);
-			if (handler) {
+			if (handler != null) {
 				button.addEventListener("click", handler);
 			}
 			return button;
 		}
 				
-		public static function createTextField(panel, text, x, y, border, color, font, fontSize) {
+		public static function createTextField(panel:UIComponent, text:String, x:Number, y:Number, border:Boolean, color:uint, font:String, fontSize:uint) : Label {
 			var label:Label = new Label();
             var format:TextFormat = new TextFormat();
             if (panel) {
@@ -53,7 +53,7 @@
 			
 			return label;
 		}
-		public static function createTextInput(panel, maxChars, x, y, h, w, border, color, font, fontSize) {
+		public static function createTextInput(panel:UIComponent, maxChars:int, x:Number, y:Number, h:Number, w:Number, border:Boolean, color:uint, font:String, fontSize:int) : TextInput {
 			var unameInput:TextInput = new TextInput();
 			unameInput.x = x;
 			unameInput.y = y;
@@ -63,7 +63,7 @@
             panel.addChild(unameInput);
 			return unameInput;
 		}
-		public static function createTextArea(panel, text, x, y, height, width, border, color, bgColor, font, fontSize, editable, alpha):TextArea {
+		public static function createTextArea(panel:UIComponent, text:String, x:Number, y:Number, height:Number, width:Number, border:Boolean, color:uint, bgColor:uint, font:String, fontSize:int, editable:Boolean, alpha:int):TextArea {
 		    var myTextArea:TextArea = new TextArea();
 			myTextArea.wordWrap = true;
 			myTextArea.text = text;
@@ -84,7 +84,7 @@
 			panel.addChild(myTextArea);
 			return myTextArea;
 		}
-		public static function createList(panel, x, y, height, width, border, color, bgColor, font, fontSize ):List {
+		public static function createList(panel:UIComponent, x:Number, y:Number, height:Number, width:Number, border:Boolean, color:uint, bgColor:uint, font:String, fontSize:int ):List {
 		    var myList:List = new List();
 			myList.width = width;
             myList.height = height;
@@ -121,8 +121,7 @@
                                   inner,
                                   knockout);
         }
-		public static function createMessageBox(panel, msg, callback):void {
-			
+		public static function createMessageBox(panel:UIComponent, msg:String, callback:Function):void {
 			var msgbox:Panel = new Panel();
 			Util.createTextField(msgbox, msg, 20, 10, false, 0xa09e9e, "Verdana", 12);
 			var okBtn:Button = new Button();
@@ -131,7 +130,7 @@
 			okBtn.y = 40;
 			msgbox.addChild(okBtn);
 
-			function okBtnClickHandler(event:Event) {
+			function okBtnClickHandler(event:Event) : void {
 				callback();
 			}
 			okBtn.addEventListener("click", okBtnClickHandler);
@@ -139,18 +138,18 @@
 		}
 		
 		public static function readQueryString():Array {
-			var params = new Array();
+			var params:Array = new Array();
 			try  {
-				var all = ExternalInterface.call("window.location.href.toString");
-				var queryString = ExternalInterface.call("window.location.search.substring", 1);
+				var all:String = ExternalInterface.call("window.location.href.toString");
+				var queryString:String = ExternalInterface.call("window.location.search.substring", 1);
 				if(queryString) {
 					var allParams:Array = queryString.split('&');
-					for (var i = 0, index = -1; i < allParams.length; i++) {
+					for (var i:int = 0, index:int = -1; i < allParams.length; i++) {
 						var keyValuePair:String = allParams[i];
 						if((index = keyValuePair.indexOf("=")) > 0) {
 							var paramKey:String = keyValuePair.substring(0,index);
 							var paramValue:String = keyValuePair.substring(index+1);
-							var decodedValue = decodeURIComponent(paramValue);
+							var decodedValue:String = decodeURIComponent(paramValue);
 							params[paramKey] = decodedValue;
 						}
 					}
@@ -161,7 +160,7 @@
 			}
 			return params;
 		}
-		public static function createCheckBox(mcParent, cbText, x:uint, y:uint) {
+		public static function createCheckBox(mcParent:UIComponent, cbText:String, x:uint, y:uint) : CheckBox {
 			var cb1:CheckBox = new CheckBox();
 			cb1.label = cbText;
 			cb1.x = x;
@@ -169,7 +168,7 @@
 			mcParent.addChild(cb1);
 			return cb1;
 		}
-		public static function createImage(mcParent, imageSrc, x, y) {
+		public static function createImage(mcParent:UIComponent, imageSrc:String, x:Number, y:Number) : Image {
 			var image:Image = new Image();
 			image.source = imageSrc;
 			image.y = y;
@@ -177,7 +176,7 @@
 			mcParent.addChild(image);
 			return image;
 		}
-		public static function createRadioButton(mcParent, rbLabel:String, rbg:String, x, y):RadioButton {
+		public static function createRadioButton(mcParent:UIComponent, rbLabel:String, rbg:String, x:Number, y:Number):RadioButton {
             var rb:RadioButton = new RadioButton();
             rb.label = rbLabel;
             mcParent.addChild(rb);
@@ -186,7 +185,7 @@
 			return rb;
         }
 
-		public static function createStepper(mcParent, step, max, initValue, x, y, width):NumericStepper {
+		public static function createStepper(mcParent:UIComponent, step:Number, max:Number, initValue:Number, x:Number, y:Number, width:Number):NumericStepper {
             var ns:NumericStepper = new NumericStepper();
             ns.stepSize = step;
             ns.minimum = 0;
@@ -198,15 +197,15 @@
 			return ns;
         }
 
-		public static function createLabel(mcParent, labelText:String, x:uint, y:uint):Label {
-			var label = new Label();
+		public static function createLabel(mcParent:UIComponent, labelText:String, x:uint, y:uint):Label {
+			var label:Label = new Label();
             label.text = labelText;
-            label.autoSize = TextFieldAutoSize.LEFT;
+            //label.autoSize = TextFieldAutoSize.LEFT;
             label.move(x, y);
 			mcParent.addChild(label);
 			return label;
 		}
-		public static function drawLine(panel:Sprite, startX:int, startY:int, endX:int, endY:int, w, color):void
+		public static function drawLine(panel:Sprite, startX:int, startY:int, endX:int, endY:int, w:Number, color:uint):void
 		{
 			panel.graphics.lineStyle(w, color);
 			panel.graphics.moveTo(startX, startY);

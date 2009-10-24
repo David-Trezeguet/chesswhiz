@@ -12,8 +12,8 @@
 			color = "";
 		}
 
-		public function parse(entry):void {
-			var fields = entry.split(';');
+		public function parse(entry:String):void {
+			var fields:Array = entry.split(';');
 			tid = fields[0];
 			pid = fields[1];
 			score = fields[2];
@@ -23,7 +23,7 @@
 			return this.tid;
 		}
 		public function getPlayer():PlayerInfo {
-			var player = new PlayerInfo();
+			var player:PlayerInfo = new PlayerInfo();
 			player.setColor(this.color);
 			player.setPlayerID(this.pid);
 			player.setScore(this.score);
