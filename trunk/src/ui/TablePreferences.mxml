@@ -2,7 +2,6 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="532" height="300" title="Table Preferences" initialize="init()">
 	<mx:Script>
 		<![CDATA[
-			import events.ChessWhizEvent;
 			import mx.containers.Canvas;
 			private var selectedPieceSet:int;
 			private var sound:Boolean;
