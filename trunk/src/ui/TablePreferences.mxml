@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="532" height="300" title="Table Preferences" initialize="init()">
+	<mx:Script>
+		<![CDATA[
+			import events.ChessWhizEvent;
+			import mx.containers.Canvas;
+			private var selectedPieceSet:int;
+			private var sound:Boolean;
+			private function init() : void
+			{
+				sound = false;
+				selectedPieceSet = Global.vars.app.preferences["pieceskinindex"];
+				pieceSet1.source = Global.vars.app.baseURI + "images/pieces/1/rking.png";
+				pieceSet2.source = Global.vars.app.baseURI + "images/pieces/2/rking.png";
+				pieceSet3.source = Global.vars.app.baseURI + "images/pieces/3/rking.png";
+				this.rbMute.selected = true;
+				this.rbPieseSet1.selected = true;
+				displayPreview();
+			}
+			
+			public function setCurrentPreferences(preferences:Object) : void
+			{
+				sound = preferences["sound"];
+				selectedPieceSet = preferences["pieceskinindex"];
+				if (sound) 
+				{
+					this.rbSound.selected = true;
+				}
+				else 
+				{
+					this.rbMute.selected = true;	
+				}
+				if (selectedPieceSet == 1)
+				{
+					this.rbPieseSet1.selected = true;
+				}
+				else if (selectedPieceSet == 2)
+				{
+					this.rbPieseSet2.selected = true;
+				}
+				else if (selectedPieceSet == 3)
+				{
+					this.rbPieseSet3.selected = true;
+				}
+				colorPicker.selectedColor = preferences["boardcolor"];
+				displayPreview();
+			}
+			private function onSelectPieceSet(setIndex:int) : void
+			{
+				selectedPieceSet = setIndex;
+				displayPreview();
+			}
+			public function displayPreview() : void 
+			{
+				if (previewPanel) {
+					while(this.previewPanel.numChildren) {
+						this.previewPanel.removeChildAt(0);
+					}
+				}
+				var canvas:Canvas = new Canvas();
+				this.previewPanel.addChild(canvas);
+				canvas.graphics.beginFill(colorPicker.selectedColor);
+				canvas.graphics.drawRect(canvas.x, canvas.y, 80,80);
+				Util.drawLine(canvas, 40, 0, 40, 80, 1, 0xFFFFFF);
+				Util.drawLine(canvas, 0, 40, 80, 40, 1, 0xFFFFFF);
+	            var img:Image = new Image();
+	            img.source = Global.vars.app.baseURI + "images/pieces/" + this.selectedPieceSet + "/rking.png";
+	            img.x = 20;
+	            img.y = 20;
+	            canvas.addChild(img);
+				canvas.graphics.endFill();
+			}
+			private function onEnableSound() : void
+			{
+				sound = true;
+			}
+			private function onMute() : void
+			{
+				sound = false;
+			}
+			private function onOk(event:Event) : void 
+			{
+				var preferences:Object = {};
+				preferences["sound"] = this.sound;
+				preferences["pieceskinindex"] = this.selectedPieceSet;
+				preferences["boardcolor"] = this.colorPicker.selectedColor;
+				this.parent.removeChild(this);
+				Global.vars.app.updateTablePreferences(preferences);
+			}
+			private function onCancel(event:Event) : void 
+			{
+				this.parent.removeChild(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:Panel x="10" y="10" width="127" height="120" layout="absolute" title="Sound">
+		<mx:RadioButtonGroup id="radiogroup1"/>
+		<mx:RadioButton x="11" y="8" label="On" id="rbSound" groupName="Sound" click="onEnableSound()"/>
+		<mx:RadioButton x="10" y="46" label="Off"  id="rbMute" groupName="Sound" click="onMute()"/>
+		<mx:Image x="66" y="3" source="res/images/player_volume.png"/>
+		<mx:Image x="66" y="43" source="res/images/volume_mute.png"/>
+	</mx:Panel>
+	<mx:Panel x="158" y="11" width="153" height="240" layout="absolute" title="Pieces">
+		<mx:RadioButtonGroup id="radiogroup2"/>
+		<mx:RadioButton x="10" y="17" groupName="Pieces" id="rbPieseSet1" click="onSelectPieceSet(1)"/>
+		<mx:RadioButton x="10" y="86" groupName="Pieces" id="rbPieseSet2" click="onSelectPieceSet(2)"/>
+		<mx:RadioButton x="10" y="147" groupName="Pieces" id="rbPieseSet3" click="onSelectPieceSet(3)"/>
+		<mx:Image x="59" y="10" id="pieceSet1"/>
+		<mx:Image x="59" y="78" id="pieceSet2"/>
+		<mx:Image x="59" y="140" id="pieceSet3"/>
+	</mx:Panel>
+	<mx:Panel x="7" y="148" width="130" height="102" layout="absolute" title="Board Color">
+		<mx:ColorPicker x="10" y="10" width="46" height="42" id="colorPicker" change="displayPreview()"/>
+	</mx:Panel>
+	<mx:Panel x="329" y="10" width="173" height="165" layout="absolute" title="Preview" id="previewPanel">
+	</mx:Panel>
+	<mx:Button x="376" y="228" label="Ok" width="61" click="onOk(event)"/>
+	<mx:Button x="445" y="228" label="Canel" click="onCancel(event)"/>
+</mx:Panel>
