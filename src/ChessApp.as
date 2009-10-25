@@ -17,6 +17,8 @@
 	import mx.controls.TextInput;
 	import mx.core.UIComponent;
 	
+	import ui.TablePreferences;
+	
 	import views.*;
 
 	public class ChessApp {
@@ -256,12 +258,17 @@
 		}
 		public function changeTablePref() : void {
 			if (!(this.mainWindow.getChildByName("tablePrefPanel"))) {
-				var tablePrefDialog:TablePrefDialog = new TablePrefDialog(this.mainWindow, currentTableId, preferences);
-				tablePrefDialog.display();
+				var tablePrefPanel:TablePreferences = new TablePreferences();
+				this.mainWindow.addChild(tablePrefPanel);
+				tablePrefPanel.setCurrentPreferences(this.preferences);
 			}
 		}
-		public function updatePref(pref:Object) : void {
-			if (pref) {
+		public function updateTablePreferences(pref:Object) : void {
+			if (pref != null) {
+				var tableObj:Table = Global.vars.app.getTable(this.currentTableId);
+				if (tableObj) {
+					tableObj.updatePref(pref);
+				}
 				for (var key:String in pref) {
 					this.preferences[key] = pref[key];
 				}
