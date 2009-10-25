@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="404" height="282" title="Table Settings" >
+<mx:Script>
+	<![CDATA[
+		public function setCurrentSettings(settings:Object) : void
+		{
+			this.nsGameTime.value = settings["gametime"]/60;
+			this.nsMoveTime.value = settings["movetime"];
+			this.nsExtraTime.value = settings["extratime"];
+			if (settings["rated"]) {
+				this.cbGameType.selected = true;
+			}
+		}
+		private function onOk(event:Event) : void
+		{
+			var settings:Object = {}
+			settings["gametime"] = this.nsGameTime.value * 60;
+			settings["movetime"] = this.nsMoveTime.value;
+			settings["extratime"] = this.nsExtraTime.value;
+			settings["rated"] = this.cbGameType.selected;
+			this.parent.removeChild(this);
+			Global.vars.app.updateTableSettings(settings);
+		}
+		private function onCancel(event:Event) : void
+		{
+			this.parent.removeChild(this);
+		}
+	]]>
+</mx:Script>
+	<mx:Panel width="191" height="216" layout="absolute" title="Timers" y="11" x="10">
+		<mx:NumericStepper x="10" y="27" id="nsGameTime"  minimum="10" maximum="30" stepSize="5"/>
+		<mx:NumericStepper x="10" y="77" id="nsMoveTime"  maximum="300" stepSize="30" minimum="30"/>
+		<mx:NumericStepper x="10" y="128" id="nsExtraTime"  stepSize="10" maximum="60" minimum="10"/>
+		<mx:Label x="85" y="29" text="min"/>
+		<mx:Label x="10" y="0" text="Game Time:"/>
+		<mx:Label x="10" y="57" text="Move Time:"/>
+		<mx:Label x="10" y="107" text="Free Time:"/>
+		<mx:Label x="85" y="79" text="sec"/>
+		<mx:Label x="85" y="130" text="sec"/>
+	</mx:Panel>
+	<mx:Panel x="218" y="14" width="156" height="99" layout="absolute" title="Game Type">
+		<mx:CheckBox x="10" y="10" label="Rated" id="cbGameType" />
+	</mx:Panel>
+	<mx:Button x="236" y="205" label="Ok" width="63" click="onOk(event)" />
+	<mx:Button x="309" y="205" label="Cancel" click="onCancel(event)" />
+</mx:Panel>

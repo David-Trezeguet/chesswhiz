@@ -18,6 +18,7 @@
 	import mx.core.UIComponent;
 	
 	import ui.TablePreferences;
+	import ui.TableSettings;
 	
 	import views.*;
 
@@ -252,13 +253,27 @@
 		}
 		public function changeTableSettings() : void {
 			if (!(this.mainWindow.getChildByName("tableSettingsPanel"))) {
-				var tableSettingsDialog:TableSettingsDialog = new TableSettingsDialog(this.mainWindow, currentTableId);
-				tableSettingsDialog.display();
+				var tableSettingsPanel:TableSettings = new TableSettings();
+				tableSettingsPanel.name = "tableSettingsPanel";
+				this.mainWindow.addChild(tableSettingsPanel);
+				var tableObj:Table = this.getTable(this.currentTableId);
+				if (tableObj) {
+					var settings:Object = tableObj.getSettings();
+					tableSettingsPanel.setCurrentSettings(settings);
+				}
+			}
+		}
+		public function updateTableSettings(settings:Object) : void
+		{
+			var tableObj:Table = this.getTable(this.currentTableId);
+			if (tableObj) {
+				tableObj.updateSettings(settings);
 			}
 		}
 		public function changeTablePref() : void {
 			if (!(this.mainWindow.getChildByName("tablePrefPanel"))) {
 				var tablePrefPanel:TablePreferences = new TablePreferences();
+				tablePrefPanel.name = "tablePrefPanel";
 				this.mainWindow.addChild(tablePrefPanel);
 				tablePrefPanel.setCurrentPreferences(this.preferences);
 			}
