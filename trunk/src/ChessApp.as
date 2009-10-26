@@ -47,7 +47,7 @@
 		
 
 		public function init() : void {
-			version = "FLASHCHESS-0.6.0.2";
+			version = "FLASHCHESS-0.9.0.1";
 			playerId = "";
 			sessionId = "";
 			login = false;
