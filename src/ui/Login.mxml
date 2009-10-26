@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="342" height="204" title="Login" initialize="init()">
+<mx:Script>
+	<![CDATA[
+		private function init() : void
+		{
+			loginButton.label = LocaleMgr.instance().getResourceId("ID_LOGIN");
+			guestLoginButton.label = LocaleMgr.instance().getResourceId("ID_GUESTLOGIN");
+		}
+		
+		private function onLogin(event:Event) : void
+		{
+			Global.vars.app.doLogin(this.userName.text, this.passWord.text);
+		}
+
+		private function onGuestLogin(event:Event) : void
+		{
+			Global.vars.app.doGuestLogin();
+		}
+	]]>
+</mx:Script>
+	<mx:Form x="10" y="10" width="302" height="106">
+		<mx:FormItem label="Username">
+			<mx:TextInput width="187" id="userName"/>
+		</mx:FormItem>
+		<mx:FormItem label="Password">
+			<mx:TextInput width="186" id="passWord"/>
+		</mx:FormItem>
+	</mx:Form>
+	<mx:Button x="108" y="124" label="Login" id="loginButton" width="81" click="onLogin(event)"/>
+	<mx:Button x="197" y="124" label="Login As Guest" id="guestLoginButton" click="onGuestLogin(event)"/>
+</mx:Panel>
