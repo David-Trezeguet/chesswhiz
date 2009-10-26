@@ -136,7 +136,14 @@
 			okBtn.addEventListener("click", okBtnClickHandler);
 			panel.addChild(msgbox);
 		}
-		
+
+		/**
+		 * Read the QueryString and FlashVars.
+		 *
+		 *  @References: This function is directly copied from "ShortFusion Blog":
+		 *  http://blog.shortfusion.com/index.cfm/2009/1/14/Flex-and-Flash--Reading-The-Query-String-and-FlashVars
+		 * 
+		 */
 		public static function readQueryString():Array {
 			var params:Array = new Array();
 			try  {
