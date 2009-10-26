@@ -1,22 +1,15 @@
 ﻿package {
 	import flash.events.DataEvent;
-	import flash.events.Event;
 	import flash.media.Sound;
 	import flash.net.SharedObject;
 	import flash.net.URLRequest;
 	
 	import hoxserver.*;
 	
-	import mx.containers.ControlBar;
-	import mx.containers.Form;
-	import mx.containers.FormItem;
 	import mx.containers.HBox;
-	import mx.containers.Panel;
-	import mx.controls.Button;
-	import mx.controls.Spacer;
-	import mx.controls.TextInput;
 	import mx.core.UIComponent;
 	
+	import ui.Login;
 	import ui.TablePreferences;
 	import ui.TableSettings;
 	
@@ -162,39 +155,8 @@
 		}
 
 		public function initLoginPanel() : void {
-			var loginPanel:Panel = new Panel();
-			loginPanel.title = "Login";
-			loginPanel.id = "loginPanel";
+			var loginPanel:Login = new Login();
 			this.mainWindow.addChild(loginPanel);
-			var loginForm:Form = new Form();
-			var unameFormItem:FormItem = new FormItem();
-			unameFormItem.label = "Username";
-			var tiUname:TextInput = new TextInput();
-			unameFormItem.addChild(tiUname);
-			var passwdFormItem:FormItem = new FormItem();
-			passwdFormItem.label = "Password";
-			var tiPasswd:TextInput = new TextInput();
-			tiPasswd.displayAsPassword = true;
-			passwdFormItem.addChild(tiPasswd);
-			loginForm.addChild(unameFormItem);
-			loginForm.addChild(passwdFormItem);
-			loginPanel.addChild(loginForm);
-			var cbLogin:ControlBar = new ControlBar();
-			var spacer:Spacer = new Spacer();
-			cbLogin.addChild(spacer);
-			var loginBttn:Button = new Button();
-			loginBttn.label = LocaleMgr.instance().getResourceId("ID_LOGIN");
-			loginBttn.addEventListener("click", function(event:Event) : void {
-				doLogin(tiUname.text, tiPasswd.text);
-			});
-			cbLogin.addChild(loginBttn);
-			var guestLoginBttn:Button = new Button();
-			guestLoginBttn.label = LocaleMgr.instance().getResourceId("ID_GUESTLOGIN");
-			guestLoginBttn.addEventListener("click", function(event:Event) : void {
-				doGuestLogin();
-			});
-			cbLogin.addChild(guestLoginBttn);
-			loginPanel.addChild(cbLogin);			
 		}
 		public function initViewTablesPanel(tableList:Object) : void {
 			clearView();
