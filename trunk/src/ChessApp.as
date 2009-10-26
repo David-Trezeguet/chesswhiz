@@ -10,6 +10,7 @@
 	import mx.core.UIComponent;
 	
 	import ui.Login;
+	import ui.TableList;
 	import ui.TablePreferences;
 	import ui.TableSettings;
 	
@@ -160,8 +161,12 @@
 		}
 		public function initViewTablesPanel(tableList:Object) : void {
 			clearView();
-			var view:TableListView = new TableListView(this.mainWindow);
-			view.display(tableList);
+			//var view:TableListView = new TableListView(this.mainWindow);
+			//view.display(tableList);
+			var tableListPanel:TableList = new TableList();
+			tableListPanel.setTableList(tableList);
+			this.mainWindow.addChild(tableListPanel);
+			this.menu.showNavMenu();
 		}
 
 		//public function displayVersion(mc) : void {
