@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="342" height="204" title="Login (ChessWhiz-0.9.0.1)" initialize="init()">
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	width="342" height="204"
+	title="Login (ChessWhiz-0.9.0.2)">
+
 <mx:Script>
 	<![CDATA[
-		private function init() : void
-		{
-			loginButton.label = LocaleMgr.instance().getResourceId("ID_LOGIN");
-			guestLoginButton.label = LocaleMgr.instance().getResourceId("ID_GUESTLOGIN");
-		}
-		
+
 		private function onLogin(event:Event) : void
 		{
 			Global.vars.app.doLogin(this.userName.text, this.passWord.text);
@@ -17,16 +15,24 @@
 		{
 			Global.vars.app.doGuestLogin();
 		}
+
 	]]>
 </mx:Script>
+
 	<mx:Form x="10" y="10" width="302" height="106">
 		<mx:FormItem label="Username">
-			<mx:TextInput width="187" id="userName"/>
+			<mx:TextInput id="userName" width="187" />
 		</mx:FormItem>
 		<mx:FormItem label="Password">
-			<mx:TextInput width="186" id="passWord" displayAsPassword="true"/>
+			<mx:TextInput id="passWord" width="186" displayAsPassword="true"/>
 		</mx:FormItem>
 	</mx:Form>
-	<mx:Button x="108" y="124" label="Login" id="loginButton" width="81" click="onLogin(event)"/>
-	<mx:Button x="197" y="124" label="Login As Guest" id="guestLoginButton" click="onGuestLogin(event)"/>
+	<mx:Button id="loginButton"
+		label="{resourceManager.getString('localization', 'login')}"
+		x="108" y="124" width="81"
+		click="onLogin(event)" />
+	<mx:Button id="guestLoginButton"
+		label="{resourceManager.getString('localization', 'guest_login')}"
+		x="197" y="124" 
+		click="onGuestLogin(event)" />
 </mx:Panel>

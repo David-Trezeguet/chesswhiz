@@ -29,7 +29,7 @@
 		public var selectedTid:String;
 		public var menu:AppMenu;
 		public var moveSound:Sound;
-		public var localeMgr:LocaleMgr;
+		//public var localeMgr:LocaleMgr;
 		public var urlParams:Array;
 		public var firstLogin:Boolean;
 		public var loginFailReason:String;
@@ -47,7 +47,7 @@
 		
 
 		public function init() : void {
-			version = "FLASHCHESS-0.9.0.1";
+			version = "FLASHCHESS-0.9.0.2";
 			playerId = "";
 			sessionId = "";
 			login = false;
@@ -60,7 +60,7 @@
 			urlParams = new Array();
 			urlParams = Util.readQueryString();
 			trace(urlParams.length);
-			localeMgr = LocaleMgr.instance();
+			//localeMgr = LocaleMgr.instance();
 			firstLogin = true;
 			loginFailReason = "";
 			preferences = {};
@@ -107,9 +107,9 @@
 			if (urlParams["locale"] != null && urlParams["locale"] != "") {
 				locale = urlParams["locale"];
 			}
-            trace("loading language settings");
+            trace("loading language settings: [" + locale + "]");
 			//localeMgr.loadTextXML();
-			localeMgr.loadLocaleFile(locale);
+			//localeMgr.loadLocaleFile(locale);
 		}
 
 		public function startApp():void {
@@ -121,6 +121,7 @@
 		public function processSocketConnectEvent() : void {
 			initLanguageSettings();
 			menu.showStartMenu();
+			initLoginPanel();
 		}
 
 		public function stopApp() : void {
