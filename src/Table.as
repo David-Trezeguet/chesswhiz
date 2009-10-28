@@ -6,6 +6,8 @@
 	
 	import hoxserver.*;
 	
+	import ui.TableBoard;
+	
 	import views.*;
 	
 	public class Table {
@@ -13,7 +15,7 @@
 		private var redPlayer:PlayerInfo;
 		private var blackPlayer:PlayerInfo;
 		private var observers:Array;
-		public var view:TableView;
+		public var view:TableBoard;
 		private var game:Game;
 		private var sides:Object;
 		private var tableState:String;
@@ -150,8 +152,11 @@
 		
 		public function createView ():void {
 			Global.vars.app.clearView();
-			this.view = new TableView(Global.vars.app.mainWindow, this);
-			this.view.display();
+			//this.view = new TableView(Global.vars.app.mainWindow, this);
+			//this.view.display();
+			this.view = new TableBoard();
+			this.view.display(this);
+			Global.vars.app.mainWindow.addChild(this.view);
 		}
 
 		public function reviewMove(cmd:String) : void {
@@ -429,7 +434,7 @@
 					var prevPos:Position = new Position(parseInt(move.charAt(0)), parseInt(move.charAt(1)));
 					var curPos:Position = new Position(parseInt(move.charAt(2)), parseInt(move.charAt(3)));
 					this.view.board.rewindPieceByPos(piece, curPos, prevPos, capturePiece);
-					this.view.grid.dataProvider.removeItemAt(this.moveList.length - 1);
+					//this.view.grid.dataProvider.removeItemAt(this.moveList.length - 1);
 					this.moveList.splice(this.moveList.length - 1, 1);
 					if (this.moveList.length > 1) {
 						lastMove = this.moveList[this.moveList.length - 1];
@@ -531,10 +536,10 @@
 					this.startTimer();
 				}
 				else if (moveList.length == 1) {
-					this.view.enableReviewButtons();
+					this.view.enableReviewButtons(true);
 				}
 	    	} else if (this.tableState == "OBSERVER_STATE") {
-				this.view.enableReviewButtons();
+				this.view.enableReviewButtons(true);
 				if (this.moveList.length == 2) {
 					this.startTimer();
 				}
@@ -569,10 +574,10 @@
 			if (curMoveIndex == moveIndex ) {
 				return;
 			}
-			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
-				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
-				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
-			}
+			//if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
+			//	this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
+			//	this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
+			//}
 			applyChangeSet(moveIndex);
 		}
 
@@ -652,26 +657,26 @@
 					focusPiece = this.view.board.getPieceByIndex(color, pieceIndex);
 				}
 			}
-			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
-				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = true;
-				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
-				this.view.grid.scrollToIndex(curMoveIndex - 1);
-			}
+//			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
+//				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = true;
+//				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
+//				this.view.grid.scrollToIndex(curMoveIndex - 1);
+//			}
 			this.view.board.reDraw(changeSet, focusPiece);
 		}
 		public function stopReview() : void {
-			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
-				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
-				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
-			}
+//			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
+//				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
+//				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
+//			}
 			var moveIndex:int = moveList.length;
 			if (curMoveIndex == moveIndex ) {
 				return;
 			}
-			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
-				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
-				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
-			}
+//			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
+//				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
+//				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
+//			}
 			applyChangeSet(moveIndex);
 			curMoveIndex = -1;
 		}

@@ -42,7 +42,7 @@
 		public function ChessApp(toolbar:HBox, window:UIComponent) {
 			mainToolBar = toolbar;
 			mainWindow = window;
-			baseURI = "http://www.playxiangqi.com/flex/";
+			baseURI = "http://www.playxiangqi.com/chesswhiz/";
 		}
 		
 
@@ -56,7 +56,7 @@
 			currentTableId = "";
 			tableObjects = new Array();
 			moveSound = new Sound();
-			moveSound.load(new URLRequest(this.baseURI + "/images/move.mp3"));
+			moveSound.load(new URLRequest(this.baseURI + "res/images/move.mp3"));
 			urlParams = new Array();
 			urlParams = Util.readQueryString();
 			trace(urlParams.length);
