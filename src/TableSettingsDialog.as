@@ -87,8 +87,8 @@
 			currHeight += 90;
 			var cb:ControlBar = new ControlBar();
 			this.addChild(cb);
-			var btn:Button = Util.createButton(cb, "ok", LocaleMgr.instance().getResourceId("ID_OK"), currWidth + padding, currHeight + padding, 20, 50, true, handlerOK);
-			Util.createButton(cb, "cancel", LocaleMgr.instance().getResourceId("ID_CANCEL"), btn.x + btn.width + padding, currHeight + padding, 20, 80, true, handlerCANCEL);
+			var btn:Button = Util.createButton(cb, "ok", resourceManager.getString('localization', 'ok'), currWidth + padding, currHeight + padding, 20, 50, true, handlerOK);
+			Util.createButton(cb, "cancel", resourceManager.getString('localization', 'cancel'), btn.x + btn.width + padding, currHeight + padding, 20, 80, true, handlerCANCEL);
 		}
 		public function handlerOK(event:Event) : void {
 			var settings:Object = {}

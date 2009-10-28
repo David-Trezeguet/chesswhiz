@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
-	applicationComplete="init()" backgroundGradientColors="[#000000, #ffffff]"  viewSourceURL="srcview/index.html">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+	layout="vertical" backgroundGradientColors="[#000000, #ffffff]"
+	initialize="init()"
+	applicationComplete="initComplete()"
+	viewSourceURL="srcview/index.html">
 
 <mx:Script>	
 	<![CDATA[
 
-	public var app:ChessApp;
     private function init() : void
     {
-        Global.vars.app = new ChessApp(mainToolBar, mainWindow);
+    	var locales:Array = [ "en_US" ];  // Default chain.
+
+    	// Load the locale.
+    	var urlParams:Array = Util.readQueryString();
+    	var param:String = urlParams["locale"];
+		if (param != null && param != "" && param != "en_US") {
+			locales.unshift(param); // Add at the beginning.
+		}
+		trace("Set locale-chain = [" + locales + "]");
+		resourceManager.localeChain = locales;
+	}
+
+    private function initComplete() : void
+    {
+    	Global.vars.app = new ChessApp(mainToolBar, mainWindow);
         Global.vars.app.init();
 		Global.vars.app.startApp();
 	}
@@ -16,13 +32,17 @@
 ]]>
 </mx:Script>
 
+<mx:Metadata>
+	[ResourceBundle ("localization")]
+</mx:Metadata>
+
 <mx:ApplicationControlBar id="mainMenu" dock="true"  backgroundColor="0x860b09">
-        <mx:HBox paddingBottom="5" 
-            paddingTop="5"
-            id="mainToolBar">
+        <mx:HBox id="mainToolBar"
+        	paddingBottom="5" paddingTop="5">
         </mx:HBox>
 </mx:ApplicationControlBar>
+
 <mx:Canvas id="mainWindow" >
-	
 </mx:Canvas>
+
 </mx:Application>

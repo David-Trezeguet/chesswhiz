@@ -4,6 +4,7 @@
 	
 	import mx.containers.HBox;
 	import mx.controls.Button;
+	import mx.resources.ResourceManager;
 
 	public class AppMenu  {
 
@@ -23,7 +24,7 @@
 			Util.createTextField(this.toolBar, Global.vars.app.getPlayerID(), 580, 12, false, 0xa09e9e, "Verdana", 12);
 
 			var logoutBtn:Button = new Button();
-			logoutBtn.label = LocaleMgr.instance().getResourceId("ID_LOGOUT");
+			logoutBtn.label = ResourceManager.getInstance().getString('localization', 'logout');
 			logoutBtn.x = 680;
 			logoutBtn.y = 10;
 			this.toolBar.addChild(logoutBtn);
@@ -45,7 +46,7 @@
 			}
 			showTitle();
 			var viewTablesBtn:Button = new Button();
-			viewTablesBtn.label = LocaleMgr.instance().getResourceId("ID_VIEWTABLES");
+			viewTablesBtn.label = ResourceManager.getInstance().getString('localization', 'view_tables');
 			viewTablesBtn.x = 200;
 			viewTablesBtn.y = 10;
 			this.toolBar.addChild(viewTablesBtn);
@@ -53,7 +54,7 @@
 				Global.vars.app.doViewTables();
 				});
 			var NewTableBtn:Button = new Button();
-			NewTableBtn.label = LocaleMgr.instance().getResourceId("ID_NEWTABLE");;
+			NewTableBtn.label = ResourceManager.getInstance().getString('localization', 'new_table');
 			NewTableBtn.x = 320;
 			NewTableBtn.y = 10;
 			this.toolBar.addChild(NewTableBtn);
@@ -68,7 +69,7 @@
 			showTitle();
 			if (showSettings) {
 				var tableSettingsBtn:Button = new Button();
-				tableSettingsBtn.label = LocaleMgr.instance().getResourceId("ID_SETTINGS");
+				tableSettingsBtn.label = ResourceManager.getInstance().getString('localization', 'settings');
 				tableSettingsBtn.x = 200;
 				tableSettingsBtn.y = 10;
 				this.toolBar.addChild(tableSettingsBtn);
@@ -78,7 +79,7 @@
 			}
 			if (showPref) {
 				var tablePrefBtn:Button = new Button();
-				tablePrefBtn.label = LocaleMgr.instance().getResourceId("ID_PREFERENCES");
+				tablePrefBtn.label = ResourceManager.getInstance().getString('localization', 'preferences');
 				tablePrefBtn.x = 320;
 				tablePrefBtn.y = 10;
 				this.toolBar.addChild(tablePrefBtn);
@@ -87,7 +88,7 @@
 					});
 			}
 			var closeTableBtn:Button = new Button();
-			closeTableBtn.label = LocaleMgr.instance().getResourceId("ID_CLOSE");
+			closeTableBtn.label = ResourceManager.getInstance().getString('localization', 'close');
 			closeTableBtn.x = 440;
 			closeTableBtn.y = 10;
 			this.toolBar.addChild(closeTableBtn);
@@ -102,7 +103,8 @@
 			showTitle();
 			if (color != "") {
 				var playBtn:Button = new Button();
-				playBtn.label = (color == "Red") ? LocaleMgr.instance().getResourceId("ID_PLAYRED") : LocaleMgr.instance().getResourceId("ID_PLAYBLACK");
+				playBtn.label = (color == "Red") ? ResourceManager.getInstance().getString('localization', 'play_red')
+										         : ResourceManager.getInstance().getString('localization', 'play_black');
 				playBtn.name = "playgame";
 				playBtn.x = 340;
 				playBtn.y = 10;
@@ -115,7 +117,7 @@
 
 			}
 			var closeTableBtn:Button = new Button();
-			closeTableBtn.label = LocaleMgr.instance().getResourceId("ID_CLOSE");
+			closeTableBtn.label = ResourceManager.getInstance().getString('localization', 'close');
 			closeTableBtn.x = 460;
 			closeTableBtn.y = 10;
 			this.toolBar.addChild(closeTableBtn);
@@ -129,7 +131,7 @@
 			}
 			showTitle();
 			var tablePrefBtn:Button = new Button();
-			tablePrefBtn.label = LocaleMgr.instance().getResourceId("ID_PREFERENCES");
+			tablePrefBtn.label = ResourceManager.getInstance().getString('localization', 'preferences');
 			tablePrefBtn.x = 200;
 			tablePrefBtn.y = 10;
 			this.toolBar.addChild(tablePrefBtn);
@@ -137,7 +139,7 @@
 				Global.vars.app.changeTablePref();
 				});
 			var resignTableBtn:Button = new Button();
-			resignTableBtn.label = LocaleMgr.instance().getResourceId("ID_RESIGN");
+			resignTableBtn.label = ResourceManager.getInstance().getString('localization', 'resign');
 			resignTableBtn.x = 320;
 			resignTableBtn.y = 10;
 			this.toolBar.addChild(resignTableBtn);
@@ -145,7 +147,7 @@
 				Global.vars.app.doResignTable();
 				});
 			var drawTableBtn:Button = new Button();
-			drawTableBtn.label = LocaleMgr.instance().getResourceId("ID_DRAW");
+			drawTableBtn.label = ResourceManager.getInstance().getString('localization', 'draw');
 			drawTableBtn.x = 440;
 			drawTableBtn.y = 10;
 			this.toolBar.addChild(drawTableBtn);
