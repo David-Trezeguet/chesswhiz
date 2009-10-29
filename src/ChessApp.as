@@ -9,6 +9,7 @@
 	import ui.TableList;
 	import ui.TablePreferences;
 	import ui.TableSettings;
+	import ui.TableBoard;
 	import hoxserver.*;
 	import views.*;
 
@@ -23,24 +24,20 @@
 		public var currentTableId:String;
 		public var tableObjects:Object;
 		public var selectedTid:String;
-		public var menu:AppMenu;
+		private var _menu:AppMenu;
 		public var moveSound:Sound;
 		public var firstLogin:Boolean;
 		public var loginFailReason:String;
 		public var preferences:Object;
 		public var cookie:SharedObject;
-		public var mainWindow:UIComponent;
-		public var mainToolBar:HBox;
+		private var _mainWindow:UIComponent;
+		private var _mainToolBar:HBox;
 		public var baseURI:String;
 
 		public function ChessApp(toolbar:HBox, window:UIComponent) {
-			mainToolBar = toolbar;
-			mainWindow = window;
+			_mainToolBar = toolbar;
+			_mainWindow = window;
 			baseURI = "http://www.playxiangqi.com/chesswhiz/";
-		}
-		
-
-		public function init() : void {
 			version = "FLASHCHESS-0.9.0.2";
 			playerId = "";
 			sessionId = "";
@@ -58,14 +55,11 @@
 			preferences["boardcolor"] = 0x5b5d5b;
 			preferences["linecolor"] = 0xa09e9e;
 			preferences["sound"] = true;
-			initAppMenu();
-			loadCookie();
-		}
-		public function initAppMenu() : void {
-			menu = new AppMenu(this.mainToolBar, 20, 4, 40, 810);
+			_menu = new AppMenu(_mainToolBar);
+			_loadCookie();
 		}
 
-		public function loadCookie() : void {
+		private function _loadCookie() : void {
 			cookie = SharedObject.getLocal("flashchess");
 			if (cookie && cookie.data && cookie.data.persist == 0xFFDDFF) {
 				preferences["pieceskinindex"] = cookie.data.pieceskinindex;
@@ -74,7 +68,8 @@
 				preferences["sound"] = cookie.data.sound;
 			}
 		}
-		public function saveCookie() : void {
+
+		private function _saveCookie() : void {
 			if (!cookie) {
 				cookie = SharedObject.getLocal("flashchess");
 			}
@@ -93,14 +88,17 @@
 			}
 		}
 
-		public function startApp():void {
-			// Create a connection to the server
-			session.createSocket();
+		public function startApp():void {			
+			session.createSocket();  // Create a connection to the server
 			session.connect();
 		}
 
+		public function addBoardToWindow(board:TableBoard):void {
+			_mainWindow.addChild(board);
+		}
+
 		public function processSocketConnectEvent() : void {
-			menu.showStartMenu();
+			_menu.showStartMenu();
 			initLoginPanel();
 		}
 
@@ -131,23 +129,21 @@
 
 		// Clear the main window canvas
 		public function clearView() : void {
-			while (this.mainWindow.numChildren > 0) {
-				this.mainWindow.removeChildAt(0);
+			while (_mainWindow.numChildren > 0) {
+				_mainWindow.removeChildAt(0);
 			}
 		}
 
 		public function initLoginPanel() : void {
 			var loginPanel:Login = new Login();
-			this.mainWindow.addChild(loginPanel);
+			_mainWindow.addChild(loginPanel);
 		}
 		public function initViewTablesPanel(tableList:Object) : void {
 			clearView();
-			//var view:TableListView = new TableListView(this.mainWindow);
-			//view.display(tableList);
 			var tableListPanel:TableList = new TableList();
 			tableListPanel.setTableList(tableList);
-			this.mainWindow.addChild(tableListPanel);
-			this.menu.showNavMenu();
+			_mainWindow.addChild(tableListPanel);
+			_menu.showNavMenu();
 		}
 
 		public function doLogin(uname:String, passwd:String):void {
@@ -182,25 +178,19 @@
 			session.sendChatRequest(playerId, sessionId, currentTableId, msg);
 		}
 		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
-			if (menu) {
-				menu.showTableMenu(showSettings, showPref);
-			}
+			_menu.showTableMenu(showSettings, showPref);
 		}
 		public function showObserverMenu(color:String, tid:String) : void {
-			if (menu) {
-				menu.showObserverMenu(color, tid);
-			}
+			_menu.showObserverMenu(color, tid);
 		}
 		public function showGameMenu() : void {
-			if (menu) {
-				menu.showGameMenu();
-			}
+			_menu.showGameMenu();
 		}
 		public function changeTableSettings() : void {
-			if (!(this.mainWindow.getChildByName("tableSettingsPanel"))) {
+			if (!(_mainWindow.getChildByName("tableSettingsPanel"))) {
 				var tableSettingsPanel:TableSettings = new TableSettings();
 				tableSettingsPanel.name = "tableSettingsPanel";
-				this.mainWindow.addChild(tableSettingsPanel);
+				_mainWindow.addChild(tableSettingsPanel);
 				var tableObj:Table = this.getTable(this.currentTableId);
 				if (tableObj) {
 					var settings:Object = tableObj.getSettings();
@@ -216,10 +206,10 @@
 			}
 		}
 		public function changeTablePref() : void {
-			if (!(this.mainWindow.getChildByName("tablePrefPanel"))) {
+			if (!(_mainWindow.getChildByName("tablePrefPanel"))) {
 				var tablePrefPanel:TablePreferences = new TablePreferences();
 				tablePrefPanel.name = "tablePrefPanel";
-				this.mainWindow.addChild(tablePrefPanel);
+				_mainWindow.addChild(tablePrefPanel);
 				tablePrefPanel.setCurrentPreferences(this.preferences);
 			}
 		}
@@ -232,7 +222,7 @@
 				for (var key:String in pref) {
 					this.preferences[key] = pref[key];
 				}
-				this.saveCookie();
+				_saveCookie();
 			}
 		}
 		public function handleServerEvent(event:DataEvent) : void {
@@ -411,7 +401,7 @@
 				if (pid == this.playerId) {
 					this.removeTable(tid);
 					clearView();
-					menu.showNavMenu();
+					_menu.showNavMenu();
 					doViewTables();
 				}
 			}

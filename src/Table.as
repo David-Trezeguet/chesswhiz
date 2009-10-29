@@ -149,11 +149,9 @@
 		
 		public function createView ():void {
 			Global.vars.app.clearView();
-			//this.view = new TableView(Global.vars.app.mainWindow, this);
-			//this.view.display();
 			this.view = new TableBoard();
 			this.view.display(this);
-			Global.vars.app.mainWindow.addChild(this.view);
+			Global.vars.app.addBoardToWindow(this.view);
 		}
 
 		public function reviewMove(cmd:String) : void {
