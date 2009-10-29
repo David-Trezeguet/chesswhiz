@@ -10,7 +10,7 @@
 		private var color:String;
 		private var playerId:String;
 		private var tableId:String;
-		public static const PLAY_GAME:String = "playgame";
+
 		public void function PlayEvent(pid, tid, color) {
 			this.color = color;
 			this.playerId = pid;

@@ -280,13 +280,10 @@
 			var cell:Array;
 			trace("x: " + x + " y: " + y);
 			trace("panel mouse x: " + panel.mouseX + " y: " + panel.mouseY);
-			trace("container x: " + Global.vars.app.mainWindow.x + " y: " + Global.vars.app.mainWindow.y);
-			trace("toolbar x: " + Global.vars.app.mainToolBar.x + " y: " + Global.vars.app.mainToolBar.y);
+
 			for (i = 0; i < 10; i++)
 			{
-				//yRow = Global.vars.app.mainWindow.y + this.parentClip.y + panel.y + offset + cellHeight * i;
 				yRow = offset + cellHeight * i;
-				//yRow = offset + cellHeight * i;
 				if (Math.abs(panel.mouseY-yRow) < radius)
 				{
 					trace("row"+i);
@@ -295,9 +292,7 @@
 			}
 			for (j = 0; j < 9; j++)
 			{
-				//xColumn = Global.vars.app.mainWindow.x + this.parentClip.x + panel.x + offset + cellWidth * j;
 				xColumn = offset + cellWidth * j;
-				//xColumn = offset + cellWidth * j;
 				if (Math.abs(panel.mouseX-xColumn) < radius)
 				{					
 					trace("col"+j);
