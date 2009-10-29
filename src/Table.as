@@ -3,11 +3,8 @@
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
-	
 	import hoxserver.*;
-	
 	import ui.TableBoard;
-	
 	import views.*;
 	
 	public class Table {

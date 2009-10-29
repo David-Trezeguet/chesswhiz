@@ -3,17 +3,13 @@
 	import flash.media.Sound;
 	import flash.net.SharedObject;
 	import flash.net.URLRequest;
-	
-	import hoxserver.*;
-	
 	import mx.containers.HBox;
 	import mx.core.UIComponent;
-	
 	import ui.Login;
 	import ui.TableList;
 	import ui.TablePreferences;
 	import ui.TableSettings;
-	
+	import hoxserver.*;
 	import views.*;
 
 	public class ChessApp {
@@ -29,8 +25,6 @@
 		public var selectedTid:String;
 		public var menu:AppMenu;
 		public var moveSound:Sound;
-		//public var localeMgr:LocaleMgr;
-		public var urlParams:Array;
 		public var firstLogin:Boolean;
 		public var loginFailReason:String;
 		public var preferences:Object;
@@ -57,10 +51,6 @@
 			tableObjects = new Array();
 			moveSound = new Sound();
 			moveSound.load(new URLRequest(this.baseURI + "res/images/move.mp3"));
-			urlParams = new Array();
-			urlParams = Util.readQueryString();
-			trace(urlParams.length);
-			//localeMgr = LocaleMgr.instance();
 			firstLogin = true;
 			loginFailReason = "";
 			preferences = {};
@@ -102,15 +92,6 @@
         	    }
 			}
 		}
-		public function initLanguageSettings() : void {
-			var locale:String = "en_US";
-			if (urlParams["locale"] != null && urlParams["locale"] != "") {
-				locale = urlParams["locale"];
-			}
-            trace("loading language settings: [" + locale + "]");
-			//localeMgr.loadTextXML();
-			//localeMgr.loadLocaleFile(locale);
-		}
 
 		public function startApp():void {
 			// Create a connection to the server
@@ -119,7 +100,6 @@
 		}
 
 		public function processSocketConnectEvent() : void {
-			initLanguageSettings();
 			menu.showStartMenu();
 			initLoginPanel();
 		}
@@ -169,9 +149,6 @@
 			this.mainWindow.addChild(tableListPanel);
 			this.menu.showNavMenu();
 		}
-
-		//public function displayVersion(mc) : void {
-		//}
 
 		public function doLogin(uname:String, passwd:String):void {
 			this.playerId = uname;

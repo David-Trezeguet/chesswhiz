@@ -3,21 +3,21 @@
 	width="342" height="204"
 	title="Login (ChessWhiz-0.9.0.2)">
 
-<mx:Script>
-	<![CDATA[
-
-		private function onLogin(event:Event) : void
-		{
-			Global.vars.app.doLogin(this.userName.text, this.passWord.text);
-		}
-
-		private function onGuestLogin(event:Event) : void
-		{
-			Global.vars.app.doGuestLogin();
-		}
-
-	]]>
-</mx:Script>
+	<mx:Script>
+		<![CDATA[
+	
+			private function onLogin(event:Event) : void
+			{
+				Global.vars.app.doLogin(this.userName.text, this.passWord.text);
+			}
+	
+			private function onGuestLogin(event:Event) : void
+			{
+				Global.vars.app.doGuestLogin();
+			}
+	
+		]]>
+	</mx:Script>
 
 	<mx:Form x="10" y="10" width="302" height="106">
 		<mx:FormItem label="Username">

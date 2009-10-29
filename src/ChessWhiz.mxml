@@ -5,44 +5,44 @@
 	applicationComplete="initComplete()"
 	viewSourceURL="srcview/index.html">
 
-<mx:Script>	
-	<![CDATA[
-
-    private function init() : void
-    {
-    	var locales:Array = [ "en_US" ];  // Default chain.
-
-    	// Load the locale.
-    	var urlParams:Array = Util.readQueryString();
-    	var param:String = urlParams["locale"];
-		if (param != null && param != "" && param != "en_US") {
-			locales.unshift(param); // Add at the beginning.
+	<mx:Script>	
+		<![CDATA[
+	
+	    private function init() : void
+	    {
+	    	var locales:Array = [ "en_US" ];  // Default chain.
+	
+	    	// Load the locale.
+	    	var urlParams:Array = Util.readQueryString();
+	    	var param:String = urlParams["locale"];
+			if (param != null && param != "" && param != "en_US") {
+				locales.unshift(param); // Add at the beginning.
+			}
+			trace("Set locale-chain = [" + locales + "]");
+			resourceManager.localeChain = locales;
 		}
-		trace("Set locale-chain = [" + locales + "]");
-		resourceManager.localeChain = locales;
-	}
+	
+	    private function initComplete() : void
+	    {
+	    	Global.vars.app = new ChessApp(mainToolBar, mainWindow);
+	        Global.vars.app.init();
+			Global.vars.app.startApp();
+		}
+	
+	]]>
+	</mx:Script>
 
-    private function initComplete() : void
-    {
-    	Global.vars.app = new ChessApp(mainToolBar, mainWindow);
-        Global.vars.app.init();
-		Global.vars.app.startApp();
-	}
+	<mx:Metadata>
+		[ResourceBundle ("localization")]
+	</mx:Metadata>
 
-]]>
-</mx:Script>
-
-<mx:Metadata>
-	[ResourceBundle ("localization")]
-</mx:Metadata>
-
-<mx:ApplicationControlBar id="mainMenu" dock="true"  backgroundColor="0x860b09">
+	<mx:ApplicationControlBar id="mainMenu" dock="true" backgroundColor="0x860b09">
         <mx:HBox id="mainToolBar"
         	paddingBottom="5" paddingTop="5">
         </mx:HBox>
-</mx:ApplicationControlBar>
+	</mx:ApplicationControlBar>
 
-<mx:Canvas id="mainWindow" >
-</mx:Canvas>
+	<mx:Canvas id="mainWindow" >
+	</mx:Canvas>
 
 </mx:Application>
