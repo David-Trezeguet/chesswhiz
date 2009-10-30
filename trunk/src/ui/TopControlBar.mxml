@@ -23,19 +23,24 @@
 	<mx:states>
 		<mx:State name="viewTablesState">
 			<mx:AddChild position="lastChild">
-				<mx:Button label="New Table" click="Global.vars.app.doNewTable()" id="newTableButton"/>
+				<mx:Button id="newTableButton"
+					label="{resourceManager.getString('localization', 'new_table')}"
+					click="Global.vars.app.doNewTable()"/>
 			</mx:AddChild>
 			<mx:AddChild position="lastChild">
 				<mx:Spacer width="100%" id="spacer1"/>
 			</mx:AddChild>
 			<mx:AddChild position="lastChild">
-				<mx:Button label="Logout" click="Global.vars.app.doLogout()" id="logoutButton"/>
+				<mx:Button id="logoutButton"
+					label="{resourceManager.getString('localization', 'logout')}"
+					click="Global.vars.app.doLogout()"/>
 			</mx:AddChild>
 			<mx:AddChild position="lastChild">
 				<mx:Spacer id="spacer2"/>
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{spacer2}" position="before">
-				<mx:Label text="[PLAYERID]" fontFamily="Verdana" fontSize="12" color="0xa09e9e" id="playerIdLabel"/>
+				<mx:Label id="playerIdLabel" text="[PLAYERID]"
+					fontFamily="Verdana" fontSize="12" color="0xa09e9e"/>
 			</mx:AddChild>
 			<mx:SetProperty target="{logoLabel}" name="x"/>
 			<mx:SetProperty target="{logoLabel}" name="y"/>
@@ -46,44 +51,53 @@
 		<mx:State name="observerState" basedOn="viewTablesState">
 			<mx:RemoveChild target="{newTableButton}"/>
 			<mx:AddChild relativeTo="{logoutButton}" position="before">
-				<mx:Button label="Preferences" click="Global.vars.app.changeTablePref()" id="preferencesButton"/>
+				<mx:Button id="preferencesButton"
+					label="{resourceManager.getString('localization', 'preferences')}"
+					click="Global.vars.app.changeTablePref()"/>
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button label="Close" click="Global.vars.app.doCloseTable()" id="closeButton"/>
+				<mx:Button id="closeButton"
+					label="{resourceManager.getString('localization', 'close')}"
+					click="Global.vars.app.doCloseTable()"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="newTableState" basedOn="observerState">
 			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button label="Settings" click="Global.vars.app.changeTableSettings()" id="settingsButton"/>
+				<mx:Button id="settingsButton"
+					label="{resourceManager.getString('localization', 'settings')}"
+					click="Global.vars.app.changeTableSettings()"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="openRedState" basedOn="observerState">
 			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button label="{resourceManager.getString('localization', 'play_red')}" id="playRedButton"
+				<mx:Button id="playRedButton"
+					label="{resourceManager.getString('localization', 'play_red')}"
 					click="Global.vars.app.playGame(tableId, 'Red');"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="openBlackState" basedOn="observerState">
 			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button label="{resourceManager.getString('localization', 'play_black')}" id="playBlackButton"
+				<mx:Button id="playBlackButton"
+					label="{resourceManager.getString('localization', 'play_black')}"
 					click="Global.vars.app.playGame(tableId, 'Black');"/>
 			</mx:AddChild>
-			<mx:SetProperty name="dock" value="true"/>
 		</mx:State>
 		<mx:State name="inGameState" basedOn="observerState">
 			<mx:RemoveChild target="{closeButton}"/>
 			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button label="{resourceManager.getString('localization', 'resign')}" id="resignButton"
+				<mx:Button id="resignButton"
+					label="{resourceManager.getString('localization', 'resign')}"
 					click="Global.vars.app.doResignTable()"/>
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button label="{resourceManager.getString('localization', 'draw')}" id="drawButton"
+				<mx:Button id="drawButton"
+					label="{resourceManager.getString('localization', 'draw')}"
 					click="Global.vars.app.doDrawTable()"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 
-	<mx:Label text="PlayXiangqi"
-		fontFamily="Verdana" fontSize="18" color="#FFFFFF" id="logoLabel"/>
+	<mx:Label id="logoLabel" text="PlayXiangqi"
+		fontFamily="Verdana" fontSize="18" color="#FFFFFF"/>
 	
 </mx:ApplicationControlBar>

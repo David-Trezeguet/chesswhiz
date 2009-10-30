@@ -6,7 +6,6 @@
 	
 	import hoxserver.*;
 	
-	import mx.containers.HBox;
 	import mx.core.Container;
 	
 	import ui.Login;
@@ -20,9 +19,11 @@
 
 	public class ChessApp {
 
+		public static const VERSION:String = "0.9.0.3";
+
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
-		public var version:String;
+		private var _loginVersion:String;
 		public var playerId:String;
 		public var sessionId:String;
 		public var login:Boolean;
@@ -42,7 +43,7 @@
 			_menu = menu;
 			_mainWindow = window;
 			baseURI = "http://www.playxiangqi.com/chesswhiz/";
-			version = "FLASHCHESS-0.9.0.2";
+			_loginVersion = "FLASHCHESS-" + VERSION;
 			playerId = "";
 			sessionId = "";
 			login = false;
@@ -147,9 +148,9 @@
 			_menu.currentState = "viewTablesState";
 		}
 
-		public function doLogin(uname:String, passwd:String):void {
+		public function doLogin(uname:String, passwd:String) : void {
 			this.playerId = uname;
-			_session.sendLoginRequest(uname, passwd, version);
+			_session.sendLoginRequest(uname, passwd, _loginVersion);
 		}
 		public function doLogout():void {
 			_session.sendLogoutRequest(this.playerId, this.sessionId);

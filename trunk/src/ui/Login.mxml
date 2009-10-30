@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
 	width="342" height="204"
-	title="Login (ChessWhiz-0.9.0.2)">
+	initialize="init()">
 
 	<mx:Script>
 		<![CDATA[
-	
+
+			private function init() : void
+			{
+				this.title = "ChessWhiz-" + ChessApp.VERSION;	
+			}
+
 			private function onLogin(event:Event) : void
 			{
 				Global.vars.app.doLogin(this.userName.text, this.passWord.text);
