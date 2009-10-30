@@ -14,34 +14,32 @@
 			_toolBar = tb;
 		}
 
-		private function _showTitle() : void {
+		private function _clearAllAndShowTitle() : void {
+			_toolBar.removeAllChildren();
 			Util.createTextField(_toolBar, "PlayXiangqi", 20, 10, false, 0xFFFFFF, "Verdana", 18);
-			Util.createTextField(_toolBar, Global.vars.app.getPlayerID(), 580, 12, false, 0xa09e9e, "Verdana", 12);
-
-			var logoutBtn:Button = new Button();
-			logoutBtn.label = ResourceManager.getInstance().getString('localization', 'logout');
-			logoutBtn.x = 680;
-			logoutBtn.y = 10;
-			_toolBar.addChild(logoutBtn);
-
-			function logoutBtnClickHandler(event:Event) : void {
-				Global.vars.app.doLogout();
+			
+			const playerId:String = Global.vars.app.getPlayerID();
+			if (playerId != "" )  // Already logged in?
+			{
+				Util.createTextField(_toolBar, playerId, 580, 12, false, 0xa09e9e, "Verdana", 12);
+	
+				var logoutBtn:Button = new Button();
+				logoutBtn.label = ResourceManager.getInstance().getString('localization', 'logout');
+				logoutBtn.x = 680;
+				logoutBtn.y = 10;
+				_toolBar.addChild(logoutBtn);
+				logoutBtn.addEventListener("click", function(event:Event) : void {
+					Global.vars.app.doLogout();
+					});
 			}
-			logoutBtn.addEventListener("click", logoutBtnClickHandler);
 		}
 
 		public function showStartMenu() : void {
-			while (_toolBar.numChildren > 0) {
-				_toolBar.removeChildAt(0);
-			}
-			Util.createTextField(_toolBar, "PlayXiangqi", 20, 10, false, 0xFFFFFF, "Verdana", 18);
+			_clearAllAndShowTitle();
 		}
 
 		public function showNavMenu() : void {
-			while (_toolBar.numChildren > 0) {
-				_toolBar.removeChildAt(0);
-			}
-			_showTitle();
+			_clearAllAndShowTitle();
 			var viewTablesBtn:Button = new Button();
 			viewTablesBtn.label = ResourceManager.getInstance().getString('localization', 'view_tables');
 			viewTablesBtn.x = 200;
@@ -50,21 +48,18 @@
 			viewTablesBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doViewTables();
 				});
-			var NewTableBtn:Button = new Button();
-			NewTableBtn.label = ResourceManager.getInstance().getString('localization', 'new_table');
-			NewTableBtn.x = 320;
-			NewTableBtn.y = 10;
-			_toolBar.addChild(NewTableBtn);
-			NewTableBtn.addEventListener("click", function(event:Event) : void {
+			var newTableBtn:Button = new Button();
+			newTableBtn.label = ResourceManager.getInstance().getString('localization', 'new_table');
+			newTableBtn.x = 320;
+			newTableBtn.y = 10;
+			_toolBar.addChild(newTableBtn);
+			newTableBtn.addEventListener("click", function(event:Event) : void {
 				Global.vars.app.doNewTable();
 				});
 		}
 
 		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
-			while (_toolBar.numChildren > 0) {
-				_toolBar.removeChildAt(0);
-			}
-			_showTitle();
+			_clearAllAndShowTitle();
 			if (showSettings) {
 				var tableSettingsBtn:Button = new Button();
 				tableSettingsBtn.label = ResourceManager.getInstance().getString('localization', 'settings');
@@ -96,15 +91,11 @@
 		}
 
 		public function showObserverMenu(color:String, tableId:String) : void {
-			while (_toolBar.numChildren > 0) {
-				_toolBar.removeChildAt(0);
-			}
-			_showTitle();
+			_clearAllAndShowTitle();
 			if (color != "") {
 				var playBtn:Button = new Button();
 				playBtn.label = (color == "Red") ? ResourceManager.getInstance().getString('localization', 'play_red')
 										         : ResourceManager.getInstance().getString('localization', 'play_black');
-				playBtn.name = "playgame";
 				playBtn.x = 340;
 				playBtn.y = 10;
 				_toolBar.addChild(playBtn);
@@ -126,10 +117,7 @@
 		}
 
 		public function showGameMenu() : void {
-			while (_toolBar.numChildren > 0) {
-				_toolBar.removeChildAt(0);
-			}
-			_showTitle();
+			_clearAllAndShowTitle();
 			var tablePrefBtn:Button = new Button();
 			tablePrefBtn.label = ResourceManager.getInstance().getString('localization', 'preferences');
 			tablePrefBtn.x = 200;

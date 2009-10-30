@@ -24,8 +24,8 @@
 	
 	    private function initComplete() : void
 	    {
-	    	var chessApp:ChessApp = new ChessApp(mainToolBar, mainWindow);
-	    	Global.vars.app = chessApp;  // For global references.
+			var chessApp:ChessApp = new ChessApp(mainToolBar, mainWindow);
+			Global.vars.app = chessApp;  // For global references.
 			chessApp.startApp();
 		}
 	

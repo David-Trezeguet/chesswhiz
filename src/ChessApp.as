@@ -3,46 +3,50 @@
 	import flash.media.Sound;
 	import flash.net.SharedObject;
 	import flash.net.URLRequest;
+	
+	import hoxserver.*;
+	
 	import mx.containers.HBox;
+	import mx.core.Container;
 	import mx.core.UIComponent;
+	
 	import ui.Login;
+	import ui.TableBoard;
 	import ui.TableList;
 	import ui.TablePreferences;
 	import ui.TableSettings;
-	import ui.TableBoard;
-	import hoxserver.*;
+	
 	import views.*;
 
 	public class ChessApp {
 
+		private var _menu:AppMenu;
+		private var _mainWindow:Container;
 		public var version:String;
 		public var playerId:String;
 		public var sessionId:String;
 		public var login:Boolean;
-		public var session:Session;
+		private var _session:Session;
 		public var tableEntries:Object;
 		public var currentTableId:String;
 		public var tableObjects:Object;
 		public var selectedTid:String;
-		private var _menu:AppMenu;
 		public var moveSound:Sound;
 		public var firstLogin:Boolean;
 		public var loginFailReason:String;
 		public var preferences:Object;
 		public var cookie:SharedObject;
-		private var _mainWindow:UIComponent;
-		private var _mainToolBar:HBox;
 		public var baseURI:String;
 
-		public function ChessApp(toolbar:HBox, window:UIComponent) {
-			_mainToolBar = toolbar;
+		public function ChessApp(toolbar:HBox, window:Container) {
+			_menu = new AppMenu(toolbar);
 			_mainWindow = window;
 			baseURI = "http://www.playxiangqi.com/chesswhiz/";
 			version = "FLASHCHESS-0.9.0.2";
 			playerId = "";
 			sessionId = "";
 			login = false;
-			session = new Session();
+			_session = new Session();
 			tableEntries = new Array();
 			currentTableId = "";
 			tableObjects = new Array();
@@ -55,7 +59,6 @@
 			preferences["boardcolor"] = 0x5b5d5b;
 			preferences["linecolor"] = 0xa09e9e;
 			preferences["sound"] = true;
-			_menu = new AppMenu(_mainToolBar);
 			_loadCookie();
 		}
 
@@ -89,8 +92,8 @@
 		}
 
 		public function startApp():void {			
-			session.createSocket();  // Create a connection to the server
-			session.connect();
+			_session.createSocket();  // Create a connection to the server
+			_session.connect();
 		}
 
 		public function addBoardToWindow(board:TableBoard):void {
@@ -99,11 +102,11 @@
 
 		public function processSocketConnectEvent() : void {
 			_menu.showStartMenu();
-			initLoginPanel();
+			_initLoginPanel();
 		}
 
 		public function stopApp() : void {
-			session.closeSocket();
+			_session.closeSocket();
 			for (var key:String in this.tableObjects) {
 				if (key && this.tableObjects[key]) {
 					delete this.tableObjects[key];
@@ -127,17 +130,15 @@
 			return this.sessionId;
 		}
 
-		// Clear the main window canvas
 		public function clearView() : void {
-			while (_mainWindow.numChildren > 0) {
-				_mainWindow.removeChildAt(0);
-			}
+			_mainWindow.removeAllChildren();
 		}
 
-		public function initLoginPanel() : void {
+		private function _initLoginPanel() : void {
 			var loginPanel:Login = new Login();
 			_mainWindow.addChild(loginPanel);
 		}
+
 		public function initViewTablesPanel(tableList:Object) : void {
 			clearView();
 			var tableListPanel:TableList = new TableList();
@@ -148,34 +149,34 @@
 
 		public function doLogin(uname:String, passwd:String):void {
 			this.playerId = uname;
-			session.sendLoginRequest(uname, passwd, version);
+			_session.sendLoginRequest(uname, passwd, version);
 		}
 		public function doLogout():void {
-			session.sendLogoutRequest(this.playerId, this.sessionId);
+			_session.sendLogoutRequest(this.playerId, this.sessionId);
 			stopApp();
 			startApp();
 		}
 		public function doViewTables() : void {
-			session.sendTableListRequest(playerId, sessionId);
+			_session.sendTableListRequest(playerId, sessionId);
 		}
 		public function doNewTable() : void {
-			session.sendNewTableRequest(playerId, sessionId, "Red");
+			_session.sendNewTableRequest(playerId, sessionId, "Red");
 		}
 		
 		public function doJoinTable(tid:String) : void {
-			session.sendJoinRequest(playerId, sessionId, tid, "None", "0");
+			_session.sendJoinRequest(playerId, sessionId, tid, "None", "0");
 		}
 		public function doCloseTable() : void {
-			session.sendLeaveRequest(playerId, sessionId, currentTableId);
+			_session.sendLeaveRequest(playerId, sessionId, currentTableId);
 		}
 		public function doResignTable() : void {
-			session.sendResignRequest(playerId, sessionId, currentTableId);
+			_session.sendResignRequest(playerId, sessionId, currentTableId);
 		}
 		public function doDrawTable() : void {
-			session.sendDrawRequest(playerId, sessionId, currentTableId);
+			_session.sendDrawRequest(playerId, sessionId, currentTableId);
 		}
 		public function doTableChat(msg:String) : void {
-			session.sendChatRequest(playerId, sessionId, currentTableId, msg);
+			_session.sendChatRequest(playerId, sessionId, currentTableId, msg);
 		}
 		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
 			_menu.showTableMenu(showSettings, showPref);
@@ -297,7 +298,7 @@
 				else if (!this.login) {
 					loginData = new LoginInfo();
 					loginFailReason = response.getContent();
-					session.closeSocket();
+					_session.closeSocket();
 					startApp();
 				}
 			}
@@ -336,7 +337,7 @@
 			return this.tableObjects[tableId]; 
 		}
 		public function playGame(tableId:String, color:String) : void {
-	        session.sendJoinRequest(this.getPlayerID(), this.getSessionID(), tableId, color, '0');
+	        _session.sendJoinRequest(this.getPlayerID(), this.getSessionID(), tableId, color, '0');
     	}
 		public function process_E_JOIN(event:Message) : void {
 			if (event.getCode() === "0") {
@@ -371,15 +372,15 @@
 			}
 	    }
 		public function sendMoveRequest(player:PlayerInfo, piece:Piece, curPos:Position, newPos:Position, tid:String) : void {
-			session.sendMoveRequest(this.getPlayerID(), this.getSessionID(), curPos, newPos, '1500', tid);
+			_session.sendMoveRequest(this.getPlayerID(), this.getSessionID(), curPos, newPos, '1500', tid);
 		}
 		
 		public function resignGame(tableId:String) : void {
-			this.session.sendResignRequest(this.getPlayerID(), this.getSessionID(), tableId);
+			_session.sendResignRequest(this.getPlayerID(), this.getSessionID(), tableId);
 		}
 	
 		public function drawGame(tableId:String) : void {
-			this.session.sendDrawRequest(this.getPlayerID(), this.getSessionID(), tableId);
+			_session.sendDrawRequest(this.getPlayerID(), this.getSessionID(), tableId);
 		}
 
 		public function processEvent_I_MOVES(event:Message) : void {
@@ -447,7 +448,7 @@
 			var msg:Message = new Message();
 			msg.optype = "UPDATE";
 			msg.params = {tid: tableId, pid: this.playerId, rated: (r) ? 1 : 0, itimes: times}
-			this.session.sendRequest(msg);
+			_session.sendRequest(msg);
 		}
 		public function processEvent_UPDATE(event:Message) : void {
 			// op=UPDATE&code=0&content=1;Guest#hox8233;1;600/240/5
