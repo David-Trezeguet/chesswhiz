@@ -9,26 +9,27 @@
 	import views.*;
 
 	public class Session {
-		public var socket:XMLSocket;
-		public var hostName:String;
-		public var port:int;
+		private var _socket:XMLSocket;
+		private var _hostName:String;
+		private var _port:int;
+
 		public function Session() {
 		}
+
 		public function createSocket() : void {
 			Security.allowDomain("games.playxiangqi.com");
-			hostName = "games.playxiangqi.com";
-			port = 80;
-			//hostName = "localhost";
-			//port = 80;
-			socket = new XMLSocket();
+			_hostName = "games.playxiangqi.com";
+			_port = 80;
+			_socket = new XMLSocket();
 			//socket.timeout = 60000;
 		}
+
 		public function connect() : void {
-			socket.addEventListener(Event.CLOSE, function(status:Boolean):void {
+			_socket.addEventListener(Event.CLOSE, function(status:Boolean):void {
 			       trace("connection to socket closed");
 				   Global.vars.app.processSocketCloseEvent();
             });
-			socket.addEventListener(Event.CONNECT, function(status:Boolean):void {
+			_socket.addEventListener(Event.CONNECT, function(status:Boolean):void {
 				if (status) {
 					trace("successfully connected to server");
 					Global.vars.app.processSocketConnectEvent();
@@ -38,15 +39,16 @@
 				}
 			});
 			var request:Message = new Message();
-			socket.addEventListener(DataEvent.DATA, function(event:DataEvent):void {
+			_socket.addEventListener(DataEvent.DATA, function(event:DataEvent):void {
 				trace("received data: " + event.data);
 				Global.vars.app.handleServerEvent(event);
 		    });
-			socket.connect(hostName, port);
+			_socket.connect(_hostName, _port);
 		}
+
 		public function closeSocket() : void {
-			if (socket.connected) {
-				socket.close();
+			if (_socket.connected) {
+				_socket.close();
 			}
 		}
 
@@ -57,8 +59,8 @@
 		public function sendRequest(req:Message):void  {
 			var reqMsg:String = req.getMessage();
 			trace("Sending request: " + reqMsg);
-			if (socket.connected) {
-				socket.send(reqMsg);
+			if (_socket.connected) {
+				_socket.send(reqMsg);
 			}
 			else {
 			   Global.vars.app.processSocketCloseEvent();
