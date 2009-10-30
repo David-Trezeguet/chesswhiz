@@ -37,10 +37,7 @@
 		[ResourceBundle ("localization")]
 	</mx:Metadata>
 
-    <cwui:TopControlBar id="topControlBar" dock="true">
-    </cwui:TopControlBar>
-        
-	<mx:Canvas id="mainWindow" >
-	</mx:Canvas>
+    <cwui:TopControlBar id="topControlBar" dock="true" />
+	<mx:Canvas id="mainWindow" />
 
 </mx:Application>

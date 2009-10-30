@@ -13,7 +13,7 @@
 
 			private function onLogin(event:Event) : void
 			{
-				Global.vars.app.doLogin(this.userName.text, this.passWord.text);
+				Global.vars.app.doLogin(username.text, password.text);
 			}
 	
 			private function onGuestLogin(event:Event) : void
@@ -25,11 +25,11 @@
 	</mx:Script>
 
 	<mx:Form x="10" y="10" width="302" height="106">
-		<mx:FormItem label="Username">
-			<mx:TextInput id="userName" width="187" />
+		<mx:FormItem label="{resourceManager.getString('localization', 'username')}">
+			<mx:TextInput id="username" width="187" />
 		</mx:FormItem>
-		<mx:FormItem label="Password">
-			<mx:TextInput id="passWord" width="186" displayAsPassword="true"/>
+		<mx:FormItem label="{resourceManager.getString('localization', 'password')}">
+			<mx:TextInput id="password" width="186" displayAsPassword="true"/>
 		</mx:FormItem>
 	</mx:Form>
 	<mx:Button id="loginButton"
