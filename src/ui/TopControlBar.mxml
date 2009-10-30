@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ApplicationControlBar xmlns:mx="http://www.adobe.com/2006/mxml"
+	fillAlphas="[1.0, 1.0]" fillColors="[#860B09, #C03D33]"
+	currentStateChange="onStateChange(event)">
+
+	<mx:Script>
+		<![CDATA[
+
+			import mx.events.StateChangeEvent;
+
+			public var tableId:String;
+			
+			private function onStateChange(event:StateChangeEvent):void
+			{
+				if (event.newState != "") {
+					playerIdLabel.text = Global.vars.app.getPlayerID();
+				}
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:states>
+		<mx:State name="viewTablesState">
+			<mx:AddChild position="lastChild">
+				<mx:Button label="New Table" click="Global.vars.app.doNewTable()" id="newTableButton"/>
+			</mx:AddChild>
+			<mx:AddChild position="lastChild">
+				<mx:Spacer width="100%" id="spacer1"/>
+			</mx:AddChild>
+			<mx:AddChild position="lastChild">
+				<mx:Button label="Logout" click="Global.vars.app.doLogout()" id="logoutButton"/>
+			</mx:AddChild>
+			<mx:AddChild position="lastChild">
+				<mx:Spacer id="spacer2"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{spacer2}" position="before">
+				<mx:Label text="[PLAYERID]" fontFamily="Verdana" fontSize="12" color="0xa09e9e" id="playerIdLabel"/>
+			</mx:AddChild>
+			<mx:SetProperty target="{logoLabel}" name="x"/>
+			<mx:SetProperty target="{logoLabel}" name="y"/>
+			<mx:AddChild relativeTo="{newTableButton}" position="before">
+				<mx:Spacer width="20"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="observerState" basedOn="viewTablesState">
+			<mx:RemoveChild target="{newTableButton}"/>
+			<mx:AddChild relativeTo="{logoutButton}" position="before">
+				<mx:Button label="Preferences" click="Global.vars.app.changeTablePref()" id="preferencesButton"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{spacer1}" position="before">
+				<mx:Button label="Close" click="Global.vars.app.doCloseTable()" id="closeButton"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="newTableState" basedOn="observerState">
+			<mx:AddChild relativeTo="{spacer1}" position="before">
+				<mx:Button label="Settings" click="Global.vars.app.changeTableSettings()" id="settingsButton"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="openRedState" basedOn="observerState">
+			<mx:AddChild relativeTo="{spacer1}" position="before">
+				<mx:Button label="{resourceManager.getString('localization', 'play_red')}" id="playRedButton"
+					click="Global.vars.app.playGame(tableId, 'Red');"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="openBlackState" basedOn="observerState">
+			<mx:AddChild relativeTo="{spacer1}" position="before">
+				<mx:Button label="{resourceManager.getString('localization', 'play_black')}" id="playBlackButton"
+					click="Global.vars.app.playGame(tableId, 'Black');"/>
+			</mx:AddChild>
+			<mx:SetProperty name="dock" value="true"/>
+		</mx:State>
+		<mx:State name="inGameState" basedOn="observerState">
+			<mx:RemoveChild target="{closeButton}"/>
+			<mx:AddChild relativeTo="{spacer1}" position="before">
+				<mx:Button label="{resourceManager.getString('localization', 'resign')}" id="resignButton"
+					click="Global.vars.app.doResignTable()"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{spacer1}" position="before">
+				<mx:Button label="{resourceManager.getString('localization', 'draw')}" id="drawButton"
+					click="Global.vars.app.doDrawTable()"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+
+	<mx:Label text="PlayXiangqi"
+		fontFamily="Verdana" fontSize="18" color="#FFFFFF" id="logoLabel"/>
+	
+</mx:ApplicationControlBar>

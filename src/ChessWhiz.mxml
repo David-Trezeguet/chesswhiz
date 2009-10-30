@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:cwui="ui.*"
 	layout="vertical" backgroundGradientColors="[#000000, #ffffff]"
 	initialize="init()"
 	applicationComplete="initComplete()"
@@ -24,7 +25,7 @@
 	
 	    private function initComplete() : void
 	    {
-			var chessApp:ChessApp = new ChessApp(mainToolBar, mainWindow);
+			var chessApp:ChessApp = new ChessApp(topControlBar, mainWindow);
 			Global.vars.app = chessApp;  // For global references.
 			chessApp.startApp();
 		}
@@ -36,12 +37,9 @@
 		[ResourceBundle ("localization")]
 	</mx:Metadata>
 
-	<mx:ApplicationControlBar id="mainMenu" dock="true" backgroundColor="0x860b09">
-        <mx:HBox id="mainToolBar"
-        	paddingBottom="5" paddingTop="5">
-        </mx:HBox>
-	</mx:ApplicationControlBar>
-
+    <cwui:TopControlBar id="topControlBar" dock="true">
+    </cwui:TopControlBar>
+        
 	<mx:Canvas id="mainWindow" >
 	</mx:Canvas>
 

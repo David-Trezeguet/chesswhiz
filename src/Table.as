@@ -824,6 +824,7 @@
 							this.setSideColors("Black");
 						}
 						this.createNewTableView();
+						Global.vars.app.showTableMenu(true, true);
 						this.tableState = "NEWTABLE_STATE";
 						this.view.displayMessage("" + Global.vars.app.getPlayerID() + " joined");
 					}

@@ -8,19 +8,19 @@
 	
 	import mx.containers.HBox;
 	import mx.core.Container;
-	import mx.core.UIComponent;
 	
 	import ui.Login;
 	import ui.TableBoard;
 	import ui.TableList;
 	import ui.TablePreferences;
 	import ui.TableSettings;
+	import ui.TopControlBar;
 	
 	import views.*;
 
 	public class ChessApp {
 
-		private var _menu:AppMenu;
+		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
 		public var version:String;
 		public var playerId:String;
@@ -38,8 +38,8 @@
 		public var cookie:SharedObject;
 		public var baseURI:String;
 
-		public function ChessApp(toolbar:HBox, window:Container) {
-			_menu = new AppMenu(toolbar);
+		public function ChessApp(menu:TopControlBar, window:Container) {
+			_menu = menu;
 			_mainWindow = window;
 			baseURI = "http://www.playxiangqi.com/chesswhiz/";
 			version = "FLASHCHESS-0.9.0.2";
@@ -101,7 +101,7 @@
 		}
 
 		public function processSocketConnectEvent() : void {
-			_menu.showStartMenu();
+			_menu.currentState = "";
 			_initLoginPanel();
 		}
 
@@ -144,7 +144,7 @@
 			var tableListPanel:TableList = new TableList();
 			tableListPanel.setTableList(tableList);
 			_mainWindow.addChild(tableListPanel);
-			_menu.showNavMenu();
+			_menu.currentState = "viewTablesState";
 		}
 
 		public function doLogin(uname:String, passwd:String):void {
@@ -179,13 +179,24 @@
 			_session.sendChatRequest(playerId, sessionId, currentTableId, msg);
 		}
 		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
-			_menu.showTableMenu(showSettings, showPref);
+			if (showSettings) {
+				_menu.currentState = "newTableState";
+			} else {
+				_menu.currentState = "observerState";
+			}
 		}
 		public function showObserverMenu(color:String, tid:String) : void {
-			_menu.showObserverMenu(color, tid);
+			_menu.tableId = tid;
+			if (color == "Red") {
+				_menu.currentState = "openRedState";
+			} else if (color == "Black") {
+				_menu.currentState = "openBlackState";
+			} else {
+				_menu.currentState = "observerState";
+			}
 		}
 		public function showGameMenu() : void {
-			_menu.showGameMenu();
+			_menu.currentState = "inGameState";
 		}
 		public function changeTableSettings() : void {
 			if (!(_mainWindow.getChildByName("tableSettingsPanel"))) {
@@ -402,7 +413,7 @@
 				if (pid == this.playerId) {
 					this.removeTable(tid);
 					clearView();
-					_menu.showNavMenu();
+					_menu.currentState = "viewTablesState";
 					doViewTables();
 				}
 			}
