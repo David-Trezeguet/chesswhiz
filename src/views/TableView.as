@@ -123,7 +123,7 @@ package views
 			var mcPlayerImage:Image = new Image();
 			mcPlayerImage.y = 5;
 			mcPlayerImage.x = 5;
-			mcPlayerImage.source = Global.vars.app.baseURI;
+			mcPlayerImage.source = ChessApp.BASE_URI;
 			if (player.getColor() == "Red") {
 				mcPlayerImage.source += this.redPlayerIcon;
 			} else {
@@ -168,7 +168,7 @@ package views
 			var mcTimeImage:Image = new Image();
 			mcTimeImage.y = 5;
 			mcTimeImage.x = 4;
-			mcTimeImage.source = Global.vars.app.baseURI + this.timerIcon;
+			mcTimeImage.source = ChessApp.BASE_URI + this.timerIcon;
 			mcTimeImage.width = 20;
 			mcTimers.addChild(mcTimeImage);
 			var tfTime:Label = Util.createTextField(mcTimers, timer.getTimer("game"), 30, 5, false, 0xa09e9e, "Verdana", 12);

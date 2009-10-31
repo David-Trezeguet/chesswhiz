@@ -49,7 +49,7 @@
 			var mcPlayerImage:Image = new Image();
 			mcPlayerImage.y = 2;
 			mcPlayerImage.x = 2;
-			mcPlayerImage.source = Global.vars.app.baseURI + "res/";
+			mcPlayerImage.source = ChessApp.BASE_URI + "res/";
 			if (player.getColor() == "Red") {
 				mcPlayerImage.source += this.redPlayerIcon;
 			} else {
@@ -86,7 +86,7 @@
 			var mcTimeImage:Image = new Image();
 			mcTimeImage.y = 5;
 			mcTimeImage.x = 4;
-			mcTimeImage.source = Global.vars.app.baseURI + "res/" + this.timerIcon;
+			mcTimeImage.source = ChessApp.BASE_URI + "res/" + this.timerIcon;
 			mcTimeImage.width = 20;
 			mcTimers.addChild(mcTimeImage);
 			var tfTime:Label = Util.createTextField(mcTimers, timer.getTimer("game"), 30, 5, false, 0xa09e9e, "Verdana", 12);
