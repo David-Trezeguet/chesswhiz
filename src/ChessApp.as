@@ -26,7 +26,7 @@
 		private var _loginVersion:String;
 		public var playerId:String;
 		public var sessionId:String;
-		public var login:Boolean;
+		private var _bLoggedIn:Boolean;
 		private var _session:Session;
 		public var tableEntries:Object;
 		public var currentTableId:String;
@@ -46,7 +46,7 @@
 			_loginVersion = "FLASHCHESS-" + VERSION;
 			playerId = "";
 			sessionId = "";
-			login = false;
+			_bLoggedIn = false;
 			_session = new Session();
 			tableEntries = new Array();
 			currentTableId = "";
@@ -83,17 +83,16 @@
 				cookie.data.boardcolor = preferences["boardcolor"];
 				cookie.data.linecolor = preferences["linecolor"];
 				cookie.data.sound = preferences["sound"];
-				var flushStatus:String = null;
 	            try {
-    	            flushStatus = cookie.flush(10000);
+    	            cookie.flush(10000);
  	           } catch (error:Error) {
-    	            trace("Error...Could not able to store the cookie\n");
-        	    }
+    	            trace("Error: Could not store the cookie.");
+        	   }
 			}
 		}
 
 		public function startApp():void {			
-			_session.createSocket();  // Create a connection to the server
+			_session.createSocket();
 			_session.connect();
 		}
 
@@ -113,7 +112,7 @@
 					delete this.tableObjects[key];
 				}
 			}
-			this.login = false;
+			_bLoggedIn = false;
 			this.sessionId = "";
 			this.playerId = "";
 			clearView();
@@ -238,92 +237,68 @@
 				_saveCookie();
 			}
 		}
-		public function handleServerEvent(event:DataEvent) : void {
-			var eventData:String = event.data;
-			// There can be multiple messages/events in the response body
-			if (eventData === "Not yet authenticated\n") {
-				//this.forceShutdown(response);
-				//return;
-			}
 
-			var messages:Array = eventData.split("op");
-			for (var i:int = 0; i < messages.length; i++) { 
-				if (messages[i] != "") {
-					trace("message: " + messages[i]);
-					var line:Array = messages[i].split("\n\n");
-					var msg:Message = new Message();
-					trace("event: " + "op" + line[0]);
-					msg.parse("op" + line[0]);
-					if (msg.optype == "LOGIN") {
-						this.processResponse_LOGIN(msg);
-					}
-	                else if (msg.optype == "LIST") {
-	                    this.processResponse_LIST(msg);
-	                }
-	                else if (msg.optype == "I_TABLE") {
-	                    this.processResponse_ITABLE(msg);
-	                }
-	                else if (msg.optype == "E_JOIN") {
-	                    this.process_E_JOIN(msg);
-	                }
-	                else if (msg.optype == "MOVE") {
-	                    this.process_MOVE(msg);
-	                }
-	                else if (msg.optype == "E_END") {
-	                    this.processEvent_E_END(msg);
-	                }
-	                else if (msg.optype == "LOGOUT") {
-	                    this.processResponse_LOGOUT(msg);
-	                }
-	                else if (msg.optype == "I_MOVES") {
-	                    this.processEvent_I_MOVES(msg);
-	                }
-	                else if (msg.optype == "LEAVE") {
-	                    this.processEvent_LEAVE(msg);
-	                }
-	                else if (msg.optype == "DRAW") {
-	                    this.processEvent_DRAW(msg);
-	                }
-	                else if (msg.optype == "MSG") {
-	                    this.processEvent_MSG(msg);
-	                }
-					else if (msg.optype == "UPDATE") {
-						this.processEvent_UPDATE(msg);
-					}
-				}
+		/**
+		 * @note There can be multiple messages/events in the response body
+		 */
+		public function handleServerEvent(event:DataEvent) : void
+		{
+			const eventData:String = event.data;
+			const messages:Array = eventData.split("op");
+
+			for (var i:int = 0; i < messages.length; i++) {
+				if (messages[i] == "") continue;
+
+				trace("message: " + messages[i]);
+				const line:Array = messages[i].split("\n\n");
+				const msg:Message = new Message();
+				trace("event: op" + line[0]);
+				msg.parse("op" + line[0]);
+
+				if      (msg.optype == "LOGIN")   { _processResponse_LOGIN(msg); }
+                else if (msg.optype == "LIST")    { _processResponse_LIST(msg); }
+                else if (msg.optype == "I_TABLE") { _processResponse_ITABLE(msg); }
+                else if (msg.optype == "E_JOIN")  { _process_E_JOIN(msg); }
+                else if (msg.optype == "MOVE")    { _process_MOVE(msg); }
+                else if (msg.optype == "E_END")   { _processEvent_E_END(msg);    }
+                else if (msg.optype == "LOGOUT")  { _processResponse_LOGOUT(msg); }
+                else if (msg.optype == "I_MOVES") { _processEvent_I_MOVES(msg); }
+                else if (msg.optype == "LEAVE")   { _processEvent_LEAVE(msg); }
+                else if (msg.optype == "DRAW")    { _processEvent_DRAW(msg); }
+                else if (msg.optype == "MSG")     { _processEvent_MSG(msg); }
+				else if (msg.optype == "UPDATE")  { _processEvent_UPDATE(msg); }
 			}
 		}
 
-		public function processResponse_LOGIN(response:Message) : void {
-			var loginData:LoginInfo = null;
-			if (response.optype === "LOGIN") {
-				if (!this.login && response.getCode() === "0") {
-					loginFailReason = "";
-					loginData = new LoginInfo();
-					loginData.parse(response.getContent());
-					this.sessionId = loginData.getSessionID();
-					this.playerId = loginData.getPlayerID();
-					trace("playerid: " + this.playerId + " sessionid: " + this.sessionId);
-					this.login = true;
-					this.doViewTables();
-				}
-				else if (!this.login) {
-					loginData = new LoginInfo();
-					loginFailReason = response.getContent();
-					_session.closeSocket();
-					startApp();
-				}
+		private function _processResponse_LOGIN(response:Message) : void {
+			if (_bLoggedIn) return;
+
+			var loginData:LoginInfo = new LoginInfo();
+			if (response.getCode() === "0") {
+				loginFailReason = "";
+				loginData.parse(response.getContent());
+				this.sessionId = loginData.getSessionID();
+				this.playerId = loginData.getPlayerID();
+				trace("playerid: " + this.playerId + " sessionid: " + this.sessionId);
+				_bLoggedIn = true;
+				this.doViewTables();
+			}
+			else {
+				loginFailReason = response.getContent();
+				_session.closeSocket();
+				startApp();
 			}
 		}
-		public function processResponse_LOGOUT(response:Message) : void {
-			if (!this.login && response.getCode() === "0") {
+
+		private function _processResponse_LOGOUT(response:Message) : void {
+			if (!_bLoggedIn && response.getCode() === "0") {
 				if (response.getContent() == this.playerId) {
 		        	this.stopApp();
 				}
 			}
         }
 
-		public function processResponse_LIST(response:Message) : void {
+		private function _processResponse_LIST(response:Message) : void {
 			var tableList:Array = response.parseListResponse();
 			if (this.tableEntries.length > 0) {
 				this.tableEntries.splice(0, this.tableEntries.length);
@@ -331,7 +306,8 @@
 			this.tableEntries = tableList;
 			this.initViewTablesPanel(this.tableEntries);
 		}
-		public function processResponse_ITABLE(response:Message) : void {
+
+		private function _processResponse_ITABLE(response:Message) : void {
 			var tableData:TableInfo = response.parseTableResponse();
 			var tableId:String = tableData.getID();
 			var tableObj:Table = this.getTable(tableId);
@@ -348,10 +324,12 @@
 			trace("tableid: " + tableId);
 			return this.tableObjects[tableId]; 
 		}
+
 		public function playGame(tableId:String, color:String) : void {
 	        _session.sendJoinRequest(this.getPlayerID(), this.getSessionID(), tableId, color, '0');
     	}
-		public function process_E_JOIN(event:Message) : void {
+
+		private function _process_E_JOIN(event:Message) : void {
 			if (event.getCode() === "0") {
 				var joinData:JoinInfo = new JoinInfo();
 				joinData.parse(event.getContent());
@@ -366,7 +344,7 @@
 			}
 	    }
 		
-		public function process_MOVE(event:Message) : void {
+		private function _process_MOVE(event:Message) : void {
 			var tableObj:Table = null;
 			if (event.getCode() === "0") {
 				var moveData:MoveInfo = new MoveInfo();
@@ -383,6 +361,7 @@
 				}
 			}
 	    }
+
 		public function sendMoveRequest(player:PlayerInfo, piece:Piece, curPos:Position, newPos:Position, tid:String) : void {
 			_session.sendMoveRequest(this.getPlayerID(), this.getSessionID(), curPos, newPos, '1500', tid);
 		}
@@ -395,7 +374,7 @@
 			_session.sendDrawRequest(this.getPlayerID(), this.getSessionID(), tableId);
 		}
 
-		public function processEvent_I_MOVES(event:Message) : void {
+		private function _processEvent_I_MOVES(event:Message) : void {
 			var moveList:MoveListInfo = new MoveListInfo();
 			moveList.parse(event.getContent());
 			var tableObj:Table = this.getTable( moveList.getTableID());
@@ -404,7 +383,7 @@
 			}
 		}
 	
-		public function processEvent_LEAVE(event:Message) : void {
+		private function _processEvent_LEAVE(event:Message) : void {
 			var fields:Array = event.getContent().split(';');
 			var tid:String = fields[0];
 			var pid:String = fields[1];
@@ -420,7 +399,7 @@
 			}
 		}
 	
-		public function processEvent_E_END(event:Message) : void {
+		private function _processEvent_E_END(event:Message) : void {
 			//op=E_END&code=0&content=2;black_win;Player resigned
 			if (event.getCode() === "0") {
 				var endEvent:EndEvent = new EndEvent(event.getContent());
@@ -432,7 +411,7 @@
 			}
 		}
 	
-		public function processEvent_DRAW(event:Message) : void {
+		private function _processEvent_DRAW(event:Message) : void {
 			//op=E_END&code=0&content=2;black_win;Player resigned
 			if (event.getCode() === "0") {
 				var drawEvent:DrawEvent = new DrawEvent(event.getContent());
@@ -442,7 +421,8 @@
 				}
 			}
 		}
-		public function processEvent_MSG(event:Message) : void {
+
+		private function _processEvent_MSG(event:Message) : void {
 			// op=MSG&code=0&tid=4&content=Guest#hox1454;hello
 			var tableId:String = event.getTableId();
 			var fields:Array = event.getContent().split(';');
@@ -462,7 +442,8 @@
 			msg.params = {tid: tableId, pid: this.playerId, rated: (r) ? 1 : 0, itimes: times}
 			_session.sendRequest(msg);
 		}
-		public function processEvent_UPDATE(event:Message) : void {
+
+		private function _processEvent_UPDATE(event:Message) : void {
 			// op=UPDATE&code=0&content=1;Guest#hox8233;1;600/240/5
 			var fields:Array = event.getContent().split(';');
 			var tableId:String = fields[0];
@@ -477,13 +458,9 @@
 		}
 
 		public function processSocketCloseEvent() : void {
-			//Util.createMessageBox(this, "Connection to server lost! Closing the application.", Global.vars.app.closeApp);
+			trace("Connection to server lost! Closing the application.");
 		}
 
-		public function closeApp() : void {
-			this.stopApp();
-			this.startApp();
-		}
 		public function removeTable(tableId:String) : void { 
 			var tableObj:Table = this.tableObjects[tableId];
 			if (tableObj) {
@@ -491,6 +468,7 @@
 			}
 			this.currentTableId = "";
 		}
+
 		public function playMoveSound() : void {
 			if (this.preferences["sound"]) {
 				moveSound.play();

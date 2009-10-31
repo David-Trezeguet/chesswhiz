@@ -9,19 +9,17 @@
 	import views.*;
 
 	public class Session {
-		private var _socket:XMLSocket;
-		private var _hostName:String;
-		private var _port:int;
+		private var _socket:XMLSocket  = null;
+		private const _hostName:String = "games.playxiangqi.com";
+		private const _port:int        = 80;
 
 		public function Session() {
+			Security.allowDomain("games.playxiangqi.com");
 		}
 
 		public function createSocket() : void {
-			Security.allowDomain("games.playxiangqi.com");
-			_hostName = "games.playxiangqi.com";
-			_port = 80;
 			_socket = new XMLSocket();
-			//socket.timeout = 60000;
+			//_socket.timeout = 60000;
 		}
 
 		public function connect() : void {
@@ -38,7 +36,6 @@
 					trace("failed to connect to server");
 				}
 			});
-			var request:Message = new Message();
 			_socket.addEventListener(DataEvent.DATA, function(event:DataEvent):void {
 				trace("received data: " + event.data);
 				Global.vars.app.handleServerEvent(event);
@@ -51,10 +48,6 @@
 				_socket.close();
 			}
 		}
-
-//		public function onData(event:DataEvent):void {
-//			trace("received data: " + event.data);
-//		}
 
 		public function sendRequest(req:Message):void  {
 			var reqMsg:String = req.getMessage();
