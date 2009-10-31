@@ -171,10 +171,10 @@
 			if (this.view === null) {
 				this.createView();
 			}
-			if (this.redPlayer !== null && this.redPlayer.getPlayerID() === Global.vars.app.playerId) {
+			if (this.redPlayer !== null && this.redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 				this.view.displayPlayerData(this.redPlayer);
 			}
-			else if (this.blackPlayer !== null && this.blackPlayer.getPlayerID() === Global.vars.app.playerId) {
+			else if (this.blackPlayer !== null && this.blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 				this.view.displayPlayerData(this.blackPlayer);
 			}
 		}
@@ -232,13 +232,13 @@
 		public function startGame() : void {
 			if ( (this.redPlayer !== null && this.redPlayer.getPlayerID() !== "") &&
 				 (this.blackPlayer !== null && this.blackPlayer.getPlayerID() !== "") ) {
-				if (this.redPlayer.getPlayerID() === Global.vars.app.playerId) {
+				if (this.redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 					this.game = new Game(this);
 					this.game.setLocalPlayer(this.redPlayer);
 					this.game.setOppPlayer(this.blackPlayer);
 					this.game.processEvent("start");
 				}
-				else if (this.blackPlayer.getPlayerID() === Global.vars.app.playerId) {
+				else if (this.blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 					this.game = new Game(this);
 					this.game.setLocalPlayer(this.blackPlayer);
 					this.game.setOppPlayer(this.redPlayer);
@@ -847,7 +847,7 @@
 						if (this.view !== null) {
 							// TODO: Clear palyer data
 							this.view.displayPlayerData(data);
-							if (this.redPlayer.getPlayerID() === Global.vars.app.playerId) {
+							if (this.redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 								this.view.displayPlayerData(this.redPlayer);
 							}
 							else {
@@ -868,8 +868,8 @@
 						this.displayPlayers();
 						Global.vars.app.showTableMenu(true, true);
 					}
-					if (this.redPlayer.getPlayerID() === Global.vars.app.playerId ||
-						this.blackPlayer.getPlayerID() === Global.vars.app.playerId) {
+					if (this.redPlayer.getPlayerID() === Global.vars.app.getPlayerID() ||
+						this.blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 						this.startGame();
 						this.tableState = "GAMEPLAY_STATE";
 					}

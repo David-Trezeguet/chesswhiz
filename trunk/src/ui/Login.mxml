@@ -8,7 +8,7 @@
 
 			private function init() : void
 			{
-				this.title = "ChessWhiz-" + ChessApp.VERSION;	
+				this.title = "ChessWhiz-" + ChessApp.VERSION;
 			}
 
 			private function onLogin(event:Event) : void

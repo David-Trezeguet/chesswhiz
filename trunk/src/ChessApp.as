@@ -19,43 +19,28 @@
 
 	public class ChessApp {
 
-		public static const VERSION:String = "0.9.0.3";
+		public static const VERSION:String = "0.9.0.4";
+		public static const BASE_URI:String = "http://www.playxiangqi.com/chesswhiz/";
 
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
-		private var _loginVersion:String;
-		public var playerId:String;
-		public var sessionId:String;
-		private var _bLoggedIn:Boolean;
-		private var _session:Session;
-		public var tableEntries:Object;
-		public var currentTableId:String;
-		public var tableObjects:Object;
-		public var selectedTid:String;
-		public var moveSound:Sound;
-		public var firstLogin:Boolean;
-		public var loginFailReason:String;
-		public var preferences:Object;
-		public var cookie:SharedObject;
-		public var baseURI:String;
+		private var _loginVersion:String = "FLASHCHESS-" + VERSION;
+		private var _playerId:String = "";
+		private var _sessionId:String = "";
+		private var _bLoggedIn:Boolean = false;
+		private var _session:Session = new Session();
+		private var _tableEntries:Object = [];
+		private var _currentTableId:String = "";
+		private var _tableObjects:Object = [];
+		private var _moveSound:Sound;
+		private var _loginFailReason:String = "";
+		public var preferences:Object = {};
+		private var _cookie:SharedObject;
 
 		public function ChessApp(menu:TopControlBar, window:Container) {
 			_menu = menu;
 			_mainWindow = window;
-			baseURI = "http://www.playxiangqi.com/chesswhiz/";
-			_loginVersion = "FLASHCHESS-" + VERSION;
-			playerId = "";
-			sessionId = "";
-			_bLoggedIn = false;
-			_session = new Session();
-			tableEntries = new Array();
-			currentTableId = "";
-			tableObjects = new Array();
-			moveSound = new Sound();
-			moveSound.load(new URLRequest(this.baseURI + "res/images/move.mp3"));
-			firstLogin = true;
-			loginFailReason = "";
-			preferences = {};
+			_moveSound = new Sound( new URLRequest(BASE_URI + "res/images/move.mp3") );
 			preferences["pieceskinindex"] = 1;
 			preferences["boardcolor"] = 0x5b5d5b;
 			preferences["linecolor"] = 0xa09e9e;
@@ -64,27 +49,27 @@
 		}
 
 		private function _loadCookie() : void {
-			cookie = SharedObject.getLocal("flashchess");
-			if (cookie && cookie.data && cookie.data.persist == 0xFFDDFF) {
-				preferences["pieceskinindex"] = cookie.data.pieceskinindex;
-				preferences["boardcolor"] = cookie.data.boardcolor;
-				preferences["linecolor"] = cookie.data.linecolor;
-				preferences["sound"] = cookie.data.sound;
+			_cookie = SharedObject.getLocal("flashchess");
+			if (_cookie && _cookie.data && _cookie.data.persist == 0xFFDDFF) {
+				preferences["pieceskinindex"] = _cookie.data.pieceskinindex;
+				preferences["boardcolor"] = _cookie.data.boardcolor;
+				preferences["linecolor"] = _cookie.data.linecolor;
+				preferences["sound"] = _cookie.data.sound;
 			}
 		}
 
 		private function _saveCookie() : void {
-			if (!cookie) {
-				cookie = SharedObject.getLocal("flashchess");
+			if (!_cookie) {
+				_cookie = SharedObject.getLocal("flashchess");
 			}
-			if (cookie) {
-				cookie.data.persist = 0xFFDDFF;
-				cookie.data.pieceskinindex = preferences["pieceskinindex"];
-				cookie.data.boardcolor = preferences["boardcolor"];
-				cookie.data.linecolor = preferences["linecolor"];
-				cookie.data.sound = preferences["sound"];
+			if (_cookie) {
+				_cookie.data.persist = 0xFFDDFF;
+				_cookie.data.pieceskinindex = preferences["pieceskinindex"];
+				_cookie.data.boardcolor = preferences["boardcolor"];
+				_cookie.data.linecolor = preferences["linecolor"];
+				_cookie.data.sound = preferences["sound"];
 	            try {
-    	            cookie.flush(10000);
+    	            _cookie.flush(10000);
  	           } catch (error:Error) {
     	            trace("Error: Could not store the cookie.");
         	   }
@@ -107,14 +92,14 @@
 
 		public function stopApp() : void {
 			_session.closeSocket();
-			for (var key:String in this.tableObjects) {
-				if (key && this.tableObjects[key]) {
-					delete this.tableObjects[key];
+			for (var key:String in _tableObjects) {
+				if (key && _tableObjects[key]) {
+					delete _tableObjects[key];
 				}
 			}
 			_bLoggedIn = false;
-			this.sessionId = "";
-			this.playerId = "";
+			_sessionId = "";
+			_playerId = "";
 			clearView();
 		}
 
@@ -123,12 +108,9 @@
 			var uname:String  = 'Guest#fl' + rand_no;
 			Global.vars.app.doLogin(uname, '');
 		}
-		public function getPlayerID():String {
-			return this.playerId;
-		}
-		public function getSessionID():String {
-			return this.sessionId;
-		}
+
+		public function getPlayerID():String  { return _playerId; }
+		public function getSessionID():String { return _sessionId; }
 
 		public function clearView() : void {
 			_mainWindow.removeAllChildren();
@@ -136,6 +118,7 @@
 
 		private function _initLoginPanel() : void {
 			var loginPanel:Login = new Login();
+			loginPanel.errorString = _loginFailReason;
 			_mainWindow.addChild(loginPanel);
 		}
 
@@ -148,35 +131,35 @@
 		}
 
 		public function doLogin(uname:String, passwd:String) : void {
-			this.playerId = uname;
+			_playerId = uname;
 			_session.sendLoginRequest(uname, passwd, _loginVersion);
 		}
 		public function doLogout():void {
-			_session.sendLogoutRequest(this.playerId, this.sessionId);
+			_session.sendLogoutRequest(_playerId, _sessionId);
 			stopApp();
 			startApp();
 		}
 		public function doViewTables() : void {
-			_session.sendTableListRequest(playerId, sessionId);
+			_session.sendTableListRequest(_playerId, _sessionId);
 		}
 		public function doNewTable() : void {
-			_session.sendNewTableRequest(playerId, sessionId, "Red");
+			_session.sendNewTableRequest(_playerId, _sessionId, "Red");
 		}
 		
 		public function doJoinTable(tid:String) : void {
-			_session.sendJoinRequest(playerId, sessionId, tid, "None", "0");
+			_session.sendJoinRequest(_playerId, _sessionId, tid, "None", "0");
 		}
 		public function doCloseTable() : void {
-			_session.sendLeaveRequest(playerId, sessionId, currentTableId);
+			_session.sendLeaveRequest(_playerId, _sessionId, _currentTableId);
 		}
 		public function doResignTable() : void {
-			_session.sendResignRequest(playerId, sessionId, currentTableId);
+			_session.sendResignRequest(_playerId, _sessionId, _currentTableId);
 		}
 		public function doDrawTable() : void {
-			_session.sendDrawRequest(playerId, sessionId, currentTableId);
+			_session.sendDrawRequest(_playerId, _sessionId, _currentTableId);
 		}
 		public function doTableChat(msg:String) : void {
-			_session.sendChatRequest(playerId, sessionId, currentTableId, msg);
+			_session.sendChatRequest(_playerId, _sessionId, _currentTableId, msg);
 		}
 		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
 			if (showSettings) {
@@ -203,7 +186,7 @@
 				var tableSettingsPanel:TableSettings = new TableSettings();
 				tableSettingsPanel.name = "tableSettingsPanel";
 				_mainWindow.addChild(tableSettingsPanel);
-				var tableObj:Table = this.getTable(this.currentTableId);
+				var tableObj:Table = this.getTable(_currentTableId);
 				if (tableObj) {
 					var settings:Object = tableObj.getSettings();
 					tableSettingsPanel.setCurrentSettings(settings);
@@ -212,7 +195,7 @@
 		}
 		public function updateTableSettings(settings:Object) : void
 		{
-			var tableObj:Table = this.getTable(this.currentTableId);
+			var tableObj:Table = this.getTable(_currentTableId);
 			if (tableObj) {
 				tableObj.updateSettings(settings);
 			}
@@ -227,7 +210,7 @@
 		}
 		public function updateTablePreferences(pref:Object) : void {
 			if (pref != null) {
-				var tableObj:Table = Global.vars.app.getTable(this.currentTableId);
+				var tableObj:Table = Global.vars.app.getTable(_currentTableId);
 				if (tableObj) {
 					tableObj.updatePref(pref);
 				}
@@ -275,16 +258,16 @@
 
 			var loginData:LoginInfo = new LoginInfo();
 			if (response.getCode() === "0") {
-				loginFailReason = "";
+				_loginFailReason = "";
 				loginData.parse(response.getContent());
-				this.sessionId = loginData.getSessionID();
-				this.playerId = loginData.getPlayerID();
-				trace("playerid: " + this.playerId + " sessionid: " + this.sessionId);
+				_sessionId = loginData.getSessionID();
+				_playerId = loginData.getPlayerID();
+				trace("playerid: " + _playerId + " sessionid: " + _sessionId);
 				_bLoggedIn = true;
 				this.doViewTables();
 			}
 			else {
-				loginFailReason = response.getContent();
+				_loginFailReason = response.getContent();
 				_session.closeSocket();
 				startApp();
 			}
@@ -292,7 +275,7 @@
 
 		private function _processResponse_LOGOUT(response:Message) : void {
 			if (!_bLoggedIn && response.getCode() === "0") {
-				if (response.getContent() == this.playerId) {
+				if (response.getContent() == _playerId) {
 		        	this.stopApp();
 				}
 			}
@@ -300,11 +283,11 @@
 
 		private function _processResponse_LIST(response:Message) : void {
 			var tableList:Array = response.parseListResponse();
-			if (this.tableEntries.length > 0) {
-				this.tableEntries.splice(0, this.tableEntries.length);
+			if (_tableEntries.length > 0) {
+				_tableEntries.splice(0, _tableEntries.length);
 			}
-			this.tableEntries = tableList;
-			this.initViewTablesPanel(this.tableEntries);
+			_tableEntries = tableList;
+			this.initViewTablesPanel(_tableEntries);
 		}
 
 		private function _processResponse_ITABLE(response:Message) : void {
@@ -313,16 +296,16 @@
 			var tableObj:Table = this.getTable(tableId);
 			if (tableObj == null) {
 				tableObj = new Table(tableId, preferences);
-				this.tableObjects[tableId] = tableObj;
+				_tableObjects[tableId] = tableObj;
 			}
-			this.currentTableId = tableObj.tableId;
+			_currentTableId = tableObj.tableId;
 			tableObj.newTable(tableData);
 		}
 
 		public function getTable(tableId:String) : Table 
 		{
 			trace("tableid: " + tableId);
-			return this.tableObjects[tableId]; 
+			return _tableObjects[tableId]; 
 		}
 
 		public function playGame(tableId:String, color:String) : void {
@@ -337,9 +320,9 @@
 				var tableObj:Table = this.getTable(tableId);
 				if (tableObj == null) {
 					tableObj = new Table(tableId, preferences);
-					this.tableObjects[tableId] = tableObj;
+					_tableObjects[tableId] = tableObj;
 				}
-				this.currentTableId = tableObj.tableId;
+				_currentTableId = tableObj.tableId;
 				tableObj.joinTable(joinData.getPlayer());
 			}
 	    }
@@ -355,7 +338,7 @@
 				}
 			}
 			else {
-				tableObj = this.getTable(this.currentTableId);
+				tableObj = this.getTable(_currentTableId);
 				if (tableObj) {
 					tableObj.processWrongMove(event.getContent());
 				}
@@ -390,7 +373,7 @@
 			var tableObj:Table = this.getTable(tid);
 			if (tableObj) {
 				tableObj.leaveTable(pid);
-				if (pid == this.playerId) {
+				if (pid == _playerId) {
 					this.removeTable(tid);
 					clearView();
 					_menu.currentState = "viewTablesState";
@@ -439,7 +422,7 @@
 		public function sendUpdateRequest(tableId:String, times:String, r:Boolean) : void {
 			var msg:Message = new Message();
 			msg.optype = "UPDATE";
-			msg.params = {tid: tableId, pid: this.playerId, rated: (r) ? 1 : 0, itimes: times}
+			msg.params = {tid: tableId, pid: _playerId, rated: (r) ? 1 : 0, itimes: times}
 			_session.sendRequest(msg);
 		}
 
@@ -462,16 +445,16 @@
 		}
 
 		public function removeTable(tableId:String) : void { 
-			var tableObj:Table = this.tableObjects[tableId];
+			var tableObj:Table = _tableObjects[tableId];
 			if (tableObj) {
-				this.tableObjects[tableId] = null;
+				_tableObjects[tableId] = null;
 			}
-			this.currentTableId = "";
+			_currentTableId = "";
 		}
 
 		public function playMoveSound() : void {
 			if (this.preferences["sound"]) {
-				moveSound.play();
+				_moveSound.play();
 			}
 		}
 		
