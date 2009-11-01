@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="848" height="532" initialize="init()" title="Tables">
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	width="635" height="495"
+	title="Tables">
 <mx:Script>
 	<![CDATA[
 		import hoxserver.TableInfo;
@@ -8,92 +10,71 @@
 		[Bindable]
 		private var tableListDP:ArrayCollection = new ArrayCollection();
 
-		private function init() : void
+		public function setTableList(tables:Object) : void
 		{
-			this.name = "viewTablesPanel";
-		}
-
-		public function setTableList(tableList:Array) : void
-		{
-			// Add Table header column names
-			var colNames:Array = [  "tid",
-									"group",
-									"gametype",
-									"initialtime",
-									"redid",
-									"redscore",
-									"blackid",
-									"blackscore" ];
-			var tableInfo:Object = {}
-			var tableData:TableInfo = null;
+			const colNames:Array = [ "tid",
+									 "group",
+									 "gametype",
+									 "initialtime",
+									 "redid",
+									 "blackid" ];
 			var value:String = "";
-			var nValue:int = 0;
 
-			for (var i:int = 0; i < tableList.length; i++) {
-				tableData = tableList[i];
-				if (tableData) {
-					tableInfo = {};
-					for(var j:String in colNames)
-					{
-						value = tableData[colNames[j]];
-						if (colNames[j] == "tid" || colNames[j] == "redscore" || colNames[j] == "blackscore") {
-							nValue = parseInt(value);
-							tableInfo[colNames[j]] = nValue;
-						} else {
-							if (colNames[j] == "group") {
-								if (value == "0") {
-									value = "public";
-								} else {
-									value = "private";
-								}
-							} else if (colNames[j] == "gametype") {
-								if (value == "0") {
-									value = "Rated";
-								} else {
-									value = "Unrated";
-								}
-							}
-							tableInfo[colNames[j]] = value;
-						}
+			for each (var table:TableInfo in tables)
+			{
+				var tableRow:Object = {};
+				for each (var name:String in colNames)
+				{
+					value = table[name];
+					if (name == "redid") {
+						value = ( value == "" ? "*" : value + " (" + table["redscore"] + ")" );
 					}
-					tableListDP.addItem(tableInfo);
+					else if (name == "blackid") {
+						value = ( value == "" ? "*" : value + " (" + table["blackscore"] + ")" );
+					}
+					else if (name == "group") {
+						value = (value == "0" ? "Public" : "Private");
+					}
+					else if (name == "gametype") {
+						value = (value == "0" ? "Rated" : "Unrated");
+					}
+
+					tableRow[name] = value;
 				}
+				tableListDP.addItem(tableRow);
 			}
 		}
-        private function sortTid(obj1:Object, obj2:Object) : int {
+
+        private function sortTid(obj1:Object, obj2:Object) : int
+        {
             return Util.sortNumeric(obj1, obj2, "tid");
         }
-        private function sortRedScore(obj1:Object, obj2:Object) : int {
-            return Util.sortNumeric(obj1, obj2, "redscore");
-        }
-        private function sortBlackScore(obj1:Object, obj2:Object) : int {
-            return Util.sortNumeric(obj1, obj2, "blackscore");
-        }
+
         private function onRefresh(event:Event) : void
         {
      		Global.vars.app.doViewTables();
         }
+
         private function onJoin(event:Event) : void
         {
- 			if (this.tableListDG.selectedItem) {
-				trace("selected tid: " + tableListDG.selectedItem.tid);
+ 			if (tableListDG.selectedItem) {
 				Global.vars.app.doJoinTable(tableListDG.selectedItem.tid);
 			}
         }
+
 	]]>
 </mx:Script>
-	<mx:DataGrid x="10" y="10" id="tableListDG" dataProvider="{tableListDP}" height="392">
+
+	<mx:DataGrid id="tableListDG" x="10" y="10" dataProvider="{tableListDP}" height="392">
 		<mx:columns>
-			<mx:DataGridColumn headerText="tid" dataField="tid" sortable="true" sortCompareFunction="sortTid"/>
-			<mx:DataGridColumn headerText="group" dataField="group"/>
-			<mx:DataGridColumn headerText="gametype" dataField="gametype"/>
-			<mx:DataGridColumn headerText="initialtime" dataField="initialtime"/>
-			<mx:DataGridColumn headerText="redid" dataField="redid"/>
-			<mx:DataGridColumn headerText="redscore" dataField="redscore" sortable="true" sortCompareFunction="sortRedScore"/>
-			<mx:DataGridColumn headerText="blackid" dataField="blackid" sortable="false" sortCompareFunction="sortBlackScore"/>
-			<mx:DataGridColumn headerText="blackscore" dataField="blackscore"/>
+			<mx:DataGridColumn headerText="Table" dataField="tid" width="60" sortable="true" sortCompareFunction="sortTid" />
+			<mx:DataGridColumn headerText="Group" dataField="group" width="70" />
+			<mx:DataGridColumn headerText="Type" dataField="gametype" width="80" />
+			<mx:DataGridColumn headerText="Timer" dataField="initialtime" />
+			<mx:DataGridColumn headerText="Red Player" dataField="redid" width="140" />
+			<mx:DataGridColumn headerText="Black Player" dataField="blackid" width="140" />
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Button x="594" y="435" label="Refresh" id="refreshButton" width="95" click="onRefresh(event)"/>
-	<mx:Button x="718" y="435" id="joinButton" label="Join" width="94" click="onJoin(event)"/>
+	<mx:Button id="refreshButton" x="384" y="423" label="Refresh" width="95" click="onRefresh(event)"/>
+	<mx:Button id="joinButton" x="508" y="423" label="Join" width="94" click="onJoin(event)"/>
 </mx:Panel>
