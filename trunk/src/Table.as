@@ -542,7 +542,6 @@
 			if (this.moveList.length == 1) {
 				Global.vars.app.showTableMenu(false, true);
 			}
-    		this.view.displayMoveData(mov, this.moveList.length);
 		}
 
 		public function processReviewMove(cmd:String) : void {
