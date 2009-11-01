@@ -4,58 +4,59 @@
 	<![CDATA[
 		import hoxserver.TableInfo;
 		import mx.collections.ArrayCollection;
+
 		[Bindable]
 		private var tableListDP:ArrayCollection = new ArrayCollection();
+
 		private function init() : void
 		{
 			this.name = "viewTablesPanel";
 		}
-		public function setTableList(tableList:Object) : void
+
+		public function setTableList(tableList:Array) : void
 		{
-			// add Table header column names
-			var colNames:Array = [
-			"tid",
-			"group",
-			"gametype",
-			"initialtime",
-			"redid",
-			"redscore",
-			"blackid",
-			"blackscore"];
+			// Add Table header column names
+			var colNames:Array = [  "tid",
+									"group",
+									"gametype",
+									"initialtime",
+									"redid",
+									"redscore",
+									"blackid",
+									"blackscore" ];
 			var tableInfo:Object = {}
 			var tableData:TableInfo = null;
 			var value:String = "";
 			var nValue:int = 0;
-			if (tableList.length > 0) {
-				for (var i:int = 0; i < tableList.length; i++) {
-					tableData = tableList[i];
-					if (tableData) {
-						tableInfo = {};
-						for(var j:String in colNames)
-						{
-							value = tableList[i][colNames[j]];
-							if (colNames[j] == "tid" || colNames[j] == "redscore" || colNames[j] == "blackscore") {
-								nValue = parseInt(value);
-								tableInfo[colNames[j]] = nValue;
-							} else {
-								if (colNames[j] == "group") {
-									if (value == "0") {
-										value = "public";
-									} else {
-										value = "private";
-									}
-								} else if (colNames[j] == "gametype") {
-									if (value == "0") {
-										value = "Rated";
-									} else {
-										value = "Unrated";
-									}
+
+			for (var i:int = 0; i < tableList.length; i++) {
+				tableData = tableList[i];
+				if (tableData) {
+					tableInfo = {};
+					for(var j:String in colNames)
+					{
+						value = tableData[colNames[j]];
+						if (colNames[j] == "tid" || colNames[j] == "redscore" || colNames[j] == "blackscore") {
+							nValue = parseInt(value);
+							tableInfo[colNames[j]] = nValue;
+						} else {
+							if (colNames[j] == "group") {
+								if (value == "0") {
+									value = "public";
+								} else {
+									value = "private";
 								}
-								tableInfo[colNames[j]] = value;
+							} else if (colNames[j] == "gametype") {
+								if (value == "0") {
+									value = "Rated";
+								} else {
+									value = "Unrated";
+								}
 							}
+							tableInfo[colNames[j]] = value;
 						}
-						tableListDP.addItem(tableInfo);
 					}
+					tableListDP.addItem(tableInfo);
 				}
 			}
 		}
