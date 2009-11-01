@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
 	width="635" height="495"
-	title="Tables">
+	title="{resourceManager.getString('localization', 'Tables')}">
 <mx:Script>
 	<![CDATA[
 		import hoxserver.TableInfo;
@@ -67,14 +67,24 @@
 
 	<mx:DataGrid id="tableListDG" x="10" y="10" dataProvider="{tableListDP}" height="392">
 		<mx:columns>
-			<mx:DataGridColumn headerText="Table" dataField="tid" width="60" sortable="true" sortCompareFunction="sortTid" />
-			<mx:DataGridColumn headerText="Group" dataField="group" width="70" />
-			<mx:DataGridColumn headerText="Type" dataField="gametype" width="80" />
-			<mx:DataGridColumn headerText="Timer" dataField="initialtime" />
-			<mx:DataGridColumn headerText="Red Player" dataField="redid" width="140" />
-			<mx:DataGridColumn headerText="Black Player" dataField="blackid" width="140" />
+			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Table')}"
+				dataField="tid" width="60" sortable="true" sortCompareFunction="sortTid" />
+			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Group')}"
+				dataField="group" width="70" />
+			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Type')}"
+				dataField="gametype" width="80" />
+			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Timer')}"
+				dataField="initialtime" />
+			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Red_Player')}"
+				dataField="redid" width="140" />
+			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Black_Player')}"
+				dataField="blackid" width="140" />
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Button id="refreshButton" x="384" y="423" label="Refresh" width="95" click="onRefresh(event)"/>
-	<mx:Button id="joinButton" x="508" y="423" label="Join" width="94" click="onJoin(event)"/>
+	<mx:Button id="refreshButton"
+		label="{resourceManager.getString('localization', 'refresh')}" 
+		x="384" y="423" width="95" click="onRefresh(event)"/>
+	<mx:Button id="joinButton"
+		label="{resourceManager.getString('localization', 'join_table')}"
+		x="508" y="423" width="94" click="onJoin(event)"/>
 </mx:Panel>
