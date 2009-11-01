@@ -19,6 +19,7 @@
 		private var timerIcon:String;
 		private var redPlayerIcon:String;
 		private var blackPlayerIcon:String;
+
 		public function display(tObj:Table) : void
 		{
 			this.title = "Table #" + tObj.tableId;
@@ -33,14 +34,16 @@
 			this.leftMargin = 10;
 			this.topMargin = 10;
 			this.board = new Board(this.boardHeight, this.boardWidth, this.tableObj);
-			this.displayBoard();
+			_displayBoard();
 		}
-		public function displayBoard():void 
+
+		private function _displayBoard() : void 
 		{
 			var pref:Object = this.tableObj.getPreferences();
 			this.board.createBoard(this, pref["boardcolor"], pref["linecolor"], pref["pieceskinindex"], this.leftMargin, this.topMargin + this.boardPanelHeight);
 		}
-		public function displayPlayerData(player:PlayerInfo):void
+
+		public function displayPlayerData(player:PlayerInfo) : void
 		{
 			var mcPlayer:HBox = (player.getColor() === this.tableObj.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
 			while (mcPlayer.numChildren > 0) {
@@ -62,7 +65,8 @@
 			var timer:GameTimers = this.tableObj.getTimers(player.getColor());
 			this.displayTimers(player.getColor(), timer);
 		}
-		public function removePlayerData(color:String):void 
+
+		public function removePlayerData(color:String) : void 
 		{
 			var mcPlayer:HBox = (color === this.tableObj.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
 			while (mcPlayer.numChildren > 0) {
@@ -117,24 +121,14 @@
 			}
 		}
 
-		public function displayMessage(msg:String):void
+		public function displayMessage(msg:String) : void
 		{
 			this.taMessages.text += msg + "\n";		
 		}
-		
-		public function displayMoves():void 
-		{
-		}
-		
-		public function displayMoveData(mov:String, moveIndex:int) : void
-		{
-			
-		}
 
-		public function reviewMove(event:Event):void
+		public function reviewMove(event:Event) : void
 		{
 			var button:Button = Button(event.target);
-			trace("button name: " + button.name);
 			tableObj.reviewMove(button.name);
 		}
 		
@@ -142,7 +136,8 @@
 		{
 			this.taChat.text  += "[" + pid + "] " + chatMsg + "\n";
 		}
-        public function postChatMessage(event:KeyboardEvent):void
+
+        public function postChatMessage(event:KeyboardEvent) : void
         {
         	if (event.keyCode != Keyboard.ENTER) {
         		return;
@@ -157,7 +152,7 @@
 				temp = chatMsg.substr(0, chatMsg.length - 1);
 				chatMsg = temp;
 			}
-			trace("chat input msg: " + chatMsg);
+
 			if (chatMsg.search("/debug") == 0) {
 				tableObj.handleDebugCmd(chatMsg);
 				this.taChatInput.text = "";
@@ -168,10 +163,6 @@
 			this.displayChatMessage(Global.vars.app.getPlayerID(), chatMsg);
         }
 
-		public function getBoard():Board 
-		{
-			return board;
-		}
 		public function redrawBoard(boardColor:uint, lineColor:uint, pieceSkin:int) : void 
 		{
 			this.board.drawBoard(this, boardColor, lineColor, pieceSkin, this.leftMargin, this.topMargin + this.boardPanelHeight);
@@ -202,6 +193,7 @@
 
 	]]>
 </mx:Script>
+
 	<mx:HBox x="150" y="638" width="187" height="31" id="mcMoves">
 		<mx:Button label="|&lt;" name="start" enabled="false" click="reviewMove(event)"/>
 		<mx:Button label="&lt;" name="rewind" enabled="false" click="reviewMove(event)"/>

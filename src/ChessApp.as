@@ -8,7 +8,7 @@
 	
 	import mx.core.Container;
 	
-	import ui.Login;
+	import ui.LoginPanel;
 	import ui.TableBoard;
 	import ui.TableList;
 	import ui.TablePreferences;
@@ -106,7 +106,7 @@
 		}
 
 		private function _initLoginPanel() : void {
-			var loginPanel:Login = new Login();
+			var loginPanel:LoginPanel = new LoginPanel();
 			loginPanel.errorString = _loginFailReason;
 			_mainWindow.addChild(loginPanel);
 		}
