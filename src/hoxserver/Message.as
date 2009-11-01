@@ -199,13 +199,13 @@
 			this.parseMessage(content);
 		}
 		
-		public function parseListResponse() : Array {
-			var entries:Array = this.params.content.split('\n');
-			var tables:Array = [];
+		public function parseListResponse() : Object {
+			var tables:Object = {};
+			const entries:Array = this.params.content.split('\n');
 			for (var i:int = 0; i < entries.length; i++) {
-				var entry:String = entries[i];
+				const entry:String = entries[i];
 				if (entry !== "") {
-				    trace("table entry: " + entries[i]);
+				    trace("table entry: " + entry);
 					var table:TableInfo = new TableInfo();
 					table.parse(entry);
 					tables[table.getID()] = table;

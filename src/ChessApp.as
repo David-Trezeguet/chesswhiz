@@ -111,10 +111,10 @@
 			_mainWindow.addChild(loginPanel);
 		}
 
-		private function _initViewTablesPanel(tableList:Array) : void {
+		private function _initViewTablesPanel(tables:Object) : void {
 			clearView();
 			var tableListPanel:TableList = new TableList();
-			tableListPanel.setTableList(tableList);
+			tableListPanel.setTableList(tables);
 			_mainWindow.addChild(tableListPanel);
 			_menu.currentState = "viewTablesState";
 		}
@@ -289,8 +289,8 @@
         }
 
 		private function _processResponse_LIST(response:Message) : void {
-			const tableEntries:Array = response.parseListResponse();
-			_initViewTablesPanel(tableEntries);
+			const tables:Object = response.parseListResponse();
+			_initViewTablesPanel(tables);
 		}
 
 		private function _processResponse_ITABLE(response:Message) : void {
