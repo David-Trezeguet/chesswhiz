@@ -4,6 +4,8 @@
 	
 	import mx.containers.Canvas;
 	import mx.controls.Image;
+	
+	import ui.BoardCanvas;
 
 	public class Piece
 	{
@@ -17,7 +19,7 @@
 		private var _color:String;
 		private var _imgLabel:String;
 		private var _mImageHolder:Image;
-		private var _board:Board;
+		private var _board:BoardCanvas;
 		private var _curRow:int;
 		private var _curColumn:int;
 		private var _imageRadius:int;
@@ -28,7 +30,7 @@
 		private var _centerX:int;
 		private var _centerY:int;
 		
-		public function Piece(id:int, type:String, row:int, column:int, src:String, imgLabel:String, color:String, board:Board):void {
+		public function Piece(id:int, type:String, row:int, column:int, src:String, imgLabel:String, color:String, board:BoardCanvas):void {
 			_id = id;
 			_type = type;
 			_row = _curRow = row;
@@ -44,7 +46,7 @@
 			_enabled = false;
 		}
 
-		public function clone() : Piece {
+		/* public function clone() : Piece {
 			var piece:Piece = new Piece(0, "", 0, 0, "", "", "", null);
 			piece._id = this._id;
 			piece._type = this._type;
@@ -61,7 +63,8 @@
 			piece._captured = this._captured;
 			piece._inFocus = this._inFocus;
 			return piece;
-		}
+		} */
+
 		public function getIndex():int {
 			return _id;
 		}
