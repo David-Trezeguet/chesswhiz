@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
 	width="376" height="200"
-	initialize="init()">
+	initialize="init()"
+	creationComplete="creationCompleteHandler()">
 
 	<mx:Script>
 		<![CDATA[
+			import mx.events.ValidationResultEvent;
+			import mx.validators.Validator;
+
+			/* ----------------------------------------------------------------
+			 * Reference: Adobe - Flex Quick Start Basics: Validating Data 
+			 *   http://www.adobe.com/devnet/flex/quickstart/validating_data/
+			 * ----------------------------------------------------------------
+			 */
+
+			[Bindable]
+			public var formIsValid:Boolean = false;
+
+            // Holds a reference to the currently focussed control on the form.
+            private var focusedFormControl:DisplayObject;
 
 			private function init() : void
 			{
@@ -16,33 +31,112 @@
 				guestLoginButton.label = resourceManager.getString('localization', 'guest_login');
 			}
 
+			private function creationCompleteHandler() : void
+  			{
+                /* Set the focus on the 1st field so the user does not have to
+                 * move the mouse over to it. Note that the user still has to
+                 * click on the Flex application to give it focus. This is
+                 * currently a limitation in Flex.
+                 */
+  				focusManager.setFocus(usernameInput); 
+  			}
+
+			/**
+			 * Validate the form.
+			 */
+			private function validateForm(event:Event) : void 
+			{
+				// Save a reference to the currently focussed form control
+				// so that the isValid() helper method can notify only
+				// the currently focussed form control and not affect
+				// any of the other form controls.
+				focusedFormControl = event.target as DisplayObject;
+
+				this.errorString = "";
+				formIsValid = true; // Mark the form as valid to start with.
+
+				// Run each validator in turn, using the validate()
+				// helper method and update the value of formIsValid accordingly.
+				validate(usernameValidator);
+				validate(passwordValidator);         
+			}
+
+             /**
+              * Helper method. Performs validation on a passed Validator instance.
+              * Validator is the base class of all Flex validation classes so 
+              * you can pass any validation class to this method.
+              */
+			private function validate(validator:Validator) : Boolean
+			{                
+				// Get a reference to the source of the validator.
+				var validatorSource:DisplayObject = validator.source as DisplayObject;
+
+				// Suppress events if the current control being validated is not
+				// the currently focussed control on the form. This stops the user
+				// from receiving visual validation cues on other form controls.
+				const suppressEvents:Boolean = (validatorSource != focusedFormControl);
+
+				// Carry out validation. Returns a ValidationResultEvent.
+				// Passing null for the first parameter makes the validator use
+				// the property defined in the 'property' tag of the <mx:Validator> tag.
+				const event:ValidationResultEvent = validator.validate(null, suppressEvents);
+
+				// Check if validation passed and return a boolean value accordingly.
+				const currentControlIsValid:Boolean = (event.type == ValidationResultEvent.VALID);
+				formIsValid = formIsValid && currentControlIsValid;
+
+				return currentControlIsValid;
+			}
+
 			private function onLogin(event:Event) : void
 			{
-				Global.vars.app.doLogin(username.text, password.text);
+				Global.vars.app.doLogin(usernameInput.text, passwordInput.text);
 			}
 	
 			private function onGuestLogin(event:Event) : void
 			{
 				Global.vars.app.doGuestLogin();
 			}
-	
+
 		]]>
 	</mx:Script>
 
+	<!-- Username must not be empty -->
+	<mx:StringValidator id="usernameValidator"
+		source="{usernameInput}" 
+		property="text"
+		required="true"
+		requiredFieldError="{resourceManager.getString('localization', 'field_required_prompt')}"
+	/>
+
+	<!-- Password must not be empty -->
+	<mx:StringValidator id="passwordValidator"
+		source="{passwordInput}" 
+		property="text"
+		required="true"
+		requiredFieldError="{resourceManager.getString('localization', 'field_required_prompt')}"
+	/>
+
+	<!-- 
+		User interface 
+	-->
 	<mx:Form verticalGap="10" width="100%" height="100%">
 		<mx:FormHeading id="formHeading" label="login_prompt"/>
 
 		<mx:FormItem id="usernameItem" label="username" width="100%">
-			<mx:TextInput id="username" width="100%"/>
+			<mx:TextInput id="usernameInput" width="100%"
+				change="validateForm(event)" />
 		</mx:FormItem>
 		<mx:FormItem id="passwordItem" label="password" width="100%">
-			<mx:TextInput id="password" displayAsPassword="true" width="100%"/>
+			<mx:TextInput id="passwordInput" displayAsPassword="true" width="100%"
+				change="validateForm(event)" />
 		</mx:FormItem>
 
 		<mx:FormItem direction="horizontal" paddingTop="10" width="100%">
 			<mx:Button id="loginButton" label="'login'"
+				enabled="{formIsValid}"
 				click="onLogin(event)" />
-			<mx:Spacer width="100%"/>
+			<mx:Spacer width="100%" />
 			<mx:Button id="guestLoginButton" label="'guest_login'" 
 				click="onGuestLogin(event)" />
 		</mx:FormItem>
