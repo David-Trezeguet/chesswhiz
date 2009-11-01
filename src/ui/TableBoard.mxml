@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="858" height="750">
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:cwui="ui.*"
+	layout="absolute" width="858" height="750">
+
 <mx:Script>
 	<![CDATA[
 		import mx.controls.Label;
@@ -8,39 +11,22 @@
 		import hoxserver.*;
 
 		private var tableObj:Table;
-		public var board:Board;
-		private var boardPanelWidth:int;
-		private var boardPanelHeight:int;
-		private var boardHeight:int;
-		private var boardWidth:int;
-		private var topMargin:int;
-		private var leftMargin:int;
 		public var grid:DataGrid;
 		private var timerIcon:String;
 		private var redPlayerIcon:String;
 		private var blackPlayerIcon:String;
 
-		public function display(tObj:Table) : void
+		public function display(table:Table) : void
 		{
-			this.title = "Table #" + tObj.tableId;
+			this.title = "Table #" + table.tableId;
 			this.redPlayerIcon = "images/redplayer.png";
 			this.blackPlayerIcon =  "images/blackplayer.png";
 			this.timerIcon = "images/player_time.png";
-			this.tableObj = tObj;
-			this.boardHeight = 560;
-			this.boardWidth = 560;
-			this.boardPanelHeight = 30;
-			this.boardPanelWidth = 560;
-			this.leftMargin = 10;
-			this.topMargin = 10;
-			this.board = new Board(this.boardHeight, this.boardWidth, this.tableObj);
-			_displayBoard();
-		}
-
-		private function _displayBoard() : void 
-		{
+			this.tableObj = table;
+			
+			board.setTable(this.tableObj);
 			var pref:Object = this.tableObj.getPreferences();
-			this.board.createBoard(this, pref["boardcolor"], pref["linecolor"], pref["pieceskinindex"], this.leftMargin, this.topMargin + this.boardPanelHeight);
+			board.drawBoardAndPieces(pref["boardcolor"], pref["linecolor"], pref["pieceskinindex"]);
 		}
 
 		public function displayPlayerData(player:PlayerInfo) : void
@@ -165,7 +151,7 @@
 
 		public function redrawBoard(boardColor:uint, lineColor:uint, pieceSkin:int) : void 
 		{
-			this.board.drawBoard(this, boardColor, lineColor, pieceSkin, this.leftMargin, this.topMargin + this.boardPanelHeight);
+			board.drawBoardAndPieces(boardColor, lineColor, pieceSkin);
 			this.board.changePiecesSkin(pieceSkin);
 			var piece:Piece = this.board.getFocusPiece();
 			if (piece) {
@@ -219,4 +205,6 @@
 		<mx:HBox x="363" y="1" width="197" height="28" id="bottomTimers">
 		</mx:HBox>
 	</mx:Canvas>
+	<cwui:BoardCanvas x="10" y="48" width="560" height="543" id="board">
+	</cwui:BoardCanvas>
 </mx:Panel>

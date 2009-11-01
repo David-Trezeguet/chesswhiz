@@ -150,8 +150,8 @@
 		public function createView ():void {
 			Global.vars.app.clearView();
 			this.view = new TableBoard();
+			Global.vars.app.addBoardToWindow(this.view);  // Realize the UI first!
 			this.view.display(this);
-			Global.vars.app.addBoardToWindow(this.view);
 		}
 
 		public function reviewMove(cmd:String) : void {
@@ -405,7 +405,7 @@
 			}
 		};
 		
-		public function playMove(moveData:MoveInfo) : void {
+		/* public function playMove(moveData:MoveInfo) : void {
 			Global.vars.app.playMoveSound();
 			var curPos:Position = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
 			var newPos:Position = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
@@ -413,7 +413,7 @@
 			if (piece) {
 				this.processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
 			}
-		}
+		} */
 		
 		public function rewindLastMove() : void {
 			if (this.moveList.length > 0) {
@@ -436,7 +436,7 @@
 						if (lastMove != "") {
 							fields = lastMove.split(":");
 							piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
-							this.view.board.setFocus(piece);
+							this.view.board.setFocusOnPiece(piece);
 						}
 					}
 				}

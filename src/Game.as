@@ -1,6 +1,8 @@
 ﻿package {
 	import hoxserver.*;
 	
+	import ui.BoardCanvas;
+	
 	import views.*;
 
 	public class Game
@@ -97,7 +99,7 @@
 			return false;
 		}
 
-		public function validateMove(board:Board, newPos:Position, piece:Piece):Array
+		public function validateMove(board:BoardCanvas, newPos:Position, piece:Piece):Array
 		{
 			var result:Array = new Array();
 			var reason:String = "";
