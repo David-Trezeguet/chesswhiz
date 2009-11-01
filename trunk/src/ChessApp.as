@@ -29,9 +29,8 @@
 		private var _sessionId:String = "";
 		private var _bLoggedIn:Boolean = false;
 		private var _session:Session = new Session();
-		private var _tableEntries:Object = [];
 		private var _currentTableId:String = "";
-		private var _tableObjects:Object = [];
+		private var _tableObjects:Object = {};
 		private var _moveSound:Sound;
 		private var _loginFailReason:String = "";
 		public var preferences:Object = {};
@@ -92,21 +91,11 @@
 
 		public function stopApp() : void {
 			_session.closeSocket();
-			for (var key:String in _tableObjects) {
-				if (key && _tableObjects[key]) {
-					delete _tableObjects[key];
-				}
-			}
+			_tableObjects = {};
 			_bLoggedIn = false;
 			_sessionId = "";
 			_playerId = "";
 			clearView();
-		}
-
-		public function doGuestLogin() : void {
-			var rand_no:Number = Math.ceil( 9999*Math.random() );
-			var uname:String  = 'Guest#fl' + rand_no;
-			Global.vars.app.doLogin(uname, '');
 		}
 
 		public function getPlayerID():String  { return _playerId; }
@@ -122,7 +111,7 @@
 			_mainWindow.addChild(loginPanel);
 		}
 
-		public function initViewTablesPanel(tableList:Object) : void {
+		private function _initViewTablesPanel(tableList:Array) : void {
 			clearView();
 			var tableListPanel:TableList = new TableList();
 			tableListPanel.setTableList(tableList);
@@ -134,14 +123,23 @@
 			_playerId = uname;
 			_session.sendLoginRequest(uname, passwd, _loginVersion);
 		}
-		public function doLogout():void {
+
+		public function doGuestLogin() : void {
+			const rand_no:Number = Math.ceil( 9999*Math.random() );
+			const uname:String  = 'Guest#fl' + rand_no;
+			this.doLogin(uname, '');
+		}
+
+		public function doLogout() : void {
 			_session.sendLogoutRequest(_playerId, _sessionId);
 			stopApp();
 			startApp();
 		}
+
 		public function doViewTables() : void {
 			_session.sendTableListRequest(_playerId, _sessionId);
 		}
+
 		public function doNewTable() : void {
 			_session.sendNewTableRequest(_playerId, _sessionId, "Red");
 		}
@@ -149,18 +147,23 @@
 		public function doJoinTable(tid:String) : void {
 			_session.sendJoinRequest(_playerId, _sessionId, tid, "None", "0");
 		}
+
 		public function doCloseTable() : void {
 			_session.sendLeaveRequest(_playerId, _sessionId, _currentTableId);
 		}
+
 		public function doResignTable() : void {
 			_session.sendResignRequest(_playerId, _sessionId, _currentTableId);
 		}
+
 		public function doDrawTable() : void {
 			_session.sendDrawRequest(_playerId, _sessionId, _currentTableId);
 		}
+
 		public function doTableChat(msg:String) : void {
 			_session.sendChatRequest(_playerId, _sessionId, _currentTableId, msg);
 		}
+
 		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
 			if (showSettings) {
 				_menu.currentState = "newTableState";
@@ -168,6 +171,7 @@
 				_menu.currentState = "observerState";
 			}
 		}
+
 		public function showObserverMenu(color:String, tid:String) : void {
 			_menu.tableId = tid;
 			if (color == "Red") {
@@ -178,9 +182,11 @@
 				_menu.currentState = "observerState";
 			}
 		}
+
 		public function showGameMenu() : void {
 			_menu.currentState = "inGameState";
 		}
+
 		public function changeTableSettings() : void {
 			if (!(_mainWindow.getChildByName("tableSettingsPanel"))) {
 				var tableSettingsPanel:TableSettings = new TableSettings();
@@ -193,6 +199,7 @@
 				}
 			}
 		}
+
 		public function updateTableSettings(settings:Object) : void
 		{
 			var tableObj:Table = this.getTable(_currentTableId);
@@ -200,6 +207,7 @@
 				tableObj.updateSettings(settings);
 			}
 		}
+
 		public function changeTablePref() : void {
 			if (!(_mainWindow.getChildByName("tablePrefPanel"))) {
 				var tablePrefPanel:TablePreferences = new TablePreferences();
@@ -208,17 +216,16 @@
 				tablePrefPanel.setCurrentPreferences(this.preferences);
 			}
 		}
+
 		public function updateTablePreferences(pref:Object) : void {
-			if (pref != null) {
-				var tableObj:Table = Global.vars.app.getTable(_currentTableId);
-				if (tableObj) {
-					tableObj.updatePref(pref);
-				}
-				for (var key:String in pref) {
-					this.preferences[key] = pref[key];
-				}
-				_saveCookie();
+			var tableObj:Table = this.getTable(_currentTableId);
+			if (tableObj) {
+				tableObj.updatePref(pref);
 			}
+			for (var key:String in pref) {
+				this.preferences[key] = pref[key];
+			}
+			_saveCookie();
 		}
 
 		/**
@@ -282,12 +289,8 @@
         }
 
 		private function _processResponse_LIST(response:Message) : void {
-			var tableList:Array = response.parseListResponse();
-			if (_tableEntries.length > 0) {
-				_tableEntries.splice(0, _tableEntries.length);
-			}
-			_tableEntries = tableList;
-			this.initViewTablesPanel(_tableEntries);
+			const tableEntries:Array = response.parseListResponse();
+			_initViewTablesPanel(tableEntries);
 		}
 
 		private function _processResponse_ITABLE(response:Message) : void {
@@ -304,7 +307,6 @@
 
 		public function getTable(tableId:String) : Table 
 		{
-			trace("tableid: " + tableId);
 			return _tableObjects[tableId]; 
 		}
 
