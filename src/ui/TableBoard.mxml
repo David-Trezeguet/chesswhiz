@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
-	layout="horizontal" width="900" height="700"
+	layout="horizontal" width="880" height="700"
 	paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8"
 	initialize="init()">
 
@@ -35,15 +35,15 @@
 
 		public function displayPlayerData(player:PlayerInfo) : void
 		{
-			var playerLabel:Label = (player.getColor() === _table.getTopSideColor() ? topLabel : bottomLabel);
-			playerLabel.text = player.getPlayerID() + "(" + player.getScore() + ")";
+			var playerLabel:Label = (player.color === _table.getTopSideColor() ? topLabel : bottomLabel);
+			playerLabel.text = player.pid + "(" + player.score + ")";
 
-			var playerImage:Image = (player.getColor() === _table.getTopSideColor() ? topImage : bottomImage);
+			var playerImage:Image = (player.color === _table.getTopSideColor() ? topImage : bottomImage);
 			playerImage.source = ChessApp.BASE_URI + "res/"
-				+ (player.getColor() == "Red" ? RED_PLAYER_ICON : BLACK_PLAYER_ICON); 
+				+ (player.color == "Red" ? RED_PLAYER_ICON : BLACK_PLAYER_ICON); 
 			
-			var timer:GameTimers = _table.getTimers(player.getColor());
-			updateTimers(player.getColor(), timer);
+			var timer:GameTimers = _table.getTimers(player.color);
+			updateTimers(player.color, timer);
 		}
 
 		public function removePlayerData(color:String) : void 
@@ -75,7 +75,7 @@
 			this.taMessages.text += msg + "\n";		
 		}
 
-		public function reviewMove(event:Event) : void
+		private function reviewMove(event:Event) : void
 		{
 			var button:Button = Button(event.target);
 			_table.reviewMove(button.name);
@@ -144,7 +144,7 @@
 	]]>
 </mx:Script>
 
-	<mx:VBox height="100%" width="570" verticalGap="5">
+	<mx:VBox height="100%" width="550" verticalGap="5">
 	
 		<mx:HBox width="100%">
 			<mx:HBox id="topPlayer" width="209" height="28" verticalAlign="middle">
@@ -185,10 +185,10 @@
 		</mx:HBox>
 	</mx:VBox>
 
-	<mx:Spacer width="100%" />
+	<mx:Spacer width="0" />
 
 	<mx:VBox height="100%" width="270">
-		<mx:Spacer height="30" />
+		<mx:Spacer height="26" />
 		<mx:Panel title="Messages" width="100%" height="242" layout="absolute">
 			<mx:TextArea id="taMessages" width="100%" height="100%" editable="false" />
 		</mx:Panel>

@@ -47,7 +47,7 @@
 			if (this.state === "idle") {
 				if (event === "start") {
 					this.start();
-					if (this.localPlayer.getColor() === "Red") {
+					if (this.localPlayer.color === "Red") {
 						this.state = "localmove";
 					}
 					else {
@@ -68,17 +68,17 @@
 		}
 		
 		public function start() : void {
-			this.tableObj.view.board.enableEvents(this.localPlayer.getColor());
+			this.tableObj.view.board.enableEvents(this.localPlayer.color);
 		}
 		
 		public function end() : void {
 		}
 		public function getMyPiece(type:String) : Array {
-			return this.tableObj.view.board.getPiece(this.localPlayer.getColor(), type);
+			return this.tableObj.view.board.getPiece(this.localPlayer.color, type);
 		}
 
 		public function getOppPieces(type:String) : Array {
-			if (this.localPlayer.getColor() === "Black") {
+			if (this.localPlayer.color === "Black") {
 				return this.tableObj.view.board.getPiece("Red", type);
 			}
 			return this.tableObj.view.board.getPiece("Black", type);

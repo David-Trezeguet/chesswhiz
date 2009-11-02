@@ -24,9 +24,9 @@
 		}
 		public function getPlayer():PlayerInfo {
 			var player:PlayerInfo = new PlayerInfo();
-			player.setColor(this.color);
-			player.setPlayerID(this.pid);
-			player.setScore(this.score);
+			player.color = this.color;
+			player.pid = this.pid;
+			player.score = this.score;
 			return player;
 		}
 	}
