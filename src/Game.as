@@ -5,86 +5,73 @@
 
 	public class Game
 	{
-		public var tableObj:Table;
-		public var localPlayer:PlayerInfo;
-		public var oppPlayer:PlayerInfo;
-		public var state:String;
-		public function Game(tableObj:Table)
+		private var _table:Table;
+		private var _localPlayer:PlayerInfo = null
+		private var _oppPlayer:PlayerInfo = null;
+		private var _state:String = "idle";
+
+		public function Game(table:Table)
 		{
-			this.tableObj = tableObj;
-			this.localPlayer = null;
-			this.oppPlayer = null;
-			this.state = "idle";
+			_table = table;
 		}
 		
 		public function setLocalPlayer(player:PlayerInfo) : void {
-			this.localPlayer = player.clone();
+			_localPlayer = player.clone();
 		}
-		
-		public function getLocalPlayer() : PlayerInfo {
-			return this.localPlayer;
-		}
-		
+
 		public function setOppPlayer(player:PlayerInfo) : void {
-			this.oppPlayer = player.clone();
+			_oppPlayer = player.clone();
 		}
-		
-		public function getOppPlayer() : PlayerInfo {
-			return this.oppPlayer;
-		}
-		
-		public function capturePiece() : void {
-		}
-		
+
+		public function getLocalPlayer() : PlayerInfo { return _localPlayer; }
+		public function getOppPlayer()   : PlayerInfo { return _oppPlayer;   }
+		public function getGameState()   : String     { return _state;       }
+
 		public function waitingForMyMove() : Boolean {
-	    	if (this.state === "localmove") {
-    	    	return true;
-    		}
-    		return false;
+	    	return (_state === "localmove");
 		}
 
 		public function processEvent(event:String) : void {
-			if (this.state === "idle") {
+			if (_state === "idle") {
 				if (event === "start") {
 					this.start();
-					if (this.localPlayer.color === "Red") {
-						this.state = "localmove";
+					if (_localPlayer.color === "Red") {
+						_state = "localmove";
 					}
 					else {
-						this.state = "oppmove";
+						_state = "oppmove";
 					}
 				}
 			}
-			else if (this.state === "localmove") {
+			else if (_state === "localmove") {
 				if (event === "move") {
-					this.state = "oppmove";
+					_state = "oppmove";
 				}
 			}
-			else if (this.state === "oppmove") {
+			else if (_state === "oppmove") {
 				if (event === "move") {
-					this.state = "localmove";
+					_state = "localmove";
 				}
 			}
-		}
-		
-		public function start() : void {
-			this.tableObj.view.board.enableEvents(this.localPlayer.color);
-		}
-		
-		public function end() : void {
-		}
-		public function getMyPiece(type:String) : Array {
-			return this.tableObj.view.board.getPiece(this.localPlayer.color, type);
 		}
 
-		public function getOppPieces(type:String) : Array {
-			if (this.localPlayer.color === "Black") {
-				return this.tableObj.view.board.getPiece("Red", type);
+		public function start() : void {
+			_table.view.board.enableEvents(_localPlayer.color);
+		}
+
+		private function _getMyPieces(type:String) : Array {
+			return _table.view.board.getPiece(_localPlayer.color, type);
+		}
+
+		private function _getOppPieces(type:String) : Array {
+			if (_localPlayer.color === "Black") {
+				return _table.view.board.getPiece("Red", type);
 			}
-			return this.tableObj.view.board.getPiece("Black", type);
+			return _table.view.board.getPiece("Black", type);
 		}
 		
-		public function isInsideFort(color:String, newPos:Position) : Boolean {
+		private function _isInsideFort(color:String, newPos:Position) : Boolean
+		{
 			if (color == "Black") {
 				if ((newPos.column <= 5 && newPos.column >= 3) && (newPos.row <= 2 && newPos.row >= 0)) {
 					return true;
@@ -97,7 +84,7 @@
 			return false;
 		}
 
-		public function validateMove(board:BoardCanvas, newPos:Position, piece:Piece):Array
+		public function validateMove(board:BoardCanvas, newPos:Position, piece:Piece) : Array
 		{
 			var result:Array = new Array();
 			var reason:String = "";
@@ -173,7 +160,7 @@
 			if (piece.getType() === "king") {
 				if ((startRowDiff <= 2 && startColDiff <= 2) &&
 					((move === 0 && colDiff === 1) || (move === 1 && rowDiff === 1))) {
-					if (isInsideFort(piece.getColor(), newPos)) {
+					if (_isInsideFort(piece.getColor(), newPos)) {
 						validMove = 1;
 					}
 				}
@@ -184,7 +171,7 @@
 			} else if (piece.getType() === "advisor") {
 				if ((startRowDiff <= 2 && startColDiff <= 2) &&
 					(move === 2 && rowDiff === 1 && colDiff === 1)) {
-					if (isInsideFort(piece.getColor(), newPos)) {
+					if (_isInsideFort(piece.getColor(), newPos)) {
 						validMove = 1;
 					}
 				}
@@ -232,23 +219,25 @@
 			result[1] = reason;
 			return result;
 		}
-		public function isCheckMate(piece:Piece) : Boolean {
+
+		public function isCheckMate(piece:Piece) : Boolean
+		{
 			var resultObj:Array = null;
-			var myKing:Array = this.getMyPiece("king");
+			var myKing:Array = _getMyPieces("king");
 			var myKingPos:Position = myKing[0].getPosition();
 			if (piece) {
-				resultObj = this.validateMove(this.tableObj.view.board, myKingPos, piece);
+				resultObj = this.validateMove(_table.view.board, myKingPos, piece);
 				if (resultObj[0]) {
 					return true;
 				}
 			}
 			var types:Array = ["cannon", "horse", "chariot", "king"];
 			for (var j:int = 0; j < types.length; j++) {
-				var pieces:Array = this.getOppPieces(types[j]);
+				var pieces:Array = _getOppPieces(types[j]);
 				for (var i:int = 0; i < pieces.length; i++) {
 					var oPiece:Piece = pieces[i];
 					if (oPiece && !oPiece.isCaptured()) {
-						resultObj = this.validateMove(this.tableObj.view.board, myKingPos, oPiece);
+						resultObj = this.validateMove(_table.view.board, myKingPos, oPiece);
 						if (resultObj[0]) {
 							return true;
 						}

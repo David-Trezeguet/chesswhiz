@@ -9,7 +9,6 @@
 	<![CDATA[
 		import mx.controls.Label;
 		import mx.controls.Image;
-		import mx.controls.DataGrid;
 		import hoxserver.*;
 
 		private static const RED_PLAYER_ICON:String   = "images/redplayer.png";

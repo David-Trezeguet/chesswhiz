@@ -323,14 +323,9 @@
 			}
 			return this.blackPieces[index];
 		}
-		public function getGame():Game
-		{
-			return this.tableObj.getGame();
-		}
-		public function getTable():Table
-		{
-			return this.tableObj;
-		}
+
+		public function getGame():Game { return this.tableObj.getGame(); }
+		public function getTable():Table { return this.tableObj; }
 
 		public function getInterveningPiece(curPos:Position, newPos:Position) : int
 		{
