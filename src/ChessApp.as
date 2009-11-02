@@ -7,6 +7,7 @@
 	import hoxserver.*;
 	
 	import mx.core.Container;
+	import mx.managers.PopUpManager;
 	
 	import ui.LoginPanel;
 	import ui.TableBoard;
@@ -17,7 +18,7 @@
 
 	public class ChessApp
 	{
-		public static const VERSION:String = "0.9.0.5";
+		public static const VERSION:String = "0.9.0.6";
 		public static const BASE_URI:String = "http://www.playxiangqi.com/chesswhiz/";
 
 		public var preferences:Object = {};
@@ -187,16 +188,16 @@
 			_menu.currentState = "inGameState";
 		}
 
-		public function changeTableSettings() : void {
-			if (!(_mainWindow.getChildByName("tableSettingsPanel"))) {
-				var tableSettingsPanel:TableSettings = new TableSettings();
-				tableSettingsPanel.name = "tableSettingsPanel";
-				_mainWindow.addChild(tableSettingsPanel);
-				var tableObj:Table = _getTable(_currentTableId);
-				if (tableObj) {
-					var settings:Object = tableObj.getSettings();
-					tableSettingsPanel.setCurrentSettings(settings);
-				}
+		public function changeTableSettings() : void
+		{
+			var settingsPanel:TableSettings = new TableSettings();
+			PopUpManager.addPopUp(settingsPanel, _mainWindow, true /* modal */);
+			PopUpManager.centerPopUp(settingsPanel);
+			
+			var tableObj:Table = _getTable(_currentTableId);
+			if (tableObj) {
+				var settings:Object = tableObj.getSettings();
+				settingsPanel.setCurrentSettings(settings);
 			}
 		}
 

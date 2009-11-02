@@ -1,7 +1,7 @@
 ﻿package hoxserver {
 	public class TableInfo
 	{
-		public var	tid:String;
+		public var tid:String;
 		public var group:String;
 		public var gametype:String;
 		public var initialtime:String;
