@@ -2,8 +2,6 @@
 	import hoxserver.*;
 	
 	import ui.BoardCanvas;
-	
-	import views.*;
 
 	public class Game
 	{

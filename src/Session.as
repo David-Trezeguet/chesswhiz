@@ -5,8 +5,6 @@
 	import flash.system.Security;
 	
 	import hoxserver.*;
-	
-	import views.*;
 
 	public class Session {
 		private var _socket:XMLSocket  = null;

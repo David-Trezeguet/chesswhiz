@@ -5,7 +5,6 @@
 	import flash.utils.Timer;
 	import hoxserver.*;
 	import ui.TableBoard;
-	import views.*;
 	
 	public class Table {
 		public var tableId:String;
