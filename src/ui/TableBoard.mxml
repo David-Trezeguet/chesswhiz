@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
-	layout="absolute" width="858" height="750">
+	layout="horizontal" width="900" height="700"
+	paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8">
 
 <mx:Script>
 	<![CDATA[
@@ -10,74 +11,51 @@
 		import mx.controls.DataGrid;
 		import hoxserver.*;
 
-		private var tableObj:Table;
-		public var grid:DataGrid;
-		private var timerIcon:String;
-		private var redPlayerIcon:String;
-		private var blackPlayerIcon:String;
+		private static const RED_PLAYER_ICON:String   = "images/redplayer.png";
+		private static const BLACK_PLAYER_ICON:String = "images/blackplayer.png";
+		private static const TIMER_ICON:String        = "images/player_time.png";
+
+		private var _table:Table;
 
 		public function display(table:Table) : void
 		{
 			this.title = "Table #" + table.tableId;
-			this.redPlayerIcon = "images/redplayer.png";
-			this.blackPlayerIcon =  "images/blackplayer.png";
-			this.timerIcon = "images/player_time.png";
-			this.tableObj = table;
-			
-			board.setTable(this.tableObj);
-			var pref:Object = this.tableObj.getPreferences();
+			_table = table;
+			board.setTable(_table);
+			const pref:Object = _table.getPreferences();
 			board.drawBoardAndPieces(pref["boardcolor"], pref["linecolor"], pref["pieceskinindex"]);
 		}
 
 		public function displayPlayerData(player:PlayerInfo) : void
 		{
-			var mcPlayer:HBox = (player.getColor() === this.tableObj.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
-			while (mcPlayer.numChildren > 0) {
-				mcPlayer.removeChildAt(0);
-			}
+			var mcPlayer:HBox = (player.getColor() === _table.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
+			mcPlayer.removeAllChildren();
 			var mcPlayerImage:Image = new Image();
-			mcPlayerImage.y = 2;
-			mcPlayerImage.x = 2;
 			mcPlayerImage.source = ChessApp.BASE_URI + "res/";
-			if (player.getColor() == "Red") {
-				mcPlayerImage.source += this.redPlayerIcon;
-			} else {
-				mcPlayerImage.source += this.blackPlayerIcon;
-			}
-			mcPlayerImage.width = 20;
+			mcPlayerImage.source += (player.getColor() == "Red" ? RED_PLAYER_ICON : BLACK_PLAYER_ICON);
+			mcPlayerImage.width = 32;
 			mcPlayer.addChild(mcPlayerImage);
 			Util.createTextField(mcPlayer, player.getPlayerID() + "(" + player.getScore() + ")", 45, 5, false, 0xa09e9e, "Verdana", 12);
 
-			var timer:GameTimers = this.tableObj.getTimers(player.getColor());
-			this.displayTimers(player.getColor(), timer);
+			var timer:GameTimers = _table.getTimers(player.getColor());
+			_displayTimers(player.getColor(), timer);
 		}
 
 		public function removePlayerData(color:String) : void 
 		{
-			var mcPlayer:HBox = (color === this.tableObj.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
-			while (mcPlayer.numChildren > 0) {
-				mcPlayer.removeChildAt(0);
-			}
-			var mcTimers:HBox = (color === this.tableObj.getTopSideColor()) ? this.topTimers : this.bottomTimers;
-			while (mcTimers.numChildren > 0) {
-				mcTimers.removeChildAt(0);
-			}			
+			var mcPlayer:HBox = (color === _table.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
+			mcPlayer.removeAllChildren();
+			var mcTimers:HBox = (color === _table.getTopSideColor()) ? this.topTimers : this.bottomTimers;
+			mcTimers.removeAllChildren();		
 		}
 		
-		public function displayTimers(color:String, timer:GameTimers) : void
+		private function _displayTimers(color:String, timer:GameTimers) : void
 		{
-			var mcPlayer:HBox = (color === this.tableObj.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
-			var mcTimers:HBox = (color === this.tableObj.getTopSideColor()) ? this.topTimers : this.bottomTimers;
-			while (mcTimers.numChildren > 0) {
-				mcTimers.removeChildAt(0);
-			}
-			var bounds:Object = topPanel.getBounds(this);
-			trace("x: " + bounds.x + " y: " + bounds.y + " w: " + bounds.width + " h: " + bounds.height);
+			var mcTimers:HBox = (color === _table.getTopSideColor()) ? this.topTimers : this.bottomTimers;
+			mcTimers.removeAllChildren();
+
 			var mcTimeImage:Image = new Image();
-			mcTimeImage.y = 5;
-			mcTimeImage.x = 4;
-			mcTimeImage.source = ChessApp.BASE_URI + "res/" + this.timerIcon;
-			mcTimeImage.width = 20;
+			mcTimeImage.source = ChessApp.BASE_URI + "res/" + TIMER_ICON;
 			mcTimers.addChild(mcTimeImage);
 			var tfTime:Label = Util.createTextField(mcTimers, timer.getTimer("game"), 30, 5, false, 0xa09e9e, "Verdana", 12);
 			tfTime.name = color + "game";
@@ -89,7 +67,7 @@
 		
 		public function updateTimers(color:String, timer:GameTimers) : void
 		{
-			var mcTimers:HBox = (color === this.tableObj.getTopSideColor()) ? this.topTimers : this.bottomTimers;
+			var mcTimers:HBox = (color === _table.getTopSideColor()) ? this.topTimers : this.bottomTimers;
 			if (mcTimers == null || mcTimers.numChildren == 0) {
 				return;
 			}
@@ -115,7 +93,7 @@
 		public function reviewMove(event:Event) : void
 		{
 			var button:Button = Button(event.target);
-			tableObj.reviewMove(button.name);
+			_table.reviewMove(button.name);
 		}
 		
 		public function displayChatMessage(pid:String, chatMsg:String) : void 
@@ -140,7 +118,7 @@
 			}
 
 			if (chatMsg.search("/debug") == 0) {
-				tableObj.handleDebugCmd(chatMsg);
+				_table.handleDebugCmd(chatMsg);
 				this.taChatInput.text = "";
 				return;
 			}
@@ -167,6 +145,7 @@
 				piece.setFocus();
 			}
 		}
+
 		public function enableReviewButtons(flag:Boolean) : void 
 		{
 			for (var i:int = 0; i < this.mcMoves.numChildren; i++) {
@@ -180,31 +159,43 @@
 	]]>
 </mx:Script>
 
-	<mx:HBox x="150" y="638" width="187" height="31" id="mcMoves">
-		<mx:Button label="|&lt;" name="start" enabled="false" click="reviewMove(event)"/>
-		<mx:Button label="&lt;" name="rewind" enabled="false" click="reviewMove(event)"/>
-		<mx:Button label="&gt;" name="forward" enabled="false" click="reviewMove(event)"/>
-		<mx:Button label="&gt;|" name="end" enabled="false" click="reviewMove(event)"/>
-	</mx:HBox>
-	<mx:Panel x="578" y="10" width="250" height="242" layout="absolute" title="Messages">
-		<mx:TextArea x="10" y="10" width="220" height="182"  id="taMessages"/>
-	</mx:Panel>
-	<mx:Panel x="578" y="302" width="260" height="298" layout="absolute" title="Chat">
-		<mx:TextArea x="10" y="10" width="220" height="168" id="taChat" />
-		<mx:TextInput x="10" y="186" width="220" height="62" id="taChatInput" keyDown="postChatMessage(event)"/>
-	</mx:Panel>
-	<mx:Canvas x="10" y="10" width="560" height="30" id="topPanel" >
-		<mx:HBox x="0" y="0" width="251" height="28" id="topPlayer">
+	<mx:VBox height="100%" width="570" verticalGap="5">
+	
+		<mx:HBox width="100%">
+			<mx:HBox id="topPlayer" width="209" height="28" />
+			<mx:Spacer width="100%" />
+			<mx:HBox id="topTimers" width="197" height="28"  verticalAlign="middle"/>
 		</mx:HBox>
-		<mx:HBox x="377" y="0" width="183" height="28" id="topTimers">
+		
+		<cwui:BoardCanvas id="board" x="10" y="48" width="550" height="550" />
+
+		<mx:HBox width="100%">
+			<mx:HBox id="bottomPlayer" width="209" height="28" />
+			<mx:Spacer width="100%" />
+			<mx:HBox id="bottomTimers" width="197" height="28"  verticalAlign="middle"/>
 		</mx:HBox>
-	</mx:Canvas>
-	<mx:Canvas x="10" y="599" width="560" height="30" id="bottomPanel">
-		<mx:HBox x="0" y="1" width="209" height="28" id="bottomPlayer">
+		
+		<mx:HBox id="mcMoves" x="150" y="638" width="100%" horizontalGap="3">
+			<mx:Spacer width="170" />
+			<mx:Button name="start" label="|&lt;" enabled="false" click="reviewMove(event)" />
+			<mx:Button name="rewind" label="&lt;" enabled="false" click="reviewMove(event)" />
+			<mx:Button name="forward" label="&gt;" enabled="false" click="reviewMove(event)" />
+			<mx:Button name="end" label="&gt;|" enabled="false" click="reviewMove(event)" />
 		</mx:HBox>
-		<mx:HBox x="363" y="1" width="197" height="28" id="bottomTimers">
-		</mx:HBox>
-	</mx:Canvas>
-	<cwui:BoardCanvas x="10" y="48" width="560" height="543" id="board">
-	</cwui:BoardCanvas>
+	</mx:VBox>
+
+	<mx:Spacer width="100%" />
+
+	<mx:VBox height="100%" width="270">
+		<mx:Spacer height="30" />
+		<mx:Panel title="Messages" width="100%" height="242" layout="absolute">
+			<mx:TextArea id="taMessages" width="100%" height="100%" editable="false" />
+		</mx:Panel>
+
+		<mx:Panel title="Chat" width="100%" height="298" layout="vertical">
+			<mx:TextArea id="taChat" width="100%" height="204" editable="false"/>
+			<mx:TextInput id="taChatInput" width="100%" height="40" keyDown="postChatMessage(event)" />
+		</mx:Panel>
+	</mx:VBox>
+
 </mx:Panel>

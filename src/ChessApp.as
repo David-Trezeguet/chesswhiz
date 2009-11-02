@@ -19,7 +19,7 @@
 
 	public class ChessApp {
 
-		public static const VERSION:String = "0.9.0.4";
+		public static const VERSION:String = "0.9.0.5";
 		public static const BASE_URI:String = "http://www.playxiangqi.com/chesswhiz/";
 
 		private var _menu:TopControlBar;
