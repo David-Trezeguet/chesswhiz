@@ -14,8 +14,6 @@
 	import ui.TablePreferences;
 	import ui.TableSettings;
 	import ui.TopControlBar;
-	
-	import views.*;
 
 	public class ChessApp {
 

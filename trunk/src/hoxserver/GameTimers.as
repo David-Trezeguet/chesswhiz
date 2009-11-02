@@ -5,7 +5,7 @@
 		public var moveTime:int;
 		public var extraTime:int;
 
-		public function GameTimers(time:String):void {
+		public function GameTimers(time:String) : void {
 			this.initialTimes = time;
 			if (time !== "") {
 				var timers:Array = time.split("/");
@@ -28,20 +28,12 @@
 			var timers:Array = this.initialTimes.split("/");
 			this.moveTime = parseInt(timers[1]);
 		}
-		
-		public function getGameTime() :int {
-			return this.gameTime;
-		}
-		
-		public function getMoveTime() : int {
-			return this.moveTime;
-		}
-		
-		public function getExtraTime() : int {
-			return this.extraTime;
-		}
-		
-		public function formatTime(seconds:int) : String {
+
+		public function getGameTime() :int { return this.gameTime; }
+		public function getMoveTime() : int { return this.moveTime; }
+		public function getExtraTime() : int { return this.extraTime; }
+
+		private function _formatTime(seconds:int) : String {
 			var time:String = "";
 			var min:int = 0;
 			var sec:int = seconds;
@@ -72,15 +64,9 @@
 		}
 		
 		public function getTimer(type:String) : String {
-			if (type === "game") {
-				return this.formatTime(this.gameTime);
-			}
-			else if (type === "move") {
-				return this.formatTime(this.moveTime);
-			}
-			else if (type === "extra") {
-				return this.formatTime(this.extraTime);
-			}
+			if (type === "game")  { return this._formatTime(this.gameTime);  }
+			if (type === "move")  { return this._formatTime(this.moveTime);  }
+			if (type === "extra") { return this._formatTime(this.extraTime); }
 			return "";
 		}
 	}

@@ -2,7 +2,8 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
 	layout="horizontal" width="900" height="700"
-	paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8">
+	paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8"
+	initialize="init()">
 
 <mx:Script>
 	<![CDATA[
@@ -17,6 +18,12 @@
 
 		private var _table:Table;
 
+		private function init() : void
+		{
+			topTimerImage.source = ChessApp.BASE_URI + "res/" + TIMER_ICON;
+			bottomTimerImage.source = topTimerImage.source;
+		}
+
 		public function display(table:Table) : void
 		{
 			this.title = "Table #" + table.tableId;
@@ -28,60 +35,38 @@
 
 		public function displayPlayerData(player:PlayerInfo) : void
 		{
-			var mcPlayer:HBox = (player.getColor() === _table.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
-			mcPlayer.removeAllChildren();
-			var mcPlayerImage:Image = new Image();
-			mcPlayerImage.source = ChessApp.BASE_URI + "res/";
-			mcPlayerImage.source += (player.getColor() == "Red" ? RED_PLAYER_ICON : BLACK_PLAYER_ICON);
-			mcPlayerImage.width = 32;
-			mcPlayer.addChild(mcPlayerImage);
-			Util.createTextField(mcPlayer, player.getPlayerID() + "(" + player.getScore() + ")", 45, 5, false, 0xa09e9e, "Verdana", 12);
+			var playerLabel:Label = (player.getColor() === _table.getTopSideColor() ? topLabel : bottomLabel);
+			playerLabel.text = player.getPlayerID() + "(" + player.getScore() + ")";
 
+			var playerImage:Image = (player.getColor() === _table.getTopSideColor() ? topImage : bottomImage);
+			playerImage.source = ChessApp.BASE_URI + "res/"
+				+ (player.getColor() == "Red" ? RED_PLAYER_ICON : BLACK_PLAYER_ICON); 
+			
 			var timer:GameTimers = _table.getTimers(player.getColor());
-			_displayTimers(player.getColor(), timer);
+			updateTimers(player.getColor(), timer);
 		}
 
 		public function removePlayerData(color:String) : void 
 		{
-			var mcPlayer:HBox = (color === _table.getTopSideColor()) ? this.topPlayer : this.bottomPlayer;
-			mcPlayer.removeAllChildren();
-			var mcTimers:HBox = (color === _table.getTopSideColor()) ? this.topTimers : this.bottomTimers;
-			mcTimers.removeAllChildren();		
-		}
-		
-		private function _displayTimers(color:String, timer:GameTimers) : void
-		{
-			var mcTimers:HBox = (color === _table.getTopSideColor()) ? this.topTimers : this.bottomTimers;
-			mcTimers.removeAllChildren();
+			var playerLabel:Label = (color === _table.getTopSideColor() ? topLabel : bottomLabel);
+			playerLabel.text = "";
 
-			var mcTimeImage:Image = new Image();
-			mcTimeImage.source = ChessApp.BASE_URI + "res/" + TIMER_ICON;
-			mcTimers.addChild(mcTimeImage);
-			var tfTime:Label = Util.createTextField(mcTimers, timer.getTimer("game"), 30, 5, false, 0xa09e9e, "Verdana", 12);
-			tfTime.name = color + "game";
-			tfTime = Util.createTextField(mcTimers, timer.getTimer("move"), 70, 5, false, 0xa09e9e, "Verdana", 12);
-			tfTime.name = color + "move";
-			tfTime = Util.createTextField(mcTimers, timer.getTimer("extra"), 110, 5, false, 0xa09e9e, "Verdana", 12);
-			tfTime.name = color + "extra";
+			// NOTE: There is not need to clear/reset the timer for now.
 		}
 		
 		public function updateTimers(color:String, timer:GameTimers) : void
 		{
-			var mcTimers:HBox = (color === _table.getTopSideColor()) ? this.topTimers : this.bottomTimers;
-			if (mcTimers == null || mcTimers.numChildren == 0) {
-				return;
+			if (color === _table.getTopSideColor())
+			{
+				topTimerGame.text = timer.getTimer("game");
+				topTimerMove.text = timer.getTimer("move");
+				topTimerExtra.text = timer.getTimer("extra");
 			}
-			var tfTime:Label = mcTimers.getChildByName(color + "game") as Label;
-			if (tfTime) {
-				tfTime.text = timer.getTimer("game");
-			}
-			tfTime = mcTimers.getChildByName(color + "move") as Label;
-			if (tfTime) {
-				tfTime.text = timer.getTimer("move");
-			}
-			tfTime = mcTimers.getChildByName(color + "extra") as Label;
-			if (tfTime) {
-				tfTime.text = timer.getTimer("extra");
+			else
+			{
+				bottomTimerGame.text = timer.getTimer("game");
+				bottomTimerMove.text = timer.getTimer("move");
+				bottomTimerExtra.text = timer.getTimer("extra");
 			}
 		}
 
@@ -130,8 +115,8 @@
 		public function redrawBoard(boardColor:uint, lineColor:uint, pieceSkin:int) : void 
 		{
 			board.drawBoardAndPieces(boardColor, lineColor, pieceSkin);
-			this.board.changePiecesSkin(pieceSkin);
-			var piece:Piece = this.board.getFocusPiece();
+			board.changePiecesSkin(pieceSkin);
+			var piece:Piece = board.getFocusPiece();
 			if (piece) {
 				piece.setFocus();
 			}
@@ -139,8 +124,8 @@
 		
 		public function changePieceSkin(pieceSkin:int) : void 
 		{
-			this.board.changePiecesSkin(pieceSkin);
-			var piece:Piece = this.board.getFocusPiece();
+			board.changePiecesSkin(pieceSkin);
+			var piece:Piece = board.getFocusPiece();
 			if (piece) {
 				piece.setFocus();
 			}
@@ -162,17 +147,33 @@
 	<mx:VBox height="100%" width="570" verticalGap="5">
 	
 		<mx:HBox width="100%">
-			<mx:HBox id="topPlayer" width="209" height="28" />
+			<mx:HBox id="topPlayer" width="209" height="28" verticalAlign="middle">
+				<mx:Image id="topImage" scaleContent="true"/>
+				<mx:Label id="topLabel" fontSize="12" color="#A09E9E"/>
+			</mx:HBox>
 			<mx:Spacer width="100%" />
-			<mx:HBox id="topTimers" width="197" height="28"  verticalAlign="middle"/>
+			<mx:HBox id="topTimers" width="197" height="28" verticalAlign="middle">
+				<mx:Image id="topTimerImage"/>
+				<mx:Label id="topTimerGame" fontSize="12" color="#A09E9E" text="00:00"/>
+				<mx:Label id="topTimerMove" fontSize="12" color="#A09E9E" text="00:00"/>
+				<mx:Label id="topTimerExtra" fontSize="12" color="#A09E9E" text="00:00"/>
+			</mx:HBox>
 		</mx:HBox>
 		
 		<cwui:BoardCanvas id="board" x="10" y="48" width="550" height="550" />
 
 		<mx:HBox width="100%">
-			<mx:HBox id="bottomPlayer" width="209" height="28" />
+			<mx:HBox id="bottomPlayer" width="209" height="28" verticalAlign="middle">
+				<mx:Image id="bottomImage" scaleContent="true"/>
+				<mx:Label id="bottomLabel" fontSize="12" color="#A09E9E"/>
+			</mx:HBox>
 			<mx:Spacer width="100%" />
-			<mx:HBox id="bottomTimers" width="197" height="28"  verticalAlign="middle"/>
+			<mx:HBox id="bottomTimers" width="197" height="28" verticalAlign="middle">
+				<mx:Image id="bottomTimerImage"/>
+				<mx:Label id="bottomTimerGame" fontSize="12" color="#A09E9E" text="00:00"/>
+				<mx:Label id="bottomTimerMove" fontSize="12" color="#A09E9E" text="00:00"/>
+				<mx:Label id="bottomTimerExtra" fontSize="12" color="#A09E9E" text="00:00"/>
+			</mx:HBox>
 		</mx:HBox>
 		
 		<mx:HBox id="mcMoves" x="150" y="638" width="100%" horizontalGap="3">
