@@ -1,6 +1,8 @@
 ﻿package {
 
 	import flash.events.MouseEvent;
+	import flash.filters.BitmapFilterQuality;
+	import flash.filters.GlowFilter;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Image;
@@ -11,8 +13,6 @@
 	{
 		private var _type:String;
 		private var _imageSrc:String;
-		private var  _height:int;
-		private var  _width:int;
 		private var _id:int;
 		private var _row:int;
 		private var _column:int;
@@ -23,14 +23,16 @@
 		private var _curRow:int;
 		private var _curColumn:int;
 		private var _imageRadius:int;
-		private var _captured:Boolean;
-		private var _parentClip:Canvas;
-		private var _inFocus:Boolean;
-		private var _enabled:Boolean;
+		private var _captured:Boolean = false;
+		private var _parentClip:Canvas = null;
+		private var _inFocus:Boolean = false;
+		private var _enabled:Boolean = false;
 		private var _centerX:int;
 		private var _centerY:int;
 		
-		public function Piece(id:int, type:String, row:int, column:int, src:String, imgLabel:String, color:String, board:BoardCanvas):void {
+		public function Piece(id:int, type:String, row:int, column:int,
+							  src:String, imgLabel:String, color:String, board:BoardCanvas) : void
+		{
 			_id = id;
 			_type = type;
 			_row = _curRow = row;
@@ -40,119 +42,74 @@
 			_imgLabel = imgLabel;
 			_board = board;
 			_imageRadius = _centerX = _centerY = 22;
-			_captured = false;
-			_parentClip = null;
-			_inFocus = false;
-			_enabled = false;
 		}
 
-		/* public function clone() : Piece {
-			var piece:Piece = new Piece(0, "", 0, 0, "", "", "", null);
-			piece._id = this._id;
-			piece._type = this._type;
-			piece._row = this._row;
-			piece._curRow = this._curRow;
-			piece._column = this._column;
-			piece._curColumn = this._curColumn;
-			piece._imageSrc = this._imageSrc;
-			piece._color = this._color;
-			piece._mImageHolder = this._mImageHolder;
-			piece._imgLabel = this._imgLabel;
-			piece._board = this._board;
-			piece._imageRadius = this._imageRadius;
-			piece._captured = this._captured;
-			piece._inFocus = this._inFocus;
-			return piece;
-		} */
+		public function getIndex():int { return _id; }
+		public function get getRow():int { return _row; }
+		public function get getColumn():int { return _column; }
+		public function getColor():String { return _color; }
+		public function isEventsEnabled() : Boolean { return _enabled; }
+		public function getType():String { return _type; }
+		public function getImageHolder() : Image { return _mImageHolder; }
+		public function isCaptured():Boolean { return _captured; }
+		public function getPosition():Position { return new Position(_curRow, _curColumn); }
+		public function getInitialPosition():Position { return new Position(_row,_column); }
 
-		public function getIndex():int {
-			return _id;
-		}
-
-		public function get getRow():int {
-			return _row;
-		}
-
-		public function get getColumn():int {
-			return _column;
-		}
-		
-		public function getColor():String {
-			return _color;
-		}
-
-		public function isEventsEnabled() : Boolean {
-			return _enabled;
-		}
-
-		public function getType():String {
-			return _type;
-		}
-
-		public function getPosition():Position
+		public function setCapture(flag:Boolean) : void
 		{
-			return new Position(_curRow, _curColumn);
+			_captured = flag;
 		}
 		
-		public function setPosition(newPos:Position):void
+		public function setPosition(newPos:Position) : void
 		{
 			_curRow = newPos.row;
 			_curColumn = newPos.column;
 		}
 
-		public function getInitialPosition():Position
+		public function setImageCenter(x:int, y:int) : void
 		{
-		    return new Position(_row,_column);
-		}
-		
-		public function getImageHolder() : Image {
-			return _mImageHolder;
-		}
-		public function setImageHolder(imgHolder:Image) : void {
-			_mImageHolder = imgHolder;
-		}
-
-		public function setImageCenter(x:int, y:int) : void {
 			this._centerX = x;
 			this._centerY = y;
 		}
-		public function draw(parentClip:Canvas, offset:int, width:int, height:int, pieceSkinIndex:int):void
+
+		public function draw(parentClip:Canvas, offset:int, width:int, height:int, pieceSkinIndex:int) : void
 		{
 			_parentClip = parentClip;
 			var viewPos:Position = _board.getViewPosition(getPosition());
 			_mImageHolder = new Image();
-			_mImageHolder.name = this._imgLabel;
+			_mImageHolder.name = _imgLabel;
 			_mImageHolder.x = (offset + viewPos.column * width) - _centerX;
 			_mImageHolder.y = (offset + viewPos.row * height) - _centerY;
 			_mImageHolder.source =  ChessApp.BASE_URI + "res/images/pieces/" + pieceSkinIndex + "/" + _imageSrc;
 			parentClip.addChild(_mImageHolder);
 		}
 
-		public function enableEvents(): void {
+		public function enableEvents() : void
+		{
 			if (_mImageHolder != null) {
 				_mImageHolder.addEventListener(MouseEvent.MOUSE_DOWN, startDragHandler);
-				//mImageHolder.addEventListener(MouseEvent.MOUSE_MOVE, moveHandler);
 				_mImageHolder.addEventListener(MouseEvent.MOUSE_UP, stopDragHandler);
 				_enabled = true;
 			}
 		}
 
-		public function disableEvents() : void {
+		public function disableEvents() : void
+		{
 			if (_mImageHolder != null) {
 				_mImageHolder.removeEventListener(MouseEvent.MOUSE_DOWN, startDragHandler);
-				//mImageHolder.addEventListener(MouseEvent.MOUSE_MOVE, moveHandler);
 				_mImageHolder.removeEventListener(MouseEvent.MOUSE_UP, stopDragHandler);
 				_enabled = false;
 			}
 		}
 
-		public function startDragHandler(evt:MouseEvent):void 
+		private function startDragHandler(evt:MouseEvent) : void 
 		{
 			var maxDepth:int = _parentClip.numChildren - 1;
 			_parentClip.setChildIndex(_mImageHolder, maxDepth);
 			_mImageHolder.startDrag();
 		}
-		public function stopDragHandler(evt:MouseEvent):void 
+
+		private function stopDragHandler(evt:MouseEvent) : void 
 		{
 			_mImageHolder.stopDrag();
 			var newPos:Position = _board.getNearestCell(evt.stageX, evt.stageY, 30);
@@ -165,28 +122,32 @@
 			}
 		}
 		
-		public function setCapture(flag:Boolean):void
+		public function setFocus() : void
 		{
-			_captured = flag;
-		}
-		public function isCaptured():Boolean
-		{
-			return _captured;
-		}
-		
-		public function setFocus() : void {
 			_inFocus = true;
-			if (_mImageHolder != null) {
-				_mImageHolder.filters = [Util.createGlowFilter()];
+			if (_mImageHolder != null)
+			{	
+	            const glowFilter:GlowFilter = new GlowFilter( 0x33CCFF /* color */,
+							                                  0.8      /* alpha */,
+							                                  10       /* blurX */,
+							                                  10       /* blurY */,
+							                                  2        /* strength */,
+							                                  BitmapFilterQuality.HIGH,
+							                                  false   /* inner */,
+							                                  false   /* knockout */ );
+				_mImageHolder.filters = [glowFilter];
 			}
 		}
-		public function clearFocus() : void {
+
+		public function clearFocus() : void
+		{
 			_inFocus = false;
 			if (_mImageHolder != null) {
 				_mImageHolder.filters = [];
 			}
 		}
-		public function removeImage(parentClip:Canvas):void
+
+		public function removeImage(parentClip:Canvas) : void
 		{
 			if (_mImageHolder != null) {
 				if (isEventsEnabled()) {
@@ -199,7 +160,9 @@
 				_mImageHolder = null;
 			}
 		}
-		public function moveImage() : void {
+
+		public function moveImage() : void
+		{
 			var viewPos:Position = _board.getViewPosition(getPosition());
 			if (_mImageHolder != null) {
 				_mImageHolder.x = _board.getX(viewPos.column) - _imageRadius;

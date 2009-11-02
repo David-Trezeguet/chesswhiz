@@ -61,16 +61,6 @@
 			_observers[_observers.length] = player.clone();
 		}
 		
-		/* public function init(tableData:TableInfo):void {
-			if ( tableData.getRedPlayer() ) {
-				_setRedPlayer(tableData.getRedPlayer());
-			}
-		
-			if ( tableData.getBlackPlayer() ) {
-				_setBlackPlayer(tableData.getBlackPlayer());
-			}
-		} */
-		
 		public function getTopSideColor():String { return _sides.top.color; }
 		public function getBottomSideColor():String { return _sides.bottom.color; }		
 		public function getGame():Game { return _game; }
@@ -767,9 +757,9 @@
 		{
 			if (_tableState === "IDLE_STATE") {
 				if (type === "JOINTABLE_EVENT") {
-					if (data.getPlayerID() === Global.vars.app.getPlayerID()) {
-						if (data.getColor() !== "None") {
-							_setSideColors(data.getColor());
+					if (data.pid === Global.vars.app.getPlayerID()) {
+						if (data.color !== "None") {
+							_setSideColors(data.color);
 							_createNewTableView();
 							_tableState = "NEWTABLE_STATE";
 						}
@@ -815,7 +805,7 @@
 			}
 			else if (_tableState === "NEWTABLE_STATE") {
 				if (type == "JOINTABLE_EVENT") {
-					if (data.getColor() !== "None") {
+					if (data.color !== "None") {
 						if (this.view !== null) {
 							// TODO: Clear palyer data
 							this.view.displayPlayerData(data);
