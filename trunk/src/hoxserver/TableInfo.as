@@ -60,17 +60,17 @@
 			
 		public function getRedPlayer():PlayerInfo {
 			var player:PlayerInfo = new PlayerInfo();
-			player.setColor("Red");
-			player.setPlayerID(this.redid);
-			player.setScore(this.redscore);
+			player.color = "Red";
+			player.pid = this.redid;
+			player.score = this.redscore;
 			return player;
 		}
 		
 		public function getBlackPlayer():PlayerInfo  {
 			var player:PlayerInfo = new PlayerInfo();
-			player.setColor("Black");
-			player.setPlayerID(this.blackid);
-			player.setScore(this.blackscore);
+			player.color = "Black";
+			player.pid = this.blackid;
+			player.score = this.blackscore;
 			return player;
 		}
 		
