@@ -9,11 +9,11 @@
 	
 	public class Table {
 		public var tableId:String;
-		private var redPlayer:PlayerInfo;
-		private var blackPlayer:PlayerInfo;
-		private var observers:Array;
+		private var _redPlayer:PlayerInfo = null;
+		private var _blackPlayer:PlayerInfo = null;
+		private var observers:Array = [];
 		public var view:TableBoard;
-		private var game:Game;
+		private var game:Game = null;
 		private var sides:Object;
 		private var tableState:String;
 		private var tableData:TableInfo;
@@ -27,14 +27,10 @@
 		private var curMoveIndex:int;
 		private var stateBeforeReview:String;
 		private var settings:Object;
-		private var curPref:Object;
+		private var _curPref:Object;
 
 		public function Table(tableId:String, pref:Object) {
 			this.tableId = tableId;
-			this.redPlayer = null;
-			this.blackPlayer = null;
-			this.observers = [];
-			this.game = null;
 			this.sides = {
 				top:  new Side("top", "Red", null),
 				bottom: new Side("bottom", "Black", null)
@@ -57,7 +53,7 @@
 			settings["movetime"] = 300;
 			settings["extratime"] = 20;
 			settings["rated"] = false;
-			curPref = pref;
+			_curPref = pref;
 		}
 
 		public function setTableData(tableData:TableInfo):void {
@@ -65,11 +61,11 @@
 		}
 		
 		public function setRedPlayer(player:PlayerInfo):void {
-			this.redPlayer = player.clone();
+			_redPlayer = player.clone();
 		}
 		
 		public function setBlackPlayer(player:PlayerInfo):void {
-			this.blackPlayer =  player.clone();
+			_blackPlayer =  player.clone();
 		}
 		
 		public function setOwner(pid:String):void {
@@ -94,17 +90,10 @@
 			}
 		}
 		
-		public function getTopSideColor():String {
-			return this.sides.top.color;
-		}
-		
-		public function getBottomSideColor():String {
-			return this.sides.bottom.color;
-		}
-		
-		public function getGame():Game {
-			return this.game;
-		}
+		public function getTopSideColor():String { return this.sides.top.color; }
+		public function getBottomSideColor():String { return this.sides.bottom.color; }		
+		public function getGame():Game { return this.game; }
+
 		public function setSideColors(color:String):void {
 			if (color === "Red") {
 				this.sides.top.color = "Black";
@@ -124,12 +113,12 @@
 		}
 		public function getJoinColor():String {
 			var joinColor:String = "";
-			if ( (this.redPlayer !== null && this.redPlayer.getPlayerID() !== "") && 
-				 (this.blackPlayer === null || this.blackPlayer.getPlayerID() === "") ) {
+			if ( (_redPlayer !== null && _redPlayer.getPlayerID() !== "") && 
+				 (_blackPlayer === null || _blackPlayer.getPlayerID() === "") ) {
 				joinColor = "Black";
 			}
-			else if ( (this.blackPlayer !== null && this.blackPlayer.getPlayerID() !== "") &&
-					  (this.redPlayer === null || this.redPlayer.getPlayerID() === "") ) {
+			else if ( (_blackPlayer !== null && _blackPlayer.getPlayerID() !== "") &&
+					  (_redPlayer === null || _redPlayer.getPlayerID() === "") ) {
 				joinColor = "Red";
 			}
 			return joinColor;
@@ -147,7 +136,7 @@
 			this.processTableEvent("TABLEINFO_EVENT", tableData);
 		}
 		
-		public function createView ():void {
+		private function _createView () : void {
 			Global.vars.app.clearView();
 			this.view = new TableBoard();
 			Global.vars.app.addBoardToWindow(this.view);  // Realize the UI first!
@@ -167,29 +156,29 @@
 			this.processTableEvent("MOVEREVIEW_EVENT", cmd);
 		}
 
-		public function createNewTableView():void {
+		private function _createNewTableView() : void {
 			if (this.view === null) {
-				this.createView();
+				_createView();
 			}
-			if (this.redPlayer !== null && this.redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
-				this.view.displayPlayerData(this.redPlayer);
+			if (_redPlayer !== null && _redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
+				this.view.displayPlayerData(_redPlayer);
 			}
-			else if (this.blackPlayer !== null && this.blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
-				this.view.displayPlayerData(this.blackPlayer);
+			else if (_blackPlayer !== null && _blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
+				this.view.displayPlayerData(_blackPlayer);
 			}
 		}
 		
-		public function createObserveTableView(joinColor:String) : void {
+		private function _createObserveTableView(joinColor:String) : void {
 			if (this.view === null) {
-				this.createView();
+				_createView();
 			}
-			if (this.redPlayer !== null && this.redPlayer.getPlayerID() !== "") {
-				this.view.displayPlayerData(this.redPlayer);
-				this.view.displayMessage("" + this.redPlayer.getPlayerID() + " joined");
+			if (_redPlayer !== null && _redPlayer.getPlayerID() !== "") {
+				this.view.displayPlayerData(_redPlayer);
+				this.view.displayMessage("" + _redPlayer.getPlayerID() + " joined");
 			}
-			if (this.blackPlayer !== null && this.blackPlayer.getPlayerID() !== "") {
-				this.view.displayPlayerData(this.blackPlayer);
-				this.view.displayMessage("" + this.blackPlayer.getPlayerID() + " joined");
+			if (_blackPlayer !== null && _blackPlayer.getPlayerID() !== "") {
+				this.view.displayPlayerData(_blackPlayer);
+				this.view.displayMessage("" + _blackPlayer.getPlayerID() + " joined");
 			}
 			trace("joinable color: " + joinColor);
 			Global.vars.app.showObserverMenu(joinColor, this.tableId);
@@ -216,32 +205,32 @@
 				return;
 			}
 			if (this.sides.top.color == "Red") {
-				this.view.displayPlayerData(this.redPlayer);
+				this.view.displayPlayerData(_redPlayer);
 			}
 			else {
-				this.view.displayPlayerData(this.blackPlayer);
+				this.view.displayPlayerData(_blackPlayer);
 			}
 			if (this.sides.bottom.color == "Red") {
-				this.view.displayPlayerData(this.redPlayer);
+				this.view.displayPlayerData(_redPlayer);
 			}
 			else {
-				this.view.displayPlayerData(this.blackPlayer);
+				this.view.displayPlayerData(_blackPlayer);
 			}
 		}
 
 		public function startGame() : void {
-			if ( (this.redPlayer !== null && this.redPlayer.getPlayerID() !== "") &&
-				 (this.blackPlayer !== null && this.blackPlayer.getPlayerID() !== "") ) {
-				if (this.redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
+			if ( (_redPlayer !== null && _redPlayer.getPlayerID() !== "") &&
+				 (_blackPlayer !== null && _blackPlayer.getPlayerID() !== "") ) {
+				if (_redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 					this.game = new Game(this);
-					this.game.setLocalPlayer(this.redPlayer);
-					this.game.setOppPlayer(this.blackPlayer);
+					this.game.setLocalPlayer(_redPlayer);
+					this.game.setOppPlayer(_blackPlayer);
 					this.game.processEvent("start");
 				}
-				else if (this.blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
+				else if (_blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 					this.game = new Game(this);
-					this.game.setLocalPlayer(this.blackPlayer);
-					this.game.setOppPlayer(this.redPlayer);
+					this.game.setLocalPlayer(_blackPlayer);
+					this.game.setOppPlayer(_redPlayer);
 					this.game.processEvent("start");
 				}
 			}
@@ -429,7 +418,6 @@
 					var prevPos:Position = new Position(parseInt(move.charAt(0)), parseInt(move.charAt(1)));
 					var curPos:Position = new Position(parseInt(move.charAt(2)), parseInt(move.charAt(3)));
 					this.view.board.rewindPieceByPos(piece, curPos, prevPos, capturePiece);
-					//this.view.grid.dataProvider.removeItemAt(this.moveList.length - 1);
 					this.moveList.splice(this.moveList.length - 1, 1);
 					if (this.moveList.length > 1) {
 						lastMove = this.moveList[this.moveList.length - 1];
@@ -568,10 +556,6 @@
 			if (curMoveIndex == moveIndex ) {
 				return;
 			}
-			//if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
-			//	this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
-			//	this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
-			//}
 			applyChangeSet(moveIndex);
 		}
 
@@ -651,26 +635,13 @@
 					focusPiece = this.view.board.getPieceByIndex(color, pieceIndex);
 				}
 			}
-//			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
-//				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = true;
-//				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
-//				this.view.grid.scrollToIndex(curMoveIndex - 1);
-//			}
 			this.view.board.reDraw(changeSet, focusPiece);
 		}
 		public function stopReview() : void {
-//			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
-//				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
-//				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
-//			}
 			var moveIndex:int = moveList.length;
 			if (curMoveIndex == moveIndex ) {
 				return;
 			}
-//			if ((curMoveIndex - 1) >= 0 && (curMoveIndex - 1) < moveList.length) {
-//				this.view.grid.dataProvider.getItemAt(curMoveIndex - 1).selected = false;
-//				this.view.grid.dataProvider.invalidateItemAt(curMoveIndex - 1);
-//			}
 			applyChangeSet(moveIndex);
 			curMoveIndex = -1;
 		}
@@ -697,12 +668,12 @@
 			} else if (arg == "blackpieces") {
 				result += this.view.board.getBlackPiecesInfo();
 			} else if (arg == "redplayer") {
-				player = this.redPlayer;
+				player = _redPlayer;
 				if (player) {
 					result += "redplayer: " + player.getPlayerID() + " " + player.getScore();
 				}
 			}  else if (arg == "blackplayer") {
-				player = this.blackPlayer;
+				player = _blackPlayer;
 				if (player) {
 					result += "blackplayer: " + player.getPlayerID() + " " + player.getScore();
 				}
@@ -723,14 +694,14 @@
 				result += "\n";
 				result += this.view.board.getBlackPiecesInfo();
 				result += "\n";
-				player = this.redPlayer;
+				player = _redPlayer;
 				if (player) {
 					result += "redplayer: " + player.getPlayerID() + " " + player.getScore();
 					result += "\n";
 				} else {
 					result += "redplayer: \n";
 				}
-				player = this.blackPlayer;
+				player = _blackPlayer;
 				if (player) {
 					result += "blackplayer: " + player.getPlayerID() + " " + player.getScore();
 					result += "\n";
@@ -757,8 +728,8 @@
 		}
 
 		public function isPlaying(pid:String):Boolean {
-			if ((this.redPlayer && this.redPlayer.getPlayerID() == pid) ||
-				(this.blackPlayer && this.blackPlayer.getPlayerID() == pid)) {
+			if ((_redPlayer && _redPlayer.getPlayerID() == pid) ||
+				(_blackPlayer && _blackPlayer.getPlayerID() == pid)) {
 				return true;
 			}
 			return false;
@@ -774,10 +745,10 @@
 			}
 			else {
 				if (this.view !== null) {
-					if (this.redPlayer && this.redPlayer.getPlayerID() == pid) {
+					if (_redPlayer && _redPlayer.getPlayerID() == pid) {
 						this.view.removePlayerData("Red");
 						this.stopTimer();
-					} else if (this.blackPlayer && this.blackPlayer.getPlayerID() == pid) {
+					} else if (_blackPlayer && _blackPlayer.getPlayerID() == pid) {
 						this.view.removePlayerData("Black");
 						this.stopTimer();
 					} 
@@ -797,13 +768,13 @@
 					if (data.getPlayerID() === Global.vars.app.getPlayerID()) {
 						if (data.getColor() !== "None") {
 							this.setSideColors(data.getColor());
-							this.createNewTableView();
+							_createNewTableView();
 							this.tableState = "NEWTABLE_STATE";
 						}
 						else {
 							var joinColor:String = this.getJoinColor();
 							this.setSideColors(joinColor);
-							this.createObserveTableView(joinColor);
+							_createObserveTableView(joinColor);
 							if (joinColor === "") {
 								this.tableState = "OBSERVER_STATE";
 							}
@@ -822,7 +793,7 @@
 						else if (data.getBlackPlayer().getPlayerID() === Global.vars.app.getPlayerID()) {
 							this.setSideColors("Black");
 						}
-						this.createNewTableView();
+						_createNewTableView();
 						Global.vars.app.showTableMenu(true, true);
 						this.tableState = "NEWTABLE_STATE";
 						this.view.displayMessage("" + Global.vars.app.getPlayerID() + " joined");
@@ -830,7 +801,7 @@
 					else {
 						joinColor = this.getJoinColor();
 						this.setSideColors(joinColor);
-						this.createObserveTableView(joinColor);
+						_createObserveTableView(joinColor);
 						if (joinColor === "") {
 							this.tableState = "OBSERVER_STATE";
 						}
@@ -846,11 +817,11 @@
 						if (this.view !== null) {
 							// TODO: Clear palyer data
 							this.view.displayPlayerData(data);
-							if (this.redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
-								this.view.displayPlayerData(this.redPlayer);
+							if (_redPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
+								this.view.displayPlayerData(_redPlayer);
 							}
 							else {
-								this.view.displayPlayerData(this.blackPlayer);
+								this.view.displayPlayerData(_blackPlayer);
 							}
 						}
 						this.startGame();
@@ -867,8 +838,8 @@
 						this.displayPlayers();
 						Global.vars.app.showTableMenu(true, true);
 					}
-					if (this.redPlayer.getPlayerID() === Global.vars.app.getPlayerID() ||
-						this.blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
+					if (_redPlayer.getPlayerID() === Global.vars.app.getPlayerID() ||
+						_blackPlayer.getPlayerID() === Global.vars.app.getPlayerID()) {
 						this.startGame();
 						this.tableState = "GAMEPLAY_STATE";
 					}
@@ -991,15 +962,10 @@
 			}
 		}
 
-		public function getSettings() : Object {
-			return this.settings;
-		}
-		public function getPreferences() : Object {
-			return this.curPref;
-		}
-		public function getMoveList() : Array {
-			return this.moveList;
-		}
+		public function getSettings() : Object { return this.settings; }
+		public function getPreferences() : Object { return _curPref; }
+		public function getMoveList() : Array { return this.moveList; }
+
 		public function updateSettings(newSettings:Object) : void {
 			var bUpdated:Boolean = false;
 			var times:String = newSettings["gametime"] + "/" + newSettings["movetime"] + "/" + newSettings["extratime"];
@@ -1020,13 +986,13 @@
 			}
 		}
 		public function updatePref(newPref:Object) : void {
-			if (curPref["boardcolor"] != newPref["boardcolor"]) {
-				this.view.redrawBoard(newPref["boardcolor"], this.curPref["linecolor"], newPref["pieceskinindex"]);
+			if (_curPref["boardcolor"] != newPref["boardcolor"]) {
+				this.view.redrawBoard(newPref["boardcolor"], _curPref["linecolor"], newPref["pieceskinindex"]);
 			}
-			else if (curPref["pieceskinindex"] != newPref["pieceskinindex"]) {
+			else if (_curPref["pieceskinindex"] != newPref["pieceskinindex"]) {
 				this.view.changePieceSkin(newPref["pieceskinindex"]);
 			}
-			this.curPref = newPref;
+			_curPref = newPref;
 		}
 	}
 }
