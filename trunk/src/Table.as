@@ -3,15 +3,19 @@
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	
 	import hoxserver.*;
+	
 	import ui.TableBoard;
 	
-	public class Table {
+	public class Table
+	{
 		public var tableId:String;
+		public var view:TableBoard  = null;
+
 		private var _redPlayer:PlayerInfo = null;
 		private var _blackPlayer:PlayerInfo = null;
 		private var _observers:Array = [];
-		public var view:TableBoard  = null;
 		private var _game:Game = null;
 		private var _sides:Object;
 		private var _tableState:String = "IDLE_STATE";
@@ -26,7 +30,8 @@
 		private var _settings:Object;
 		private var _curPref:Object;
 
-		public function Table(tableId:String, pref:Object) {
+		public function Table(tableId:String, pref:Object)
+		{
 			this.tableId = tableId;
 			_sides = {
 				top:  new Side("top", "Red", null),
@@ -40,23 +45,23 @@
 			_curPref = pref;
 		}
 
-		public function setTableData(tableData:TableInfo):void {
+		private function _setTableData(tableData:TableInfo) : void {
 			_tableData = tableData.clone();
 		}
 		
-		private function _setRedPlayer(player:PlayerInfo):void {
+		private function _setRedPlayer(player:PlayerInfo) : void {
 			_redPlayer = player.clone();
 		}
 		
-		private function _setBlackPlayer(player:PlayerInfo):void {
+		private function _setBlackPlayer(player:PlayerInfo) : void {
 			_blackPlayer =  player.clone();
 		}
 		
-		private function _setObserver(player:PlayerInfo):void {
+		private function _setObserver(player:PlayerInfo) : void {
 			_observers[_observers.length] = player.clone();
 		}
 		
-		public function init(tableData:TableInfo):void {
+		/* public function init(tableData:TableInfo):void {
 			if ( tableData.getRedPlayer() ) {
 				_setRedPlayer(tableData.getRedPlayer());
 			}
@@ -64,13 +69,14 @@
 			if ( tableData.getBlackPlayer() ) {
 				_setBlackPlayer(tableData.getBlackPlayer());
 			}
-		}
+		} */
 		
 		public function getTopSideColor():String { return _sides.top.color; }
 		public function getBottomSideColor():String { return _sides.bottom.color; }		
 		public function getGame():Game { return _game; }
 
-		public function setSideColors(color:String):void {
+		private function _setSideColors(color:String) : void
+		{
 			if (color === "Red") {
 				_sides.top.color = "Black";
 				_sides.bottom.color = "Red";
@@ -84,10 +90,13 @@
 				_sides.bottom.color = "Red";
 			}
 		}
+
 		public function getTimers(color:String) : GameTimers {
 			return new GameTimers(_tableData.getTime(color));			
 		}
-		public function getJoinColor():String {
+
+		private function _getJoinColor():String
+		{
 			var joinColor:String = "";
 			if ( (_redPlayer !== null && _redPlayer.pid !== "") && 
 				 (_blackPlayer === null || _blackPlayer.pid === "") ) {
@@ -99,7 +108,9 @@
 			}
 			return joinColor;
 		}
-		public function newTable(tableData:TableInfo):void {
+
+		public function newTable(tableData:TableInfo) : void
+		{
 			if ( tableData.getRedPlayer() != null ||
 				 tableData.getRedPlayer().pid != "" ) {
 				_setRedPlayer(tableData.getRedPlayer());
@@ -108,18 +119,20 @@
 				 tableData.getBlackPlayer().pid != "" ) {
 				_setBlackPlayer(tableData.getBlackPlayer());
 			}
-			this.setTableData(tableData);
+			_setTableData(tableData);
 			_processTableEvent("TABLEINFO_EVENT", tableData);
 		}
 		
-		private function _createView () : void {
+		private function _createView () : void
+		{
 			Global.vars.app.clearView();
 			this.view = new TableBoard();
 			Global.vars.app.addBoardToWindow(this.view);  // Realize the UI first!
 			this.view.display(this);
 		}
 
-		public function reviewMove(cmd:String) : void {
+		public function reviewMove(cmd:String) : void
+		{
 			if (_tableState != "MOVEREVIEW_STATE") {
 				if (_moveList.length > 0 && cmd != "end" && cmd != "forward") {
 					_curMoveIndex = _moveList.length;
@@ -132,7 +145,8 @@
 			_processTableEvent("MOVEREVIEW_EVENT", cmd);
 		}
 
-		private function _createNewTableView() : void {
+		private function _createNewTableView() : void
+		{
 			if (this.view === null) {
 				_createView();
 			}
@@ -144,7 +158,8 @@
 			}
 		}
 		
-		private function _createObserveTableView(joinColor:String) : void {
+		private function _createObserveTableView(joinColor:String) : void
+		{
 			if (this.view === null) {
 				_createView();
 			}
@@ -163,20 +178,26 @@
 		public function displayChatMessage(pid:String, chatMsg:String) : void {
 			this.view.displayChatMessage(pid, chatMsg);
 		}
-		public function getMoveListInfo():String {
+
+		private function _getMoveListInfo() : String
+		{
 			var result:String = "movelist: \n";
 			var mov:String = "";
 			var line:String = "";
 			for (var i:int = 0; i < _moveList.length; i++) {
 				mov = _moveList[i];
 				var fields:Array = mov.split(":");
-				line = fields[0] + " " + this.view.board.getPieceByIndex(fields[0], fields[1]).getType() + " " + fields[2].charAt(0) + "," + String.fromCharCode(97 + parseInt(fields[2].charAt(1))) + "->" + fields[2].charAt(2) + "," + String.fromCharCode(97 + parseInt(fields[2].charAt(3))) + "\n";
+				line = fields[0] + " " + this.view.board.getPieceByIndex(fields[0], fields[1]).getType()
+					+ " " + fields[2].charAt(0) + ","
+					+ String.fromCharCode(97 + parseInt(fields[2].charAt(1)))
+					+ "->" + fields[2].charAt(2) + "," + String.fromCharCode(97 + parseInt(fields[2].charAt(3))) + "\n";
 				result += line;
 			}
 			return result;
 		}
 
-		public function displayPlayers():void {
+		private function _displayPlayers() : void
+		{
 			if (this.view === null) {
 				return;
 			}
@@ -194,9 +215,11 @@
 			}
 		}
 
-		public function startGame() : void {
+		private function _startGame() : void
+		{
 			if ( (_redPlayer !== null && _redPlayer.pid !== "") &&
-				 (_blackPlayer !== null && _blackPlayer.pid !== "") ) {
+				 (_blackPlayer !== null && _blackPlayer.pid !== "") )
+			{
 				if (_redPlayer.pid === Global.vars.app.getPlayerID()) {
 					_game = new Game(this);
 					_game.setLocalPlayer(_redPlayer);
@@ -211,15 +234,6 @@
 				}
 			}
 		}
-
-		public function resumeGame() : void {
-			if(_game) {
-				_game.start();
-			}
-			else {
-				this.startGame();
-			}
-		}
 		
 		public function stopGame(reason:String, winner:String) : void {
 			if (_game) {
@@ -228,7 +242,7 @@
 			}
 			this.view.board.displayStatus("Game Over (" + reason + ")");
 			this.view.displayMessage(winner);
-			this.stopTimer();
+			_stopTimer();
 			_processTableEvent("RESIGNGAME_EVENT", null);
 		}
 		
@@ -252,23 +266,25 @@
 			}
 		}
 	
-		public function startTimer() : void {
+		private function _startTimer() : void
+		{
 			_redTimes = new GameTimers(_tableData.getRedTime());
 			_redTimer = new Timer(1000, _redTimes.gameTime);
-			_redTimer.addEventListener(TimerEvent.TIMER, this.timerHandler);
+			_redTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
 
 			_blackTimes = new GameTimers(_tableData.getBlackTime());
 			_blackTimer = new Timer(1000, _blackTimes.gameTime);
-			_blackTimer.addEventListener(TimerEvent.TIMER, this.timerHandler);
-			var color:String = this.getMoveColor();
-			if (color == "Red") {
+			_blackTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
+
+			if (_getMoveColor() == "Red") {
 				_redTimer.start();
 			} else {
 				_blackTimer.start();
 			}
 		}
 
-		public function getMoveColor():String {
+		private function _getMoveColor() : String
+		{
 			var color:String = "";
 			if (_game != null) {
 				if (_game.waitingForMyMove()) {
@@ -289,7 +305,9 @@
 			}
 			return color;
 		}
-		public function stopTimer() : void {
+
+		private function _stopTimer() : void
+		{
 			if (_redTimer) {
 				_redTimer.stop();
 			}
@@ -297,9 +315,10 @@
 				_blackTimer.stop();
 			}
 		}
-		public function resetTimer() : void {
-			var color:String = this.getMoveColor();
-			if (color === "Red") {
+
+		private function _resetTimer() : void
+		{
+			if (_getMoveColor() === "Red") {
 				_blackTimes.resetMoveTime();
 				_blackTimer.stop();
 				_redTimer.start();
@@ -311,18 +330,19 @@
 			}
 		}
 
-		public function timerHandler(event:Event) : void {
-			var color:String = this.getMoveColor();
+		private function _timerHandler(event:Event) : void
+		{
+			const color:String = _getMoveColor();
 			if (color === "Red") {
 				if (_redTimes) {
 					_redTimes.gameTime--;
 					if (_redTimes.gameTime == 0) {
-						this.gameTimeout(color);
+						_gameTimeout(color);
                         return;
 					}
 					_redTimes.moveTime--;
 					if (_redTimes.moveTime == 0) {
-						this.moveTimeout(color);
+						_moveTimeout(color);
 						_redTimer.stop();
 						return;
 					}
@@ -333,12 +353,12 @@
 				if (_blackTimes) {
 					_blackTimes.gameTime--;
 					if (_blackTimes.gameTime == 0) {
-						this.gameTimeout(color);
+						_gameTimeout(color);
                         return;
 					}
 					_blackTimes.moveTime--;
 					if (_blackTimes.moveTime == 0) {
-						this.moveTimeout(color);
+						_moveTimeout(color);
 						_blackTimer.stop();
 						return;
 					}
@@ -347,19 +367,22 @@
 			}
 		}
 
-		public function moveTimeout(color:String) : void {
+		private function _moveTimeout(color:String) : void {
 			this.view.displayMessage(color + " move timeout");
 			_processTableEvent("MOVETIMEOUT_EVENT", color);
 		}
-		public function gameTimeout(color:String) : void {
+
+		private function _gameTimeout(color:String) : void {
 			this.view.displayMessage(color + " game timeout");
 			_processTableEvent("GAMETIMEOUT_EVENT", color);
 		}
 
-		public function closeTable() : void {
-		    this.stopTimer();
+		private function _closeTable() : void {
+		    _stopTimer();
 		}
-		public function playMoveList(moveList:MoveListInfo) : void {
+
+		public function playMoveList(moveList:MoveListInfo) : void
+		{
 			for (var i:int = 0; i < moveList.moves.length; i++) {
 				var curPos:Position = new Position(parseInt(moveList.moves[i].charAt(1)), parseInt(moveList.moves[i].charAt(0)));
 				var newPos:Position = new Position(parseInt(moveList.moves[i].charAt(3)), parseInt(moveList.moves[i].charAt(2)));
@@ -370,17 +393,8 @@
 			}
 		};
 		
-		/* public function playMove(moveData:MoveInfo) : void {
-			Global.vars.app.playMoveSound();
-			var curPos:Position = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
-			var newPos:Position = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
-			var piece:Piece = this.view.board.getPieceByPos(curPos);
-			if (piece) {
-				this.processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
-			}
-		} */
-		
-		public function rewindLastMove() : void {
+		private function _rewindLastMove() : void
+		{
 			if (_moveList.length > 0) {
 				var lastMove:String = _moveList[_moveList.length - 1];
 				if (lastMove != "") {
@@ -407,15 +421,17 @@
 			}
 		}
 
-		public function processWrongMove(error:String) : void {
-			rewindLastMove();
+		public function processWrongMove(error:String) : void
+		{
+			_rewindLastMove();
 			this.view.displayMessage("Server rejected the move. " + error);
 			if (_game) {
 				_game.processEvent("move");
 			}
 		}
 
-		public function parseMove(moveData:String) : Array {
+		public function parseMove(moveData:String) : Array
+		{
 			var fields:Array = moveData.split(":");
 			var piece:Piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
 			var move:String = fields[2];
@@ -426,14 +442,17 @@
 			return [piece, move, capturePiece];
 		}
 
-		public function moveLocalPiece(piece:Piece, curPos:Position, newPos:Position) : void {
+		public function moveLocalPiece(piece:Piece, curPos:Position, newPos:Position) : void
+		{
 			if (_tableState == "MOVEREVIEW_STATE" && _curMoveIndex != _moveList.length) {
 				this.view.displayMessage("In review mode");
 				piece.moveImage();
 				return;
 			}
-			if (_tableState == "MOVEREVIEW_STATE" && _stateBeforeReview == "GAMEPLAY_STATE" && _game.getLocalPlayer().color == piece.getColor()) {
-				stopReview();
+			if (   _tableState == "MOVEREVIEW_STATE" && _stateBeforeReview == "GAMEPLAY_STATE"
+				&& _game.getLocalPlayer().color == piece.getColor() )
+			{
+				_stopReview();
 				_tableState = _stateBeforeReview;
 			}
 			if (!_game.waitingForMyMove()) {
@@ -450,7 +469,7 @@
 			_processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
 			if (_game.isCheckMate(null)) {
 				this.view.displayMessage("Invalid move. Check active");
-				rewindLastMove();
+				_rewindLastMove();
 				return;
 			}
 			Global.vars.app.playMoveSound();
@@ -463,7 +482,8 @@
 			}
 		}
 
-		public function movePiece(moveData:MoveInfo) : void {
+		public function movePiece(moveData:MoveInfo) : void
+		{
 			Global.vars.app.playMoveSound();
 			var curPos:Position = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
 			var newPos:Position = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
@@ -482,17 +502,20 @@
 				}
 			}
 		}
-		public function updateMove(piece:Piece, curPos:Position, newPos:Position) : void {
+
+		private function _updateMove(piece:Piece, curPos:Position, newPos:Position) : void
+		{
 			var curPiece:Piece = this.view.board.getPieceByPos(newPos);
-			var mov:String = "" + piece.getColor() + ":" + piece.getIndex() + ":" + curPos.row + curPos.column + newPos.row + newPos.column + ":" + ((curPiece != null) ? curPiece.getIndex() : "");
+			const mov:String = "" + piece.getColor() + ":" + piece.getIndex()
+				+ ":" + curPos.row + curPos.column + newPos.row + newPos.column
+				+ ":" + ((curPiece != null) ? curPiece.getIndex() : "");
 			_moveList[_moveList.length] = mov;
-			var i:int = 0;
 			if (_tableState == "GAMEPLAY_STATE" || _tableState == "MOVEREVIEW_STATE") {
 				if (_moveList.length == 2) {
 					if (this.view !== null) {
 						Global.vars.app.showGameMenu();
 					}
-					this.startTimer();
+					_startTimer();
 				}
 				else if (_moveList.length == 1) {
 					this.view.enableReviewButtons(true);
@@ -500,7 +523,7 @@
 	    	} else if (_tableState == "OBSERVER_STATE") {
 				this.view.enableReviewButtons(true);
 				if (_moveList.length == 2) {
-					this.startTimer();
+					_startTimer();
 				}
 			}
 			if (_moveList.length == 1) {
@@ -508,10 +531,12 @@
 			}
 		}
 
-		private function _processReviewMove(cmd:String) : void {
+		private function _processReviewMove(cmd:String) : void
+		{
 			if (_moveList.length == 0) {
 				return;
 			}
+
 			var moveIndex:int = 0;
 			if (cmd == "start") {
 				moveIndex = 0;
@@ -532,10 +557,11 @@
 			if (_curMoveIndex == moveIndex ) {
 				return;
 			}
-			applyChangeSet(moveIndex);
+			_applyChangeSet(moveIndex);
 		}
 
-		public function applyChangeSet(moveIndex:int) : void {
+		private function _applyChangeSet(moveIndex:int) : void
+		{
 			var i:int = 0;
 			var changeSet:Array = new Array();
 			var focusPiece:Piece = null;
@@ -613,23 +639,26 @@
 			}
 			this.view.board.reDraw(changeSet, focusPiece);
 		}
-		public function stopReview() : void {
+
+		private function _stopReview() : void
+		{
 			var moveIndex:int = _moveList.length;
 			if (_curMoveIndex == moveIndex ) {
 				return;
 			}
-			applyChangeSet(moveIndex);
+			_applyChangeSet(moveIndex);
 			_curMoveIndex = -1;
 		}
-		
-		public function handleDebugCmd(cmd:String) : void {
+
+		public function handleDebugCmd(cmd:String) : void
+		{
 			var prefix:String = "/debug ";
 			var arg:String = cmd.substring(prefix.length);
 			var result:String = "" + arg + ":\n";
 			var player:PlayerInfo = null;
 			if (arg == "gamestate") {
 				if (_game) {
-					result += _game.state;
+					result += _game.getGameState();
 				} else {
 					result += "";
 				}
@@ -638,7 +667,7 @@
 			} else if (arg == "piecemap") {
 				result += this.view.board.getPieceMapInfo();
 			} else if (arg == "movelist") {
-				result += this.getMoveListInfo();
+				result += _getMoveListInfo();
 			} else if (arg == "redpieces") {
 				result += this.view.board.getRedPiecesInfo();
 			} else if (arg == "blackpieces") {
@@ -657,7 +686,7 @@
 				result += "tablestate: " + _tableState;
 				result += "\n";
 				if (_game) {
-					result += "gamestate: " + _game.state;
+					result += "gamestate: " + _game.getGameState();
 					result += "\n";
 				} else {
 					result += "gamestate: \n";
@@ -689,7 +718,8 @@
 			this.view.displayMessage(result);
 		}
 
-		public function joinTable(player:PlayerInfo):void {
+		public function joinTable(player:PlayerInfo) : void
+		{
 			if (player.color === "Black") {
 				_setBlackPlayer(player);
 			}
@@ -703,30 +733,25 @@
 			this.view.displayMessage("" + player.pid + " joined");
 		}
 
-		public function isPlaying(pid:String):Boolean {
-			if ((_redPlayer && _redPlayer.pid == pid) ||
-				(_blackPlayer && _blackPlayer.pid == pid)) {
-				return true;
-			}
-			return false;
-		}
-		public function leaveTable(pid:String): void {
+		public function leaveTable(pid:String) : void
+		{
 			_processTableEvent("LEAVETABLE_EVENT", pid);
 			this.view.displayMessage("" + pid + " left");
 		}
 
-		public function processEvent_LEAVE(pid:String) : void {
+		public function processEvent_LEAVE(pid:String) : void
+		{
 			if (pid === Global.vars.app.getPlayerID()) {
-				this.closeTable();
+				_closeTable();
 			}
 			else {
 				if (this.view !== null) {
 					if (_redPlayer && _redPlayer.pid == pid) {
 						this.view.removePlayerData("Red");
-						this.stopTimer();
+						_stopTimer();
 					} else if (_blackPlayer && _blackPlayer.pid == pid) {
 						this.view.removePlayerData("Black");
-						this.stopTimer();
+						_stopTimer();
 					} 
 				}
 			}
@@ -738,18 +763,19 @@
 		 *           This is a not a good practice and should be fixed
 		 *           as soon as possbile.
 		 */
-		private function _processTableEvent(type:String, data:*) : void {
+		private function _processTableEvent(type:String, data:*) : void
+		{
 			if (_tableState === "IDLE_STATE") {
 				if (type === "JOINTABLE_EVENT") {
 					if (data.getPlayerID() === Global.vars.app.getPlayerID()) {
 						if (data.getColor() !== "None") {
-							this.setSideColors(data.getColor());
+							_setSideColors(data.getColor());
 							_createNewTableView();
 							_tableState = "NEWTABLE_STATE";
 						}
 						else {
-							var joinColor:String = this.getJoinColor();
-							this.setSideColors(joinColor);
+							var joinColor:String = _getJoinColor();
+							_setSideColors(joinColor);
 							_createObserveTableView(joinColor);
 							if (joinColor === "") {
 								_tableState = "OBSERVER_STATE";
@@ -764,10 +790,10 @@
 					if (data.getRedPlayer().pid === Global.vars.app.getPlayerID() ||
 						data.getBlackPlayer().pid === Global.vars.app.getPlayerID()) {
 						if (data.getRedPlayer().pid === Global.vars.app.getPlayerID()) {
-							this.setSideColors("Red");
+							_setSideColors("Red");
 						}
 						else if (data.getBlackPlayer().pid === Global.vars.app.getPlayerID()) {
-							this.setSideColors("Black");
+							_setSideColors("Black");
 						}
 						_createNewTableView();
 						Global.vars.app.showTableMenu(true, true);
@@ -775,8 +801,8 @@
 						this.view.displayMessage("" + Global.vars.app.getPlayerID() + " joined");
 					}
 					else {
-						joinColor = this.getJoinColor();
-						this.setSideColors(joinColor);
+						joinColor = _getJoinColor();
+						_setSideColors(joinColor);
 						_createObserveTableView(joinColor);
 						if (joinColor === "") {
 							_tableState = "OBSERVER_STATE";
@@ -800,7 +826,7 @@
 								this.view.displayPlayerData(_blackPlayer);
 							}
 						}
-						this.startGame();
+						_startGame();
 						_tableState = "GAMEPLAY_STATE";
 					}
 				}
@@ -811,12 +837,12 @@
 			else if (_tableState === "VIEWTABLE_STATE") {
 				if (type == "JOINTABLE_EVENT") {
 					if (this.view !== null) {
-						this.displayPlayers();
+						_displayPlayers();
 						Global.vars.app.showTableMenu(true, true);
 					}
 					if (_redPlayer.pid === Global.vars.app.getPlayerID() ||
 						_blackPlayer.pid === Global.vars.app.getPlayerID()) {
-						this.startGame();
+						_startGame();
 						_tableState = "GAMEPLAY_STATE";
 					}
 					else {
@@ -830,44 +856,44 @@
 			else if (_tableState === "OBSERVER_STATE") {
 				if (type === "MOVEPIECE_EVENT") {
 					var piece:Piece = data[0];
-					this.updateMove(piece, data[1], data[2]);
+					_updateMove(piece, data[1], data[2]);
 					if (this.view !== null) {
 						this.view.board.movePieceByPos(piece, data[2], (this.view === null) ? false : true);
 					}
 					if (_moveList.length > 2) {
-						this.resetTimer();
+						_resetTimer();
 					}
 				}
 				else if (type === "LEAVETABLE_EVENT") {
 					this.processEvent_LEAVE(data);
 				}
 				else if (type === "RESIGNGAME_EVENT") {
-					this.stopTimer();
+					_stopTimer();
 				}
 				else if (type === "MOVEREVIEW_EVENT") {
 					_tableState = "MOVEREVIEW_STATE";
 					_processReviewMove(data);
 				}
 				else if (type == "MOVETIMEOUT_EVENT" || type == "GAMETIMEOUT_EVENT") {
-                     this.stopTimer();
+                     _stopTimer();
                 }
 			}
 			else if (_tableState === "GAMEPLAY_STATE") {
 				if (type === "MOVEPIECE_EVENT") {
 					piece = data[0];
-					this.updateMove(piece, data[1], data[2]);
+					_updateMove(piece, data[1], data[2]);
 					if (this.view !== null) {
 						this.view.board.movePieceByPos(piece, data[2], (this.view === null) ? false : true);
 					}
 					if (_moveList.length > 2) {
-						this.resetTimer();
+						_resetTimer();
 					}
 				}
 				else if (type === "LEAVETABLE_EVENT") {
 					this.processEvent_LEAVE(data);
 				}
 				else if (type === "RESIGNGAME_EVENT") {
-                    this.stopTimer();
+                    _stopTimer();
 					if (this.view !== null) {
 						Global.vars.app.showTableMenu(false, false);
 					}
@@ -881,7 +907,7 @@
 					if (this.view !== null) {
 						Global.vars.app.showTableMenu(false, false);
 					}
-                    this.stopTimer();
+                    _stopTimer();
 					_tableState = "ENDGAME_STATE";
 				}
 			}
@@ -898,40 +924,40 @@
 				if (type == "MOVEREVIEW_EVENT") {
 					_processReviewMove(data);
 					if (data == "end" || (data == "forward" && _curMoveIndex == _moveList.length)) {
-						stopReview();
+						_stopReview();
 						_tableState = _stateBeforeReview;
 					}
 				}
 				else if (type === "MOVEPIECE_EVENT") {
 					piece = data[0];
 					if (_stateBeforeReview == "GAMEPLAY_STATE") {
-						this.updateMove(piece, data[1], data[2]);
+						_updateMove(piece, data[1], data[2]);
 						if (this.view !== null) {
 							this.view.board.updatePieceMapState(piece, data[1], data[2]);
 						}
 						if (_moveList.length > 2) {
-							this.resetTimer();
+							_resetTimer();
 						}
 					}
 					else if (_stateBeforeReview == "OBSERVER_STATE") {
 						if (_curMoveIndex == _moveList.length) {
-							stopReview();
+							_stopReview();
 							_tableState = _stateBeforeReview;
 							_processTableEvent(type, data);
 						}
 						else {
-							this.updateMove(piece, data[1], data[2]);
+							_updateMove(piece, data[1], data[2]);
 							if (this.view !== null) {
 								this.view.board.updatePieceMapState(piece, data[1], data[2]);
 							}
 							if (_moveList.length > 2) {
-								this.resetTimer();
+								_resetTimer();
 							}							
 						}
 					}
 				}
 				else {
-					stopReview();
+					_stopReview();
 					_tableState = _stateBeforeReview;
 					_processTableEvent(type, data);
 				}
@@ -942,7 +968,8 @@
 		public function getPreferences() : Object { return _curPref; }
 		public function getMoveList() : Array { return _moveList; }
 
-		public function updateSettings(newSettings:Object) : void {
+		public function updateSettings(newSettings:Object) : void
+		{
 			var bUpdated:Boolean = false;
 			var times:String = newSettings["gametime"] + "/" + newSettings["movetime"] + "/" + newSettings["extratime"];
 			if (_settings["gametime"] != newSettings["gametime"] ||
@@ -961,7 +988,9 @@
 				Global.vars.app.sendUpdateRequest(this.tableId, times, _settings["rated"]);
 			}
 		}
-		public function updatePref(newPref:Object) : void {
+
+		public function updatePref(newPref:Object) : void
+		{
 			if (_curPref["boardcolor"] != newPref["boardcolor"]) {
 				this.view.redrawBoard(newPref["boardcolor"], _curPref["linecolor"], newPref["pieceskinindex"]);
 			}

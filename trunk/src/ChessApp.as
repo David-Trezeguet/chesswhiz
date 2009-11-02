@@ -15,10 +15,12 @@
 	import ui.TableSettings;
 	import ui.TopControlBar;
 
-	public class ChessApp {
-
+	public class ChessApp
+	{
 		public static const VERSION:String = "0.9.0.5";
 		public static const BASE_URI:String = "http://www.playxiangqi.com/chesswhiz/";
+
+		public var preferences:Object = {};
 
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
@@ -31,10 +33,10 @@
 		private var _tableObjects:Object = {};
 		private var _moveSound:Sound;
 		private var _loginFailReason:String = "";
-		public var preferences:Object = {};
 		private var _cookie:SharedObject;
 
-		public function ChessApp(menu:TopControlBar, window:Container) {
+		public function ChessApp(menu:TopControlBar, window:Container)
+		{
 			_menu = menu;
 			_mainWindow = window;
 			_moveSound = new Sound( new URLRequest(BASE_URI + "res/images/move.mp3") );
@@ -190,7 +192,7 @@
 				var tableSettingsPanel:TableSettings = new TableSettings();
 				tableSettingsPanel.name = "tableSettingsPanel";
 				_mainWindow.addChild(tableSettingsPanel);
-				var tableObj:Table = this.getTable(_currentTableId);
+				var tableObj:Table = _getTable(_currentTableId);
 				if (tableObj) {
 					var settings:Object = tableObj.getSettings();
 					tableSettingsPanel.setCurrentSettings(settings);
@@ -200,7 +202,7 @@
 
 		public function updateTableSettings(settings:Object) : void
 		{
-			var tableObj:Table = this.getTable(_currentTableId);
+			var tableObj:Table = _getTable(_currentTableId);
 			if (tableObj) {
 				tableObj.updateSettings(settings);
 			}
@@ -216,7 +218,7 @@
 		}
 
 		public function updateTablePreferences(pref:Object) : void {
-			var tableObj:Table = this.getTable(_currentTableId);
+			var tableObj:Table = _getTable(_currentTableId);
 			if (tableObj) {
 				tableObj.updatePref(pref);
 			}
@@ -294,7 +296,7 @@
 		private function _processResponse_ITABLE(response:Message) : void {
 			var tableData:TableInfo = response.parseTableResponse();
 			var tableId:String = tableData.getID();
-			var tableObj:Table = this.getTable(tableId);
+			var tableObj:Table = _getTable(tableId);
 			if (tableObj == null) {
 				tableObj = new Table(tableId, preferences);
 				_tableObjects[tableId] = tableObj;
@@ -303,7 +305,7 @@
 			tableObj.newTable(tableData);
 		}
 
-		public function getTable(tableId:String) : Table 
+		private function _getTable(tableId:String) : Table 
 		{
 			return _tableObjects[tableId]; 
 		}
@@ -317,7 +319,7 @@
 				var joinData:JoinInfo = new JoinInfo();
 				joinData.parse(event.getContent());
 				var tableId:String = joinData.getTableID();
-				var tableObj:Table = this.getTable(tableId);
+				var tableObj:Table = _getTable(tableId);
 				if (tableObj == null) {
 					tableObj = new Table(tableId, preferences);
 					_tableObjects[tableId] = tableObj;
@@ -332,13 +334,13 @@
 			if (event.getCode() === "0") {
 				var moveData:MoveInfo = new MoveInfo();
 				moveData.parse(event.getContent());
-				tableObj = this.getTable( moveData.getTableID());
+				tableObj = _getTable( moveData.getTableID());
 				if (tableObj) {
 					tableObj.movePiece(moveData);
 				}
 			}
 			else {
-				tableObj = this.getTable(_currentTableId);
+				tableObj = _getTable(_currentTableId);
 				if (tableObj) {
 					tableObj.processWrongMove(event.getContent());
 				}
@@ -360,7 +362,7 @@
 		private function _processEvent_I_MOVES(event:Message) : void {
 			var moveList:MoveListInfo = new MoveListInfo();
 			moveList.parse(event.getContent());
-			var tableObj:Table = this.getTable( moveList.getTableID());
+			var tableObj:Table = _getTable( moveList.getTableID());
 			if (tableObj) {
 				tableObj.playMoveList(moveList);
 			}
@@ -370,7 +372,7 @@
 			var fields:Array = event.getContent().split(';');
 			var tid:String = fields[0];
 			var pid:String = fields[1];
-			var tableObj:Table = this.getTable(tid);
+			var tableObj:Table = _getTable(tid);
 			if (tableObj) {
 				tableObj.leaveTable(pid);
 				if (pid == _playerId) {
@@ -386,7 +388,7 @@
 			//op=E_END&code=0&content=2;black_win;Player resigned
 			if (event.getCode() === "0") {
 				var endEvent:EndEvent = new EndEvent(event.getContent());
-				var tableObj:Table = this.getTable(endEvent.getTableID());
+				var tableObj:Table = _getTable(endEvent.getTableID());
 				if (tableObj) {
 					tableObj.stopGame(endEvent.reason, endEvent.winner);
 	
@@ -398,7 +400,7 @@
 			//op=E_END&code=0&content=2;black_win;Player resigned
 			if (event.getCode() === "0") {
 				var drawEvent:DrawEvent = new DrawEvent(event.getContent());
-				var tableObj:Table = this.getTable(drawEvent.getTableID());
+				var tableObj:Table = _getTable(drawEvent.getTableID());
 				if (tableObj) {
 					tableObj.drawGame(drawEvent.getPlayerID());
 				}
@@ -412,7 +414,7 @@
 			var pid:String = fields[0];
 			var chatMsg:String = fields[1];
 			if (event.getCode() === "0") {
-				var tableObj:Table = this.getTable(tableId);
+				var tableObj:Table = _getTable(tableId);
 				if (tableObj) {
 					tableObj.displayChatMessage(pid, chatMsg);
 				}
@@ -433,7 +435,7 @@
 			var pid:String = fields[1];
 			var times:String = fields[3];
 			if (event.getCode() === "0") {
-				var tableObj:Table = this.getTable(tableId);
+				var tableObj:Table = _getTable(tableId);
 				if (tableObj) {
 					tableObj.updateGameTimes(pid, times);
 				}
