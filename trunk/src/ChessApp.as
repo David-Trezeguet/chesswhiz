@@ -120,6 +120,7 @@
 
 		public function addBoardToWindow(board:TableBoard) : void
 		{
+			_mainWindow.removeAllChildren();
 			_mainWindow.addChild(board);
 		}
 
@@ -127,7 +128,10 @@
 		{
 			trace("Successfully connected to server");
 			_menu.currentState = "";
-			_initLoginPanel();
+
+			var loginPanel:LoginPanel = new LoginPanel();
+			loginPanel.errorString = _loginFailReason;
+			_mainWindow.addChild(loginPanel);
 		}
 
 		public function stopApp() : void
@@ -137,26 +141,15 @@
 			_bLoggedIn = false;
 			_sessionId = "";
 			_playerId = "";
-			clearView();
+			_mainWindow.removeAllChildren();
 		}
 
 		public function getPlayerID():String  { return _playerId; }
 		public function getSessionID():String { return _sessionId; }
 
-		public function clearView() : void
+		private function _initViewTablesPanel(tables:Object) : void
 		{
 			_mainWindow.removeAllChildren();
-		}
-
-		private function _initLoginPanel() : void
-		{
-			var loginPanel:LoginPanel = new LoginPanel();
-			loginPanel.errorString = _loginFailReason;
-			_mainWindow.addChild(loginPanel);
-		}
-
-		private function _initViewTablesPanel(tables:Object) : void {
-			clearView();
 			var tableListPanel:TableList = new TableList();
 			tableListPanel.setTableList(tables);
 			_mainWindow.addChild(tableListPanel);
@@ -208,26 +201,22 @@
 			_session.sendChatRequest(_playerId, _sessionId, _currentTableId, msg);
 		}
 
-		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void {
-			if (showSettings) {
-				_menu.currentState = "newTableState";
-			} else {
-				_menu.currentState = "observerState";
-			}
+		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void
+		{
+			if (showSettings) { _menu.currentState = "newTableState"; }
+			else              { _menu.currentState = "observerState"; }
 		}
 
-		public function showObserverMenu(color:String, tid:String) : void {
+		public function showObserverMenu(color:String, tid:String) : void
+		{
 			_menu.tableId = tid;
-			if (color == "Red") {
-				_menu.currentState = "openRedState";
-			} else if (color == "Black") {
-				_menu.currentState = "openBlackState";
-			} else {
-				_menu.currentState = "observerState";
-			}
+			if      (color == "Red")   { _menu.currentState = "openRedState";   }
+			else if (color == "Black") { _menu.currentState = "openBlackState"; }
+			else                       { _menu.currentState = "observerState";  }
 		}
 
-		public function showGameMenu() : void {
+		public function showGameMenu() : void
+		{
 			_menu.currentState = "inGameState";
 		}
 
@@ -404,6 +393,10 @@
 			_session.sendDrawRequest(this.getPlayerID(), this.getSessionID(), tableId);
 		}
 
+		public function doUpdateTableSettings(tableId:String, times:String, bRated:Boolean) : void {
+			_session.sendUpdateTableRequest(_playerId, tableId, times, bRated)
+		}
+
 		private function _processEvent_I_MOVES(event:Message) : void {
 			var moveList:MoveListInfo = new MoveListInfo();
 			moveList.parse(event.getContent());
@@ -421,8 +414,8 @@
 			if (tableObj) {
 				tableObj.leaveTable(pid);
 				if (pid == _playerId) {
-					this.removeTable(tid);
-					clearView();
+					_removeTable(tid);
+					_mainWindow.removeAllChildren();
 					_menu.currentState = "viewTablesState";
 					doViewTables();
 				}
@@ -465,13 +458,6 @@
 				}
 			}
 		}
-		
-		public function sendUpdateRequest(tableId:String, times:String, r:Boolean) : void {
-			var msg:Message = new Message();
-			msg.optype = "UPDATE";
-			msg.params = {tid: tableId, pid: _playerId, rated: (r) ? 1 : 0, itimes: times}
-			_session.sendRequest(msg);
-		}
 
 		private function _processEvent_UPDATE(event:Message) : void {
 			// op=UPDATE&code=0&content=1;Guest#hox8233;1;600/240/5
@@ -492,7 +478,7 @@
 			trace("Connection to server lost.");
 		}
 
-		public function removeTable(tableId:String) : void { 
+		private function _removeTable(tableId:String) : void { 
 			var tableObj:Table = _tableObjects[tableId];
 			if (tableObj) {
 				_tableObjects[tableId] = null;
