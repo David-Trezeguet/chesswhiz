@@ -18,13 +18,11 @@
 
 	public class ChessApp
 	{
-		public static const VERSION:String = "0.9.0.6";
-		public static const BASE_URI:String = "http://www.playxiangqi.com/chesswhiz/";
+		private const LOGIN_VERSION:String = Global.INAME + "-" + Global.VERSION;
 
 		private var _preferences:Object = {};
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
-		private var _loginVersion:String = "FLASHCHESS-" + VERSION;
 		private var _playerId:String = "";
 		private var _sessionId:String = "";
 		private var _bLoggedIn:Boolean = false;
@@ -39,7 +37,7 @@
 		{
 			_menu = menu;
 			_mainWindow = window;
-			_moveSound = new Sound( new URLRequest(BASE_URI + "res/images/move.mp3") );
+			_moveSound = new Sound( new URLRequest(Global.BASE_URI + "res/images/move.mp3") );
 			_preferences["pieceskinindex"] = 1;
 			_preferences["boardcolor"] = 0x5b5d5b;
 			_preferences["linecolor"] = 0xa09e9e;
@@ -121,7 +119,7 @@
 
 		public function doLogin(uname:String, passwd:String) : void {
 			_playerId = uname;
-			_session.sendLoginRequest(uname, passwd, _loginVersion);
+			_session.sendLoginRequest(uname, passwd, LOGIN_VERSION);
 		}
 
 		public function doGuestLogin() : void {

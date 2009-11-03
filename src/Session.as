@@ -23,12 +23,12 @@
 		public function connect() : void {
 			_socket.addEventListener(Event.CLOSE, function(status:Boolean):void {
 			       trace("connection to socket closed");
-				   Global.vars.app.processSocketCloseEvent();
+				   Global.app.processSocketCloseEvent();
             });
 			_socket.addEventListener(Event.CONNECT, function(status:Boolean):void {
 				if (status) {
 					trace("successfully connected to server");
-					Global.vars.app.processSocketConnectEvent();
+					Global.app.processSocketConnectEvent();
 				}
 				else {
 					trace("failed to connect to server");
@@ -36,7 +36,7 @@
 			});
 			_socket.addEventListener(DataEvent.DATA, function(event:DataEvent):void {
 				trace("received data: " + event.data);
-				Global.vars.app.handleServerEvent(event);
+				Global.app.handleServerEvent(event);
 		    });
 			_socket.connect(_hostName, _port);
 		}
@@ -54,7 +54,7 @@
 				_socket.send(reqMsg);
 			}
 			else {
-			   Global.vars.app.processSocketCloseEvent();
+			   Global.app.processSocketCloseEvent();
 			}
 		}
 

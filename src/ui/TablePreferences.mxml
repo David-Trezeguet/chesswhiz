@@ -16,9 +16,9 @@
 
 			private function init() : void
 			{
-				pieceSet1.source = ChessApp.BASE_URI + "res/images/pieces/1/rking.png";
-				pieceSet2.source = ChessApp.BASE_URI + "res/images/pieces/2/rking.png";
-				pieceSet3.source = ChessApp.BASE_URI + "res/images/pieces/3/rking.png";
+				pieceSet1.source = Global.BASE_URI + "res/images/pieces/1/rking.png";
+				pieceSet2.source = Global.BASE_URI + "res/images/pieces/2/rking.png";
+				pieceSet3.source = Global.BASE_URI + "res/images/pieces/3/rking.png";
 			}
 			
 			public function setCurrentPreferences(preferences:Object) : void
@@ -54,7 +54,7 @@
 				previewCanvas.graphics.moveTo(0, size/2);
 				previewCanvas.graphics.lineTo(size, size/2);
 
-				previewPieceImage.source = ChessApp.BASE_URI + "res/images/pieces/" + _selectedPieceSet + "/rking.png";
+				previewPieceImage.source = Global.BASE_URI + "res/images/pieces/" + _selectedPieceSet + "/rking.png";
 			}
 
 			private function onOK(event:Event) : void 
@@ -65,7 +65,7 @@
 						"boardcolor"     : colorPicker.selectedColor
 					};
 				PopUpManager.removePopUp(this);
-				Global.vars.app.updateTablePreferences(preferences);
+				Global.app.updateTablePreferences(preferences);
 			}
 
 		]]>

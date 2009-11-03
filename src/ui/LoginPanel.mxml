@@ -23,7 +23,7 @@
 
 			private function init() : void
 			{
-				this.title = "ChessWhiz-" + ChessApp.VERSION;
+				this.title = "ChessWhiz-" + Global.VERSION;
 				formHeading.label = resourceManager.getString('localization', 'login_prompt');
 				usernameItem.label = resourceManager.getString('localization', 'username');
 				passwordItem.label = resourceManager.getString('localization', 'password');
@@ -90,12 +90,12 @@
 
 			private function onLogin(event:Event) : void
 			{
-				Global.vars.app.doLogin(usernameInput.text, passwordInput.text);
+				Global.app.doLogin(usernameInput.text, passwordInput.text);
 			}
 	
 			private function onGuestLogin(event:Event) : void
 			{
-				Global.vars.app.doGuestLogin();
+				Global.app.doGuestLogin();
 			}
 
 		]]>

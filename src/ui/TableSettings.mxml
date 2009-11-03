@@ -28,7 +28,7 @@
 				settings["extratime"] = this.nsExtraTime.value;
 				settings["rated"] = this.cbGameType.selected;
 				PopUpManager.removePopUp(this);
-				Global.vars.app.updateTableSettings(settings);
+				Global.app.updateTableSettings(settings);
 			}
 
 		]]>

@@ -52,13 +52,13 @@
 
         private function onRefresh(event:Event) : void
         {
-     		Global.vars.app.doViewTables();
+     		Global.app.doViewTables();
         }
 
         private function onJoin(event:Event) : void
         {
  			if (tableListDG.selectedItem) {
-				Global.vars.app.doJoinTable(tableListDG.selectedItem.tid);
+				Global.app.doJoinTable(tableListDG.selectedItem.tid);
 			}
         }
 
