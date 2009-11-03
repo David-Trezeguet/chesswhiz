@@ -1,26 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="532" height="300" title="Table Preferences" initialize="init()">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+	layout="absolute" width="532" height="300"
+	title="Table Preferences"
+	initialize="init()"
+	showCloseButton="true"
+	close="PopUpManager.removePopUp(this);">
+
 	<mx:Script>
 		<![CDATA[
+			import mx.managers.PopUpManager;
 			import mx.containers.Canvas;
+
 			private var selectedPieceSet:int;
-			private var sound:Boolean;
+			private var sound:Boolean = false;
+
 			private function init() : void
 			{
-				sound = false;
-				selectedPieceSet = Global.vars.app.preferences["pieceskinindex"];
 				pieceSet1.source = ChessApp.BASE_URI + "res/images/pieces/1/rking.png";
 				pieceSet2.source = ChessApp.BASE_URI + "res/images/pieces/2/rking.png";
 				pieceSet3.source = ChessApp.BASE_URI + "res/images/pieces/3/rking.png";
 				this.rbMute.selected = true;
 				this.rbPieseSet1.selected = true;
-				displayPreview();
+				_displayPreview();
 			}
 			
 			public function setCurrentPreferences(preferences:Object) : void
 			{
 				sound = preferences["sound"];
-				selectedPieceSet = preferences["pieceskinindex"];
+				
 				if (sound) 
 				{
 					this.rbSound.selected = true;
@@ -29,6 +36,8 @@
 				{
 					this.rbMute.selected = true;	
 				}
+
+				selectedPieceSet = preferences["pieceskinindex"];
 				if (selectedPieceSet == 1)
 				{
 					this.rbPieseSet1.selected = true;
@@ -41,57 +50,50 @@
 				{
 					this.rbPieseSet3.selected = true;
 				}
+
 				colorPicker.selectedColor = preferences["boardcolor"];
-				displayPreview();
+				_displayPreview();
 			}
+
 			private function onSelectPieceSet(setIndex:int) : void
 			{
 				selectedPieceSet = setIndex;
-				displayPreview();
+				_displayPreview();
 			}
-			public function displayPreview() : void 
+
+			private function _displayPreview() : void 
 			{
-				if (previewPanel) {
-					while(this.previewPanel.numChildren) {
-						this.previewPanel.removeChildAt(0);
-					}
-				}
-				var canvas:Canvas = new Canvas();
-				this.previewPanel.addChild(canvas);
-				canvas.graphics.beginFill(colorPicker.selectedColor);
-				canvas.graphics.drawRect(canvas.x, canvas.y, 80,80);
-				Util.drawLine(canvas, 40, 0, 40, 80, 1, 0xFFFFFF);
-				Util.drawLine(canvas, 0, 40, 80, 40, 1, 0xFFFFFF);
-	            var img:Image = new Image();
-	            img.source = ChessApp.BASE_URI + "res/images/pieces/" + this.selectedPieceSet + "/rking.png";
-	            img.x = 20;
-	            img.y = 20;
-	            canvas.addChild(img);
-				canvas.graphics.endFill();
+				previewCanvas.graphics.clear();
+				previewCanvas.graphics.beginFill(colorPicker.selectedColor);
+				previewCanvas.graphics.drawRect(previewCanvas.x, previewCanvas.y, 80, 80);
+				Util.drawLine(previewCanvas, 40, 0, 40, 80, 1, 0xFFFFFF);
+				Util.drawLine(previewCanvas, 0, 40, 80, 40, 1, 0xFFFFFF);
+				previewPieceImage.source = ChessApp.BASE_URI + "res/images/pieces/" + this.selectedPieceSet + "/rking.png";
 			}
+
 			private function onEnableSound() : void
 			{
 				sound = true;
 			}
+
 			private function onMute() : void
 			{
 				sound = false;
 			}
-			private function onOk(event:Event) : void 
+
+			private function onOK(event:Event) : void 
 			{
 				var preferences:Object = {};
 				preferences["sound"] = this.sound;
 				preferences["pieceskinindex"] = this.selectedPieceSet;
 				preferences["boardcolor"] = this.colorPicker.selectedColor;
-				this.parent.removeChild(this);
+				PopUpManager.removePopUp(this);
 				Global.vars.app.updateTablePreferences(preferences);
 			}
-			private function onCancel(event:Event) : void 
-			{
-				this.parent.removeChild(this);
-			}
+
 		]]>
 	</mx:Script>
+
 	<mx:Panel x="10" y="10" width="127" height="120" layout="absolute" title="Sound">
 		<mx:RadioButtonGroup id="radiogroup1"/>
 		<mx:RadioButton x="11" y="8" label="On" id="rbSound" groupName="Sound" click="onEnableSound()"/>
@@ -109,10 +111,13 @@
 		<mx:Image x="59" y="140" id="pieceSet3"/>
 	</mx:Panel>
 	<mx:Panel x="7" y="148" width="130" height="102" layout="absolute" title="Board Color">
-		<mx:ColorPicker x="10" y="10" width="46" height="42" id="colorPicker" change="displayPreview()"/>
+		<mx:ColorPicker x="10" y="10" width="46" height="42" id="colorPicker" change="_displayPreview()"/>
 	</mx:Panel>
 	<mx:Panel x="329" y="10" width="173" height="165" layout="absolute" title="Preview" id="previewPanel">
+		<mx:Canvas x="0" y="0" width="153" height="125" id="previewCanvas">
+			<mx:Image x="20" y="20" id="previewPieceImage"/>
+		</mx:Canvas>
 	</mx:Panel>
-	<mx:Button x="376" y="228" label="Ok" width="61" click="onOk(event)"/>
-	<mx:Button x="445" y="228" label="Canel" click="onCancel(event)"/>
-</mx:Panel>
+	<mx:Button x="376" y="228" label="OK" width="61" click="onOK(event)"/>
+	<mx:Button x="445" y="228" label="Canel" click="PopUpManager.removePopUp(this);"/>
+</mx:TitleWindow>
