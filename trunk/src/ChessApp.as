@@ -21,8 +21,7 @@
 		public static const VERSION:String = "0.9.0.6";
 		public static const BASE_URI:String = "http://www.playxiangqi.com/chesswhiz/";
 
-		public var preferences:Object = {};
-
+		private var _preferences:Object = {};
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
 		private var _loginVersion:String = "FLASHCHESS-" + VERSION;
@@ -41,20 +40,20 @@
 			_menu = menu;
 			_mainWindow = window;
 			_moveSound = new Sound( new URLRequest(BASE_URI + "res/images/move.mp3") );
-			preferences["pieceskinindex"] = 1;
-			preferences["boardcolor"] = 0x5b5d5b;
-			preferences["linecolor"] = 0xa09e9e;
-			preferences["sound"] = true;
+			_preferences["pieceskinindex"] = 1;
+			_preferences["boardcolor"] = 0x5b5d5b;
+			_preferences["linecolor"] = 0xa09e9e;
+			_preferences["sound"] = true;
 			_loadCookie();
 		}
 
 		private function _loadCookie() : void {
 			_cookie = SharedObject.getLocal("flashchess");
 			if (_cookie && _cookie.data && _cookie.data.persist == 0xFFDDFF) {
-				preferences["pieceskinindex"] = _cookie.data.pieceskinindex;
-				preferences["boardcolor"] = _cookie.data.boardcolor;
-				preferences["linecolor"] = _cookie.data.linecolor;
-				preferences["sound"] = _cookie.data.sound;
+				_preferences["pieceskinindex"] = _cookie.data.pieceskinindex;
+				_preferences["boardcolor"] = _cookie.data.boardcolor;
+				_preferences["linecolor"] = _cookie.data.linecolor;
+				_preferences["sound"] = _cookie.data.sound;
 			}
 		}
 
@@ -64,10 +63,10 @@
 			}
 			if (_cookie) {
 				_cookie.data.persist = 0xFFDDFF;
-				_cookie.data.pieceskinindex = preferences["pieceskinindex"];
-				_cookie.data.boardcolor = preferences["boardcolor"];
-				_cookie.data.linecolor = preferences["linecolor"];
-				_cookie.data.sound = preferences["sound"];
+				_cookie.data.pieceskinindex = _preferences["pieceskinindex"];
+				_cookie.data.boardcolor = _preferences["boardcolor"];
+				_cookie.data.linecolor = _preferences["linecolor"];
+				_cookie.data.sound = _preferences["sound"];
 	            try {
     	            _cookie.flush(10000);
  	           } catch (error:Error) {
@@ -209,22 +208,22 @@
 			}
 		}
 
-		public function changeTablePref() : void {
-			if (!(_mainWindow.getChildByName("tablePrefPanel"))) {
-				var tablePrefPanel:TablePreferences = new TablePreferences();
-				tablePrefPanel.name = "tablePrefPanel";
-				_mainWindow.addChild(tablePrefPanel);
-				tablePrefPanel.setCurrentPreferences(this.preferences);
-			}
+		public function changeTablePref() : void
+		{
+			var tablePrefPanel:TablePreferences = new TablePreferences();
+			PopUpManager.addPopUp(tablePrefPanel, _mainWindow, true /* modal */);
+			PopUpManager.centerPopUp(tablePrefPanel);
+			tablePrefPanel.setCurrentPreferences(_preferences);
 		}
 
-		public function updateTablePreferences(pref:Object) : void {
+		public function updateTablePreferences(pref:Object) : void
+		{
 			var tableObj:Table = _getTable(_currentTableId);
 			if (tableObj) {
 				tableObj.updatePref(pref);
 			}
 			for (var key:String in pref) {
-				this.preferences[key] = pref[key];
+				_preferences[key] = pref[key];
 			}
 			_saveCookie();
 		}
@@ -299,7 +298,7 @@
 			var tableId:String = tableData.getID();
 			var tableObj:Table = _getTable(tableId);
 			if (tableObj == null) {
-				tableObj = new Table(tableId, preferences);
+				tableObj = new Table(tableId, _preferences);
 				_tableObjects[tableId] = tableObj;
 			}
 			_currentTableId = tableObj.tableId;
@@ -322,7 +321,7 @@
 				var tableId:String = joinData.getTableID();
 				var tableObj:Table = _getTable(tableId);
 				if (tableObj == null) {
-					tableObj = new Table(tableId, preferences);
+					tableObj = new Table(tableId, _preferences);
 					_tableObjects[tableId] = tableObj;
 				}
 				_currentTableId = tableObj.tableId;
@@ -456,7 +455,7 @@
 		}
 
 		public function playMoveSound() : void {
-			if (this.preferences["sound"]) {
+			if (_preferences["sound"]) {
 				_moveSound.play();
 			}
 		}

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 	layout="horizontal"
 	width="404" height="270"
-	title="Table Settings">
+	title="Table Settings"
+	showCloseButton="true"
+	close="PopUpManager.removePopUp(this);">
 
 	<mx:Script>
 		<![CDATA[
@@ -27,11 +29,6 @@
 				settings["rated"] = this.cbGameType.selected;
 				PopUpManager.removePopUp(this);
 				Global.vars.app.updateTableSettings(settings);
-			}
-
-			private function onCancel(event:Event) : void
-			{
-				PopUpManager.removePopUp(this);
 			}
 
 		]]>
@@ -71,8 +68,8 @@
 
 		<mx:HBox width="100%">
 			<mx:Button label="OK" minWidth="70" click="onOK(event)" />
-			<mx:Button label="Cancel" minWidth="70" click="onCancel(event)" />
+			<mx:Button label="Cancel" minWidth="70" click="PopUpManager.removePopUp(this);" />
 		</mx:HBox>
 	</mx:VBox>
 
-</mx:Panel>
+</mx:TitleWindow>
