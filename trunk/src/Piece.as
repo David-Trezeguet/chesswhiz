@@ -80,7 +80,7 @@
 			_mImageHolder.name = _imgLabel;
 			_mImageHolder.x = (offset + viewPos.column * width) - _centerX;
 			_mImageHolder.y = (offset + viewPos.row * height) - _centerY;
-			_mImageHolder.source =  ChessApp.BASE_URI + "res/images/pieces/" + pieceSkinIndex + "/" + _imageSrc;
+			_mImageHolder.source =  Global.BASE_URI + "res/images/pieces/" + pieceSkinIndex + "/" + _imageSrc;
 			parentClip.addChild(_mImageHolder);
 		}
 

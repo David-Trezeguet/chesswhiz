@@ -19,7 +19,7 @@
 
 		private function init() : void
 		{
-			topTimerImage.source = ChessApp.BASE_URI + "res/" + TIMER_ICON;
+			topTimerImage.source = Global.BASE_URI + "res/" + TIMER_ICON;
 			bottomTimerImage.source = topTimerImage.source;
 		}
 
@@ -38,7 +38,7 @@
 			playerLabel.text = player.pid + "(" + player.score + ")";
 
 			var playerImage:Image = (player.color === _table.getTopSideColor() ? topImage : bottomImage);
-			playerImage.source = ChessApp.BASE_URI + "res/"
+			playerImage.source = Global.BASE_URI + "res/"
 				+ (player.color == "Red" ? RED_PLAYER_ICON : BLACK_PLAYER_ICON); 
 			
 			var timer:GameTimers = _table.getTimers(player.color);
@@ -106,9 +106,9 @@
 				this.taChatInput.text = "";
 				return;
 			}
-			Global.vars.app.doTableChat(chatMsg);
+			Global.app.doTableChat(chatMsg);
 			this.taChatInput.text = "";
-			this.displayChatMessage(Global.vars.app.getPlayerID(), chatMsg);
+			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
         }
 
 		public function redrawBoard(boardColor:uint, lineColor:uint, pieceSkin:int) : void 

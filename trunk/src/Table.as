@@ -112,12 +112,12 @@
 			_setTableData(tableData);
 			_processTableEvent("TABLEINFO_EVENT", tableData);
 		}
-		
+
 		private function _createView () : void
 		{
-			Global.vars.app.clearView();
+			Global.app.clearView();
 			this.view = new TableBoard();
-			Global.vars.app.addBoardToWindow(this.view);  // Realize the UI first!
+			Global.app.addBoardToWindow(this.view);  // Realize the UI first!
 			this.view.display(this);
 		}
 
@@ -140,10 +140,10 @@
 			if (this.view === null) {
 				_createView();
 			}
-			if (_redPlayer !== null && _redPlayer.pid === Global.vars.app.getPlayerID()) {
+			if (_redPlayer !== null && _redPlayer.pid === Global.app.getPlayerID()) {
 				this.view.displayPlayerData(_redPlayer);
 			}
-			else if (_blackPlayer !== null && _blackPlayer.pid === Global.vars.app.getPlayerID()) {
+			else if (_blackPlayer !== null && _blackPlayer.pid === Global.app.getPlayerID()) {
 				this.view.displayPlayerData(_blackPlayer);
 			}
 		}
@@ -162,7 +162,7 @@
 				this.view.displayMessage("" + _blackPlayer.pid + " joined");
 			}
 			trace("joinable color: " + joinColor);
-			Global.vars.app.showObserverMenu(joinColor, this.tableId);
+			Global.app.showObserverMenu(joinColor, this.tableId);
 		}
 
 		public function displayChatMessage(pid:String, chatMsg:String) : void {
@@ -210,13 +210,13 @@
 			if ( (_redPlayer !== null && _redPlayer.pid !== "") &&
 				 (_blackPlayer !== null && _blackPlayer.pid !== "") )
 			{
-				if (_redPlayer.pid === Global.vars.app.getPlayerID()) {
+				if (_redPlayer.pid === Global.app.getPlayerID()) {
 					_game = new Game(this);
 					_game.setLocalPlayer(_redPlayer);
 					_game.setOppPlayer(_blackPlayer);
 					_game.processEvent("start");
 				}
-				else if (_blackPlayer.pid === Global.vars.app.getPlayerID()) {
+				else if (_blackPlayer.pid === Global.app.getPlayerID()) {
 					_game = new Game(this);
 					_game.setLocalPlayer(_blackPlayer);
 					_game.setOppPlayer(_redPlayer);
@@ -462,19 +462,19 @@
 				_rewindLastMove();
 				return;
 			}
-			Global.vars.app.playMoveSound();
+			Global.app.playMoveSound();
 			if (_tableState === "GAMEPLAY_STATE") {
 				if (_game) {
 					_game.processEvent("move");
 				}
 				// Send request to the server
-				Global.vars.app.sendMoveRequest(_game.getLocalPlayer(), piece, curPos, newPos, this.tableId);
+				Global.app.sendMoveRequest(_game.getLocalPlayer(), piece, curPos, newPos, this.tableId);
 			}
 		}
 
 		public function movePiece(moveData:MoveInfo) : void
 		{
-			Global.vars.app.playMoveSound();
+			Global.app.playMoveSound();
 			var curPos:Position = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
 			var newPos:Position = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
 			var piece:Piece = this.view.board.getPieceByPos(curPos);
@@ -503,7 +503,7 @@
 			if (_tableState == "GAMEPLAY_STATE" || _tableState == "MOVEREVIEW_STATE") {
 				if (_moveList.length == 2) {
 					if (this.view !== null) {
-						Global.vars.app.showGameMenu();
+						Global.app.showGameMenu();
 					}
 					_startTimer();
 				}
@@ -517,7 +517,7 @@
 				}
 			}
 			if (_moveList.length == 1) {
-				Global.vars.app.showTableMenu(false, true);
+				Global.app.showTableMenu(false, true);
 			}
 		}
 
@@ -731,7 +731,7 @@
 
 		public function processEvent_LEAVE(pid:String) : void
 		{
-			if (pid === Global.vars.app.getPlayerID()) {
+			if (pid === Global.app.getPlayerID()) {
 				_closeTable();
 			}
 			else {
@@ -757,7 +757,7 @@
 		{
 			if (_tableState === "IDLE_STATE") {
 				if (type === "JOINTABLE_EVENT") {
-					if (data.pid === Global.vars.app.getPlayerID()) {
+					if (data.pid === Global.app.getPlayerID()) {
 						if (data.color !== "None") {
 							_setSideColors(data.color);
 							_createNewTableView();
@@ -777,18 +777,18 @@
 					}
 				}
 				else if (type === "TABLEINFO_EVENT") {
-					if (data.getRedPlayer().pid === Global.vars.app.getPlayerID() ||
-						data.getBlackPlayer().pid === Global.vars.app.getPlayerID()) {
-						if (data.getRedPlayer().pid === Global.vars.app.getPlayerID()) {
+					if (data.getRedPlayer().pid === Global.app.getPlayerID() ||
+						data.getBlackPlayer().pid === Global.app.getPlayerID()) {
+						if (data.getRedPlayer().pid === Global.app.getPlayerID()) {
 							_setSideColors("Red");
 						}
-						else if (data.getBlackPlayer().pid === Global.vars.app.getPlayerID()) {
+						else if (data.getBlackPlayer().pid === Global.app.getPlayerID()) {
 							_setSideColors("Black");
 						}
 						_createNewTableView();
-						Global.vars.app.showTableMenu(true, true);
+						Global.app.showTableMenu(true, true);
 						_tableState = "NEWTABLE_STATE";
-						this.view.displayMessage("" + Global.vars.app.getPlayerID() + " joined");
+						this.view.displayMessage("" + Global.app.getPlayerID() + " joined");
 					}
 					else {
 						joinColor = _getJoinColor();
@@ -809,7 +809,7 @@
 						if (this.view !== null) {
 							// TODO: Clear palyer data
 							this.view.displayPlayerData(data);
-							if (_redPlayer.pid === Global.vars.app.getPlayerID()) {
+							if (_redPlayer.pid === Global.app.getPlayerID()) {
 								this.view.displayPlayerData(_redPlayer);
 							}
 							else {
@@ -828,10 +828,10 @@
 				if (type == "JOINTABLE_EVENT") {
 					if (this.view !== null) {
 						_displayPlayers();
-						Global.vars.app.showTableMenu(true, true);
+						Global.app.showTableMenu(true, true);
 					}
-					if (_redPlayer.pid === Global.vars.app.getPlayerID() ||
-						_blackPlayer.pid === Global.vars.app.getPlayerID()) {
+					if (_redPlayer.pid === Global.app.getPlayerID() ||
+						_blackPlayer.pid === Global.app.getPlayerID()) {
 						_startGame();
 						_tableState = "GAMEPLAY_STATE";
 					}
@@ -885,7 +885,7 @@
 				else if (type === "RESIGNGAME_EVENT") {
                     _stopTimer();
 					if (this.view !== null) {
-						Global.vars.app.showTableMenu(false, false);
+						Global.app.showTableMenu(false, false);
 					}
 					_tableState = "ENDGAME_STATE";
 				}
@@ -895,7 +895,7 @@
 				}
 				else if (type == "MOVETIMEOUT_EVENT" || type == "GAMETIMEOUT_EVENT") {
 					if (this.view !== null) {
-						Global.vars.app.showTableMenu(false, false);
+						Global.app.showTableMenu(false, false);
 					}
                     _stopTimer();
 					_tableState = "ENDGAME_STATE";
@@ -975,7 +975,7 @@
 			}
 			_settings = newSettings;
 			if (bUpdated) {
-				Global.vars.app.sendUpdateRequest(this.tableId, times, _settings["rated"]);
+				Global.app.sendUpdateRequest(this.tableId, times, _settings["rated"]);
 			}
 		}
 
