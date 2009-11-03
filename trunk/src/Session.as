@@ -6,48 +6,45 @@
 	
 	import hoxserver.*;
 
-	public class Session {
-		private var _socket:XMLSocket  = null;
+	public class Session
+	{
 		private const _hostName:String = "games.playxiangqi.com";
 		private const _port:int        = 80;
 
-		public function Session() {
+		private var _socket:XMLSocket  = null;
+
+		public function Session()
+		{
 			Security.allowDomain("games.playxiangqi.com");
 		}
 
-		public function createSocket() : void {
-			_socket = new XMLSocket();
-			//_socket.timeout = 60000;
-		}
+		public function openSocket() : void
+		{
+			_socket = new XMLSocket(); // Default connection timeout = 20 sec.
 
-		public function connect() : void {
-			_socket.addEventListener(Event.CLOSE, function(status:Boolean):void {
-			       trace("connection to socket closed");
-				   Global.app.processSocketCloseEvent();
-            });
 			_socket.addEventListener(Event.CONNECT, function(status:Boolean):void {
-				if (status) {
-					trace("successfully connected to server");
-					Global.app.processSocketConnectEvent();
-				}
-				else {
-					trace("failed to connect to server");
-				}
+				if (status) { Global.app.processSocketConnectEvent(); }
+				else        { trace("Failed to connect to server"); }
 			});
+			_socket.addEventListener(Event.CLOSE, function(status:Boolean):void {
+				Global.app.processSocketCloseEvent();
+            });
 			_socket.addEventListener(DataEvent.DATA, function(event:DataEvent):void {
-				trace("received data: " + event.data);
 				Global.app.handleServerEvent(event);
 		    });
+
 			_socket.connect(_hostName, _port);
 		}
 
-		public function closeSocket() : void {
+		public function closeSocket() : void
+		{
 			if (_socket.connected) {
 				_socket.close();
 			}
 		}
 
-		public function sendRequest(req:Message):void  {
+		public function sendRequest(req:Message) : void
+		{
 			var reqMsg:String = req.getMessage();
 			trace("Sending request: " + reqMsg);
 			if (_socket.connected) {

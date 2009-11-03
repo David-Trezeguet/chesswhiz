@@ -1,7 +1,9 @@
 ﻿package {
 	import flash.events.DataEvent;
+	import flash.events.NetStatusEvent;
 	import flash.media.Sound;
 	import flash.net.SharedObject;
+	import flash.net.SharedObjectFlushStatus;
 	import flash.net.URLRequest;
 	
 	import hoxserver.*;
@@ -45,49 +47,91 @@
 			_loadCookie();
 		}
 
-		private function _loadCookie() : void {
-			_cookie = SharedObject.getLocal("flashchess");
-			if (_cookie && _cookie.data && _cookie.data.persist == 0xFFDDFF) {
-				_preferences["pieceskinindex"] = _cookie.data.pieceskinindex;
-				_preferences["boardcolor"] = _cookie.data.boardcolor;
-				_preferences["linecolor"] = _cookie.data.linecolor;
-				_preferences["sound"] = _cookie.data.sound;
+		private function _loadCookie() : void
+		{
+			try {
+				_cookie = SharedObject.getLocal("flashchess");
+				if (_cookie.data.persist == 0xFFDDFF) {
+					_preferences["pieceskinindex"] = _cookie.data.pieceskinindex;
+					_preferences["boardcolor"] = _cookie.data.boardcolor;
+					_preferences["linecolor"] = _cookie.data.linecolor;
+					_preferences["sound"] = _cookie.data.sound;
+				}
 			}
+			catch (error:Error) {
+				trace("Error: Failed to get the shared object: " + error);
+			} 
 		}
 
-		private function _saveCookie() : void {
+		private function _saveCookie() : void
+		{
 			if (!_cookie) {
 				_cookie = SharedObject.getLocal("flashchess");
 			}
+
 			if (_cookie) {
 				_cookie.data.persist = 0xFFDDFF;
 				_cookie.data.pieceskinindex = _preferences["pieceskinindex"];
 				_cookie.data.boardcolor = _preferences["boardcolor"];
 				_cookie.data.linecolor = _preferences["linecolor"];
 				_cookie.data.sound = _preferences["sound"];
+
+				var flushStatus:String = null;
 	            try {
-    	            _cookie.flush(10000);
- 	           } catch (error:Error) {
-    	            trace("Error: Could not store the cookie.");
-        	   }
+					flushStatus = _cookie.flush( 10*1024 /* minDiskSpace */ );
+				}
+				catch (error:Error) {
+					trace("Error: Failed to flush the shared object: " + error);
+				}
+
+				if (flushStatus != null)
+				{
+					switch (flushStatus) {
+						case SharedObjectFlushStatus.PENDING:
+							trace("Flush-Status: Requesting permission to save object...");
+							_cookie.addEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
+							break;
+						case SharedObjectFlushStatus.FLUSHED:
+							trace("Flush-Status: Shared object successfully flushed to disk.");
+							break;
+					}
+				}
 			}
 		}
 
-		public function startApp():void {			
-			_session.createSocket();
-			_session.connect();
+        private function _onFlushStatus(event:NetStatusEvent) : void
+        {
+            switch (event.info.code) {
+                case "SharedObject.Flush.Success":
+                    trace("On Flush-Status: User granted permission -- value saved.");
+                    break;
+                case "SharedObject.Flush.Failed":
+                    trace("On Flush-Status: User denied permission -- value not saved.");
+                    break;
+            }
+
+            _cookie.removeEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
+        }
+
+		public function startApp() : void
+		{
+			_session.openSocket();
 		}
 
-		public function addBoardToWindow(board:TableBoard):void {
+		public function addBoardToWindow(board:TableBoard) : void
+		{
 			_mainWindow.addChild(board);
 		}
 
-		public function processSocketConnectEvent() : void {
+		public function processSocketConnectEvent() : void
+		{
+			trace("Successfully connected to server");
 			_menu.currentState = "";
 			_initLoginPanel();
 		}
 
-		public function stopApp() : void {
+		public function stopApp() : void
+		{
 			_session.closeSocket();
 			_tableObjects = {};
 			_bLoggedIn = false;
@@ -99,11 +143,13 @@
 		public function getPlayerID():String  { return _playerId; }
 		public function getSessionID():String { return _sessionId; }
 
-		public function clearView() : void {
+		public function clearView() : void
+		{
 			_mainWindow.removeAllChildren();
 		}
 
-		private function _initLoginPanel() : void {
+		private function _initLoginPanel() : void
+		{
 			var loginPanel:LoginPanel = new LoginPanel();
 			loginPanel.errorString = _loginFailReason;
 			_mainWindow.addChild(loginPanel);
@@ -231,6 +277,7 @@
 		 */
 		public function handleServerEvent(event:DataEvent) : void
 		{
+			trace("Received data: " + event.data);
 			const eventData:String = event.data;
 			const messages:Array = eventData.split("op");
 
@@ -440,8 +487,9 @@
 			}			
 		}
 
-		public function processSocketCloseEvent() : void {
-			trace("Connection to server lost! Closing the application.");
+		public function processSocketCloseEvent() : void
+		{
+			trace("Connection to server lost.");
 		}
 
 		public function removeTable(tableId:String) : void { 
