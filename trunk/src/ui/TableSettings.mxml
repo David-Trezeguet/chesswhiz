@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 	layout="horizontal"
-	width="404" height="270"
+	width="412" height="292"
 	title="Table Settings"
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);">
@@ -34,7 +34,7 @@
 		]]>
 	</mx:Script>
 
-	<mx:Panel width="191" height="100%" layout="vertical" title="Timers" paddingLeft="8" paddingTop="5">
+	<mx:Panel width="191" layout="vertical" title="Timers" paddingLeft="8" paddingTop="5" height="230">
 		<mx:Label text="Game Time:"/>
 		<mx:HBox width="100%" verticalAlign="middle">
 			<mx:NumericStepper id="nsGameTime" minimum="5" maximum="60" stepSize="5"/>
@@ -58,15 +58,16 @@
 		</mx:HBox>
 	</mx:Panel>
 
-	<mx:VBox height="100%" width="100%" paddingBottom="10">
-		<mx:Panel width="100%" layout="vertical" title="Game Type"
-				  paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8">
-			<mx:CheckBox id="cbGameType" label="Rated"/>
+	<mx:VBox paddingBottom="0" width="173" height="230">
+		<mx:Panel layout="vertical" title="Game Type"
+				  paddingLeft="8" width="172" height="85" verticalAlign="middle">
+			<mx:CheckBox id="cbGameType" label="Rated" height="28" width="139"/>
 		</mx:Panel>
 
 		<mx:Spacer height="100%"/>
 
 		<mx:HBox width="100%">
+			<mx:Spacer width="100%"/>
 			<mx:Button label="OK" minWidth="70" click="onOK(event)" />
 			<mx:Button label="Cancel" minWidth="70" click="PopUpManager.removePopUp(this);" />
 		</mx:HBox>

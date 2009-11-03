@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
-	layout="absolute" width="532" height="300"
+	layout="horizontal" width="486" height="314"
 	title="Table Preferences"
 	initialize="init()"
 	showCloseButton="true"
@@ -11,45 +11,26 @@
 			import mx.managers.PopUpManager;
 			import mx.containers.Canvas;
 
-			private var selectedPieceSet:int;
-			private var sound:Boolean = false;
+			private var _selectedPieceSet:int = 1;
+			private var _bSound:Boolean = false;
 
 			private function init() : void
 			{
 				pieceSet1.source = ChessApp.BASE_URI + "res/images/pieces/1/rking.png";
 				pieceSet2.source = ChessApp.BASE_URI + "res/images/pieces/2/rking.png";
 				pieceSet3.source = ChessApp.BASE_URI + "res/images/pieces/3/rking.png";
-				this.rbMute.selected = true;
-				this.rbPieseSet1.selected = true;
-				_displayPreview();
 			}
 			
 			public function setCurrentPreferences(preferences:Object) : void
 			{
-				sound = preferences["sound"];
-				
-				if (sound) 
-				{
-					this.rbSound.selected = true;
-				}
-				else 
-				{
-					this.rbMute.selected = true;	
-				}
+				_bSound = preferences["sound"];
+				if (_bSound)  { rbSound.selected = true; }
+				else          { rbMute.selected  = true; }
 
-				selectedPieceSet = preferences["pieceskinindex"];
-				if (selectedPieceSet == 1)
-				{
-					this.rbPieseSet1.selected = true;
-				}
-				else if (selectedPieceSet == 2)
-				{
-					this.rbPieseSet2.selected = true;
-				}
-				else if (selectedPieceSet == 3)
-				{
-					this.rbPieseSet3.selected = true;
-				}
+				_selectedPieceSet = preferences["pieceskinindex"];
+				if      (_selectedPieceSet == 1) { rbPieseSet1.selected = true; }
+				else if (_selectedPieceSet == 2) { rbPieseSet2.selected = true; }
+				else                             { rbPieseSet3.selected = true; }
 
 				colorPicker.selectedColor = preferences["boardcolor"];
 				_displayPreview();
@@ -57,36 +38,32 @@
 
 			private function onSelectPieceSet(setIndex:int) : void
 			{
-				selectedPieceSet = setIndex;
+				_selectedPieceSet = setIndex;
 				_displayPreview();
 			}
 
 			private function _displayPreview() : void 
 			{
+				const size:int = previewCanvas.width;
 				previewCanvas.graphics.clear();
 				previewCanvas.graphics.beginFill(colorPicker.selectedColor);
-				previewCanvas.graphics.drawRect(previewCanvas.x, previewCanvas.y, 80, 80);
-				Util.drawLine(previewCanvas, 40, 0, 40, 80, 1, 0xFFFFFF);
-				Util.drawLine(previewCanvas, 0, 40, 80, 40, 1, 0xFFFFFF);
-				previewPieceImage.source = ChessApp.BASE_URI + "res/images/pieces/" + this.selectedPieceSet + "/rking.png";
-			}
+				previewCanvas.graphics.drawRect(0, 0, size, size);
+				previewCanvas.graphics.lineStyle(1, 0xFFFFFF);
+				previewCanvas.graphics.moveTo(size/2, 0);
+				previewCanvas.graphics.lineTo(size/2, size);
+				previewCanvas.graphics.moveTo(0, size/2);
+				previewCanvas.graphics.lineTo(size, size/2);
 
-			private function onEnableSound() : void
-			{
-				sound = true;
-			}
-
-			private function onMute() : void
-			{
-				sound = false;
+				previewPieceImage.source = ChessApp.BASE_URI + "res/images/pieces/" + _selectedPieceSet + "/rking.png";
 			}
 
 			private function onOK(event:Event) : void 
 			{
-				var preferences:Object = {};
-				preferences["sound"] = this.sound;
-				preferences["pieceskinindex"] = this.selectedPieceSet;
-				preferences["boardcolor"] = this.colorPicker.selectedColor;
+				const preferences:Object = {
+						"sound"          : _bSound,
+						"pieceskinindex" :  _selectedPieceSet,
+						"boardcolor"     : colorPicker.selectedColor
+					};
 				PopUpManager.removePopUp(this);
 				Global.vars.app.updateTablePreferences(preferences);
 			}
@@ -94,30 +71,50 @@
 		]]>
 	</mx:Script>
 
-	<mx:Panel x="10" y="10" width="127" height="120" layout="absolute" title="Sound">
-		<mx:RadioButtonGroup id="radiogroup1"/>
-		<mx:RadioButton x="11" y="8" label="On" id="rbSound" groupName="Sound" click="onEnableSound()"/>
-		<mx:RadioButton x="10" y="46" label="Off"  id="rbMute" groupName="Sound" click="onMute()"/>
-		<mx:Image x="66" y="3" source="res/images/player_volume.png"/>
-		<mx:Image x="66" y="43" source="res/images/volume_mute.png"/>
+	<mx:VBox height="256" verticalGap="15" width="133">
+		<mx:Panel width="127" height="142" title="Sound" layout="vertical" paddingTop="5" paddingLeft="5">
+			<mx:HBox verticalAlign="middle" height="40" width="100">
+				<mx:RadioButton id="rbSound" groupName="soundOnOff" label="On" click="_bSound = true;"/>
+				<mx:Image source="res/images/player_volume.png"/>
+			</mx:HBox>
+			
+			<mx:HBox verticalAlign="middle" width="100" height="40">
+				<mx:RadioButton id="rbMute" groupName="soundOnOff" label="Off" click="_bSound = false;"/>
+				<mx:Image source="res/images/volume_mute.png"/>
+			</mx:HBox>
+		</mx:Panel>
+		<mx:Panel layout="vertical" title="Board Color" height="95" width="126" paddingTop="5" paddingLeft="5">
+			<mx:ColorPicker id="colorPicker" change="_displayPreview()" width="40" height="40"/>
+		</mx:Panel>
+	</mx:VBox>
+
+	<mx:Panel width="135" height="256" title="Pieces" layout="vertical" verticalGap="10" paddingTop="5" paddingLeft="5">
+		<mx:HBox verticalAlign="middle" width="100" height="55" horizontalGap="15">
+			<mx:RadioButton id="rbPieseSet1" groupName="pieceType" click="onSelectPieceSet(1)"/>
+			<mx:Image id="pieceSet1"/>
+		</mx:HBox>
+		<mx:HBox verticalAlign="middle" width="100" height="55" horizontalGap="15">
+			<mx:RadioButton id="rbPieseSet2" groupName="pieceType" click="onSelectPieceSet(2)"/>
+			<mx:Image id="pieceSet2"/>
+		</mx:HBox>
+		<mx:HBox verticalAlign="middle" width="100" height="55" horizontalGap="15">
+			<mx:RadioButton id="rbPieseSet3" groupName="pieceType" click="onSelectPieceSet(3)"/>
+			<mx:Image id="pieceSet3"/>
+		</mx:HBox>
 	</mx:Panel>
-	<mx:Panel x="158" y="11" width="153" height="240" layout="absolute" title="Pieces">
-		<mx:RadioButtonGroup id="radiogroup2"/>
-		<mx:RadioButton x="10" y="17" groupName="Pieces" id="rbPieseSet1" click="onSelectPieceSet(1)"/>
-		<mx:RadioButton x="10" y="86" groupName="Pieces" id="rbPieseSet2" click="onSelectPieceSet(2)"/>
-		<mx:RadioButton x="10" y="147" groupName="Pieces" id="rbPieseSet3" click="onSelectPieceSet(3)"/>
-		<mx:Image x="59" y="10" id="pieceSet1"/>
-		<mx:Image x="59" y="78" id="pieceSet2"/>
-		<mx:Image x="59" y="140" id="pieceSet3"/>
-	</mx:Panel>
-	<mx:Panel x="7" y="148" width="130" height="102" layout="absolute" title="Board Color">
-		<mx:ColorPicker x="10" y="10" width="46" height="42" id="colorPicker" change="_displayPreview()"/>
-	</mx:Panel>
-	<mx:Panel x="329" y="10" width="173" height="165" layout="absolute" title="Preview" id="previewPanel">
-		<mx:Canvas x="0" y="0" width="153" height="125" id="previewCanvas">
-			<mx:Image x="20" y="20" id="previewPieceImage"/>
-		</mx:Canvas>
-	</mx:Panel>
-	<mx:Button x="376" y="228" label="OK" width="61" click="onOK(event)"/>
-	<mx:Button x="445" y="228" label="Canel" click="PopUpManager.removePopUp(this);"/>
+
+	<mx:VBox height="256" width="166">
+		<mx:Panel id="previewPanel" width="162" height="155" title="Preview" layout="vertical" paddingLeft="10" verticalAlign="middle">
+			<mx:Canvas id="previewCanvas" width="90" height="90">
+				<mx:Image id="previewPieceImage" x="20" y="20"/>
+			</mx:Canvas>
+		</mx:Panel>
+		<mx:Spacer height="100%"/>
+		<mx:HBox width="100%">
+			<mx:Spacer width="100%"/>
+			<mx:Button label="OK"  minWidth="70" click="onOK(event)"/>
+			<mx:Button label="Canel"  minWidth="70" click="PopUpManager.removePopUp(this);"/>
+		</mx:HBox>
+	</mx:VBox>
+
 </mx:TitleWindow>
