@@ -115,7 +115,6 @@
 
 		private function _createView () : void
 		{
-			Global.app.clearView();
 			this.view = new TableBoard();
 			Global.app.addBoardToWindow(this.view);  // Realize the UI first!
 			this.view.display(this);
@@ -975,7 +974,7 @@
 			}
 			_settings = newSettings;
 			if (bUpdated) {
-				Global.app.sendUpdateRequest(this.tableId, times, _settings["rated"]);
+				Global.app.doUpdateTableSettings(this.tableId, times, _settings["rated"]);
 			}
 		}
 
