@@ -62,7 +62,7 @@
 	</mx:Panel>
 
 	<mx:VBox height="100%" width="100%" paddingBottom="10">
-		<mx:Panel width="100%" height="78" layout="vertical" title="Game Type"
+		<mx:Panel width="100%" layout="vertical" title="Game Type"
 				  paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8">
 			<mx:CheckBox id="cbGameType" label="Rated"/>
 		</mx:Panel>

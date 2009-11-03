@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
-	layout="horizontal" width="880" height="700"
+	layout="horizontal" width="886" height="718"
 	paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8"
 	initialize="init()">
 
@@ -143,7 +143,7 @@
 	]]>
 </mx:Script>
 
-	<mx:VBox height="100%" width="550" verticalGap="5">
+	<mx:VBox height="654" width="550" verticalGap="5">
 	
 		<mx:HBox width="100%">
 			<mx:HBox id="topPlayer" width="209" height="28" verticalAlign="middle">
@@ -186,7 +186,7 @@
 
 	<mx:Spacer width="0" />
 
-	<mx:VBox height="100%" width="270">
+	<mx:VBox height="654" width="270">
 		<mx:Spacer height="26" />
 		<mx:Panel title="Messages" width="100%" height="242" layout="absolute">
 			<mx:TextArea id="taMessages" width="100%" height="100%" editable="false" />
