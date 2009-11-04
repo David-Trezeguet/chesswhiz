@@ -43,15 +43,13 @@
 		}
 
 		public function getIndex():int { return _id; }
-		public function get getRow():int { return _row; }
-		public function get getColumn():int { return _column; }
 		public function getColor():String { return _color; }
 		public function isEventsEnabled() : Boolean { return _enabled; }
 		public function getType():String { return _type; }
 		public function getImageHolder() : Image { return _imageHolder; }
 		public function isCaptured():Boolean { return _captured; }
 		public function getPosition():Position { return new Position(_curRow, _curColumn); }
-		public function getInitialPosition():Position { return new Position(_row,_column); }
+		public function getInitialPosition():Position { return new Position(_row, _column); }
 
 		public function setCapture(flag:Boolean) : void
 		{
