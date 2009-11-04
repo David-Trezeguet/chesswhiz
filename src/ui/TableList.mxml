@@ -18,8 +18,10 @@
 									 "initialtime",
 									 "redid",
 									 "blackid" ];
-			var value:String = "";
 
+			tableListDP.removeAll(); // Remove old list.
+
+			var value:String = "";
 			for each (var table:TableInfo in tables)
 			{
 				var tableRow:Object = {};

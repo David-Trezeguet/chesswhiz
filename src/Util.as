@@ -56,14 +56,6 @@
 			return params;
 		}
 
-		public static function drawLine(panel:Sprite, startX:int, startY:int,
-										endX:int, endY:int, w:Number, color:uint) : void
-		{
-			panel.graphics.lineStyle(w, color);
-			panel.graphics.moveTo(startX, startY);
-			panel.graphics.lineTo(endX, endY);
-		}
-
         public static function sortNumeric(obj1:Object, obj2:Object, key:String) : int
         {
             const value1:Number = (obj1[key] == '' || obj1[key] == null) ? null : new Number(obj1[key]);
