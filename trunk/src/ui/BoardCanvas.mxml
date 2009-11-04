@@ -8,8 +8,8 @@
 		private const margin:int = 50;
 		private const offset:int = 45;
 
-		private var cellWidth:int;
-		private var cellHeight:int;
+		private var _cellWidth:int;
+		private var _cellHeight:int;
 		private var _redPieces:Array = new Array(16);
 		private var _blackPieces:Array = new Array(16);
 		private var _redPieceHash:Object = {};
@@ -23,8 +23,8 @@
 
 		private function init() : void
 		{
-			cellWidth = (width - 2 * margin)/8;
-			cellHeight = (height - 2 * margin)/9;
+			_cellWidth = (width - 2 * margin)/8;
+			_cellHeight = (height - 2 * margin)/9;
             
 			for (var k:int = 0; k < 10; k++)
 			{
@@ -171,24 +171,24 @@
 			var i:int;
 			for (i = 0; i < 10; i++)
 			{
-				_drawLine(this, offset, offset+i*cellHeight, offset + 8*cellWidth, offset + i*cellHeight);
+				_drawLine(this, offset, offset+i*_cellHeight, offset + 8*_cellWidth, offset + i*_cellHeight);
 			}
 	
 			for (i = 0; i < 9; i++)
 			{
 				if (i === 0 || i === 8) {
-					_drawLine(this, offset + cellWidth * i, offset, offset + cellWidth * i, offset + cellHeight * 9);
+					_drawLine(this, offset + _cellWidth * i, offset, offset + _cellWidth * i, offset + _cellHeight * 9);
 				}
 				else {
-					_drawLine(this, offset + cellWidth * i, offset, offset + cellWidth * i, offset + cellHeight * 4);
-					_drawLine(this, offset + cellWidth * i, offset + 5 * cellHeight, offset + cellWidth * i, offset + cellHeight * 9);
+					_drawLine(this, offset + _cellWidth * i, offset, offset + _cellWidth * i, offset + _cellHeight * 4);
+					_drawLine(this, offset + _cellWidth * i, offset + 5 * _cellHeight, offset + _cellWidth * i, offset + _cellHeight * 9);
 				}
 			}
 	
-			_drawLine(this, offset + 3*cellWidth, offset, offset + 5*cellWidth, offset + cellHeight*2);
-			_drawLine(this, offset + 5*cellWidth, offset, offset + 3*cellWidth, offset + cellHeight*2);
-			_drawLine(this, offset + 3*cellWidth, offset + 7 * cellHeight, offset + 5*cellWidth, offset + cellHeight * 9);
-			_drawLine(this, offset + 5*cellWidth, offset + 7 * cellHeight, offset + 3*cellWidth, offset + cellHeight * 9);
+			_drawLine(this, offset + 3*_cellWidth, offset, offset + 5*_cellWidth, offset + _cellHeight*2);
+			_drawLine(this, offset + 5*_cellWidth, offset, offset + 3*_cellWidth, offset + _cellHeight*2);
+			_drawLine(this, offset + 3*_cellWidth, offset + 7 * _cellHeight, offset + 5*_cellWidth, offset + _cellHeight * 9);
+			_drawLine(this, offset + 5*_cellWidth, offset + 7 * _cellHeight, offset + 3*_cellWidth, offset + _cellHeight * 9);
 
 			var offsetLeft:int = offset;
 	        var offsetTop:int = offset;
@@ -197,19 +197,19 @@
 			if (_table.getTopSideColor() == "Red") {
 				order = "descending";
 			}
-			this.drawHeader("row", offsetLeft, offsetTop, 10, order);
-			this.drawHeader("column", offsetLeft, offsetTop, 9, order);
-			this.drawHeader("row", offset + (cellWidth * 9) + 15, offset, 10, order);
-			this.drawHeader("column", offsetLeft, offsetTop + (10 * cellHeight) + 10, 9, order);
+			_drawHeader("row", offsetLeft, offsetTop, 10, order);
+			_drawHeader("column", offsetLeft, offsetTop, 9, order);
+			_drawHeader("row", offset + (_cellWidth * 9) + 15, offset, 10, order);
+			_drawHeader("column", offsetLeft, offsetTop + (10 * _cellHeight) + 10, 9, order);
 		}
 
 		private function _displayPieces() : void {
 			var i:int = 0;
 			for (i = 0; i < 16; i++) {
-				_redPieces[i].draw(this, offset, cellWidth, cellHeight, _pieceSkinIndex);
+				_redPieces[i].draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 			}
 			for (i = 0; i < 16; i++) {
-				_blackPieces[i].draw(this, offset, cellWidth, cellHeight, _pieceSkinIndex);
+				_blackPieces[i].draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 			}
 		}
 
@@ -220,7 +220,7 @@
 			panel.graphics.lineTo(endX, endY);
 		}
 
-		public function drawHeader(type:String, offsetLeft:int, offsetTop:int, numCells:int, order:String) : void {
+		private function _drawHeader(type:String, offsetLeft:int, offsetTop:int, numCells:int, order:String) : void {
 			var start:int = 0;
 			if (order == "descending") {
 				start = numCells - 1;
@@ -229,7 +229,7 @@
 			var top:int = 0;
 			if (type == "row") {
 				for (var i:int = 0; i < numCells; i++) {
-					top = offsetTop + (i * cellHeight) - 6; 
+					top = offsetTop + (i * _cellHeight) - 6; 
 					Util.createTextField(this, "" + start, left, top, false, _lineColor, "Verdana", 12);
 					if (order == "descending") {
 						start--;
@@ -242,7 +242,7 @@
 			else {
 				top =  offsetTop - 40;
 				for (var j:int = 0; j < numCells; j++) {
-					left = offsetLeft + (j * cellWidth) - 6;
+					left = offsetLeft + (j * _cellWidth) - 6;
 					Util.createTextField(this, String.fromCharCode(97 + start), left, top, false, _lineColor, "Verdana", 12);
 					if (order == "descending") {
 						start--;
@@ -267,7 +267,7 @@
 
 			for (i = 0; i < 10; i++)
 			{
-				yRow = offset + cellHeight * i;
+				yRow = offset + _cellHeight * i;
 				if (Math.abs(this.mouseY-yRow) < radius)
 				{
 					trace("row"+i);
@@ -276,7 +276,7 @@
 			}
 			for (j = 0; j < 9; j++)
 			{
-				xColumn = offset + cellWidth * j;
+				xColumn = offset + _cellWidth * j;
 				if (Math.abs(this.mouseX-xColumn) < radius)
 				{					
 					trace("col"+j);
@@ -295,11 +295,11 @@
 		}
 
 		public function getX(column:int) : int {
-			return offset + column * cellWidth;
+			return offset + column * _cellWidth;
 		}
 
 		public function getY(row:int) : int {
-			return offset + row * cellHeight;
+			return offset + row * _cellHeight;
 		}
 		public function getPieceByPos(pos:Position):Piece
 		{
@@ -312,7 +312,6 @@
 			return (color === "Red" ? _redPieces[index] : _blackPieces[index]);
 		}
 
-		public function getGame():Game { return _table.getGame(); }
 		public function getTable():Table { return _table; }
 
 		public function getInterveningPiece(curPos:Position, newPos:Position) : int
@@ -480,7 +479,7 @@
 			if (capturedPiece) {
 				capturedPiece.setCapture(false);
 				capturedPiece.setPosition(curPos);
-				capturedPiece.draw(this, offset, cellWidth, cellHeight, _pieceSkinIndex);
+				capturedPiece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 				capturedPiece.setFocus();
 				_lastPieceInFocus = capturedPiece;
 			}
@@ -543,20 +542,7 @@
 				}
 			}			
 		}
-		public function getRedPieces() : Array {
-			var pieces:Array = new Array();
-			for (var i:int = 0; i < _redPieces.length; i++) {
-				pieces[i] = _redPieces[i].clone();
-			}
-			return pieces;
-		}
-		public function getBlackPieces() : Array {
-			var pieces:Array = new Array();
-			for (var i:int = 0; i < _blackPieces.length; i++) {
-				pieces[i] = _blackPieces[i].clone();
-			}
-			return pieces;
-		}
+
 		public function reDraw(changeSet:Array, focusPiece:Piece) : void {
 			if (changeSet == null || changeSet.length == 0) {
 				return;
@@ -583,7 +569,7 @@
 				if (!captured) {
 					if (piece.isCaptured()) {
 						piece.setPosition(pos2);
-						piece.draw(this, offset, cellWidth, cellHeight, _pieceSkinIndex);
+						piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 						if (piece.isEventsEnabled()) {
 							piece.enableEvents();
 						}
@@ -592,7 +578,7 @@
 						if (pos1.Compare(pos2) != 0) {
 							piece.removeImage(this);
 							piece.setPosition(pos2);
-							piece.draw(this, offset, cellWidth, cellHeight, _pieceSkinIndex);
+							piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 							if (piece.isEventsEnabled()) {
 								piece.enableEvents();
 							}
@@ -615,6 +601,7 @@
 				_lastPieceInFocus = focusPiece;
 			}
 		}
+
 		public function restoreState() : void {
 			var i:int = 0;
 			var piece:Piece = null;
@@ -627,7 +614,7 @@
 					if (!(_redPieces[i].isCaptured())) {
 						_redPieces[i].removeImage(this);
 					}
-					piece.draw(this, offset, cellWidth, cellHeight, _pieceSkinIndex);
+					piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 					if (piece.isEventsEnabled()) {
 						piece.enableEvents();
 					}
@@ -640,7 +627,7 @@
 					if (!(_blackPieces[i].isCaptured())) {
 						_blackPieces[i].removeImage(this);
 					}
-					piece.draw(this, offset, cellWidth, cellHeight, _pieceSkinIndex);
+					piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 					if (piece.isEventsEnabled()) {
 						piece.enableEvents();
 					}
@@ -683,6 +670,7 @@
 			}
 			return result;
 		}
+
 		public function getBlackPiecesInfo() : String {
 			var result:String = "blackpieces: \n";
 			var line:String = "";
@@ -697,47 +685,42 @@
 			return result;
 		}
 		
-		public function changePiecesSkin(skinIndex:int) : void {
-			var piece:Piece = null;
-			var i:int = 0;
-			for (i = 0; i < 16; i++) {
-				piece = _redPieces[i];
-				if (!(piece.isCaptured())) {
-					piece.removeImage(this);
-					if (skinIndex == 3) {
-						piece.setImageCenter(22, 28);
-					} else {
-						piece.setImageCenter(22, 22);
-					}
-					piece.draw(this, offset, cellWidth, cellHeight, skinIndex);
-					if (piece.isEventsEnabled()) {
-						piece.enableEvents();
-					}
-				}
-			}
-			for (i = 0; i < 16; i++) {
-				piece = _blackPieces[i];
-				if (!(piece.isCaptured())) {
-					piece.removeImage(this);
-					if (skinIndex == 3) {
-						piece.setImageCenter(22, 28);
-					} else {
-						piece.setImageCenter(22, 22);
-					}
-					piece.draw(this, offset, cellWidth, cellHeight, skinIndex);
-					if (piece.isEventsEnabled()) {
-						piece.enableEvents();
-					}
-				}
-			}
+		public function changePiecesSkin(skinIndex:int) : void
+		{
 			_pieceSkinIndex = skinIndex;
-		}
-		
-		public function getFocusPiece() : Piece {
-			return _lastPieceInFocus;
+
+			var piece:Piece = null;
+			for (var i:int = 0; i < 16; i++)
+			{
+				piece = _redPieces[i];
+				if ( ! piece.isCaptured() ) {
+					_changeSkinOfPiece(piece);
+				}
+				piece = _blackPieces[i];
+				if ( ! piece.isCaptured() ) {
+					_changeSkinOfPiece(piece);
+				}
+			}
+
+			if (_lastPieceInFocus) {
+				_lastPieceInFocus.setFocus();
+			}
 		}
 
-			
+		private function _changeSkinOfPiece(piece:Piece) : void
+		{
+			piece.removeImage(this);
+			if (_pieceSkinIndex == 3) {
+				piece.setImageCenter(22, 28);
+			} else {
+				piece.setImageCenter(22, 22);
+			}
+			piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+			if (piece.isEventsEnabled()) {
+				piece.enableEvents();
+			}
+		}
+
 	]]>
 </mx:Script>
 	
