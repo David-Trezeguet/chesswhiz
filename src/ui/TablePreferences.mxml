@@ -13,6 +13,7 @@
 
 			private var _selectedPieceSet:int = 1;
 			private var _bSound:Boolean = false;
+			private var _lineColor:uint = 0;  // TODO: Not adjustable.
 
 			private function init() : void
 			{
@@ -33,6 +34,9 @@
 				else                             { rbPieseSet3.selected = true; }
 
 				colorPicker.selectedColor = preferences["boardcolor"];
+				
+				_lineColor = preferences["linecolor"];
+				
 				_displayPreview();
 			}
 
@@ -62,7 +66,8 @@
 				const preferences:Object = {
 						"sound"          : _bSound,
 						"pieceskinindex" :  _selectedPieceSet,
-						"boardcolor"     : colorPicker.selectedColor
+						"boardcolor"     : colorPicker.selectedColor,
+						"linecolor"      : _lineColor
 					};
 				PopUpManager.removePopUp(this);
 				Global.app.updateTablePreferences(preferences);

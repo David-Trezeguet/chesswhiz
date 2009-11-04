@@ -114,20 +114,12 @@
 		public function redrawBoard(boardColor:uint, lineColor:uint, pieceSkin:int) : void 
 		{
 			board.drawBoardAndPieces(boardColor, lineColor, pieceSkin);
-			board.changePiecesSkin(pieceSkin);
-			var piece:Piece = board.getFocusPiece();
-			if (piece) {
-				piece.setFocus();
-			}
+			//board.changePiecesSkin(pieceSkin);
 		}
 		
 		public function changePieceSkin(pieceSkin:int) : void 
 		{
 			board.changePiecesSkin(pieceSkin);
-			var piece:Piece = board.getFocusPiece();
-			if (piece) {
-				piece.setFocus();
-			}
 		}
 
 		public function enableReviewButtons(flag:Boolean) : void 
