@@ -1,29 +1,9 @@
 ﻿package {
 	import flash.display.*;
 	import flash.external.*;
-	
-	import mx.controls.Label;
-	import mx.core.UIComponent;
 
 	public class Util
-	{			
-		public static function createTextField(panel:UIComponent, text:String, x:Number, y:Number,
-											   border:Boolean, color:uint, font:String, fontSize:uint) : Label
-		{
-			var label:Label = new Label();
-            if (panel) {
-                panel.addChild(label);
-            }
-			label.x = x;
-			label.y = y;
-			label.text = text;
-			label.setStyle("color", color);
-			label.setStyle("fontFamily", font);
-			label.setStyle("fontSize", fontSize);
-			
-			return label;
-		}
-
+	{
 		/**
 		 * Read the QueryString and FlashVars.
 		 *
@@ -33,15 +13,17 @@
 		 */
 		public static function readQueryString() : Array
 		{
-			var params:Array = new Array();
+			var params:Array = [];
 			try  {
 				var all:String = ExternalInterface.call("window.location.href.toString");
 				var queryString:String = ExternalInterface.call("window.location.search.substring", 1);
-				if(queryString) {
-					var allParams:Array = queryString.split('&');
+				if (queryString)
+				{
+					const allParams:Array = queryString.split('&');
 					for (var i:int = 0, index:int = -1; i < allParams.length; i++) {
 						var keyValuePair:String = allParams[i];
-						if((index = keyValuePair.indexOf("=")) > 0) {
+						if ( (index = keyValuePair.indexOf("=")) > 0 )
+						{
 							var paramKey:String = keyValuePair.substring(0,index);
 							var paramValue:String = keyValuePair.substring(index+1);
 							var decodedValue:String = decodeURIComponent(paramValue);
