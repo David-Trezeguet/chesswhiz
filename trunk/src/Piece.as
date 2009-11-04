@@ -17,7 +17,6 @@
 		private var _row:int;
 		private var _column:int;
 		private var _color:String;
-		private var _imgLabel:String;
 		private var _mImageHolder:Image;
 		private var _board:BoardCanvas;
 		private var _curRow:int;
@@ -31,7 +30,7 @@
 		private var _centerY:int;
 		
 		public function Piece(id:int, type:String, row:int, column:int,
-							  src:String, imgLabel:String, color:String, board:BoardCanvas) : void
+							  src:String, color:String, board:BoardCanvas) : void
 		{
 			_id = id;
 			_type = type;
@@ -39,7 +38,6 @@
 			_column = _curColumn = column;
 			_imageSrc = src;
 			_color = color;
-			_imgLabel = imgLabel;
 			_board = board;
 			_imageRadius = _centerX = _centerY = 22;
 		}
@@ -77,7 +75,6 @@
 			_parentClip = parentClip;
 			var viewPos:Position = _board.getViewPosition(getPosition());
 			_mImageHolder = new Image();
-			_mImageHolder.name = _imgLabel;
 			_mImageHolder.x = (offset + viewPos.column * width) - _centerX;
 			_mImageHolder.y = (offset + viewPos.row * height) - _centerY;
 			_mImageHolder.source =  Global.BASE_URI + "res/images/pieces/" + pieceSkinIndex + "/" + _imageSrc;

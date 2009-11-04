@@ -134,7 +134,7 @@
 			_mainWindow.addChild(loginPanel);
 		}
 
-		public function stopApp() : void
+		private function _stopApp() : void
 		{
 			_session.closeSocket();
 			_tableObjects = {};
@@ -169,7 +169,7 @@
 
 		public function doLogout() : void {
 			_session.sendLogoutRequest(_playerId, _sessionId);
-			stopApp();
+			_stopApp();
 			startApp();
 		}
 
@@ -317,7 +317,7 @@
 		private function _processResponse_LOGOUT(response:Message) : void {
 			if (!_bLoggedIn && response.getCode() === "0") {
 				if (response.getContent() == _playerId) {
-		        	this.stopApp();
+		        	_stopApp();
 				}
 			}
         }
