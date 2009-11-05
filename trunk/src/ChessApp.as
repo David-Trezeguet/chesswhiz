@@ -5,7 +5,6 @@
 	import flash.media.Sound;
 	import flash.net.SharedObject;
 	import flash.net.SharedObjectFlushStatus;
-	import flash.net.URLRequest;
 	
 	import hoxserver.*;
 	
@@ -39,7 +38,7 @@
 		{
 			_menu = menu;
 			_mainWindow = window;
-			_moveSound = new Sound( new URLRequest(Global.BASE_URI + "res/images/move.mp3") );
+			_moveSound = new Global.moveSoundClass() as Sound;
 			_preferences["pieceskinindex"] = 1;
 			_preferences["boardcolor"] = 0x5b5d5b;
 			_preferences["linecolor"] = 0xa09e9e;

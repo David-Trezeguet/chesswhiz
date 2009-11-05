@@ -11,15 +11,11 @@
 		import mx.controls.Image;
 		import hoxserver.*;
 
-		private static const RED_PLAYER_ICON:String   = "images/redplayer.png";
-		private static const BLACK_PLAYER_ICON:String = "images/blackplayer.png";
-		private static const TIMER_ICON:String        = "images/player_time.png";
-
 		private var _table:Table;
 
 		private function init() : void
 		{
-			topTimerImage.source = Global.BASE_URI + "res/" + TIMER_ICON;
+			topTimerImage.source = Global.timerImgClass;
 			bottomTimerImage.source = topTimerImage.source;
 		}
 
@@ -38,8 +34,8 @@
 			playerLabel.text = player.pid + "(" + player.score + ")";
 
 			var playerImage:Image = (player.color === _table.getTopSideColor() ? topImage : bottomImage);
-			playerImage.source = Global.BASE_URI + "res/"
-				+ (player.color == "Red" ? RED_PLAYER_ICON : BLACK_PLAYER_ICON); 
+			playerImage.source = (player.color == "Red" ? Global.redPlayerImgClass
+													    : Global.blackPlayerImgClass);
 			
 			var timer:GameTimers = _table.getTimers(player.color);
 			updateTimers(player.color, timer);
