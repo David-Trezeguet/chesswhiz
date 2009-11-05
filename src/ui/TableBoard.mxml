@@ -111,10 +111,9 @@
 			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
         }
 
-		public function redrawBoard(boardColor:uint, lineColor:uint, pieceSkin:int) : void 
+		public function redrawBoard(boardColor:uint, lineColor:uint) : void 
 		{
-			board.drawBoardAndPieces(boardColor, lineColor, pieceSkin);
-			//board.changePiecesSkin(pieceSkin);
+			board.drawBoard(boardColor, lineColor);
 		}
 		
 		public function changePieceSkin(pieceSkin:int) : void 

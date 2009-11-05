@@ -1,5 +1,6 @@
 ﻿package {
 	import flash.events.DataEvent;
+	import flash.events.Event;
 	import flash.events.NetStatusEvent;
 	import flash.media.Sound;
 	import flash.net.SharedObject;
@@ -10,6 +11,7 @@
 	
 	import mx.core.Container;
 	import mx.managers.PopUpManager;
+	import mx.utils.ObjectUtil;
 	
 	import ui.LoginPanel;
 	import ui.TableBoard;
@@ -20,8 +22,6 @@
 
 	public class ChessApp
 	{
-		private const LOGIN_VERSION:String = Global.INAME + "-" + Global.VERSION;
-
 		private var _preferences:Object = {};
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
@@ -158,7 +158,7 @@
 
 		public function doLogin(uname:String, passwd:String) : void {
 			_playerId = uname;
-			_session.sendLoginRequest(uname, passwd, LOGIN_VERSION);
+			_session.sendLoginRequest(uname, passwd, Global.LOGIN_VERSION);
 		}
 
 		public function doGuestLogin() : void {
@@ -241,24 +241,32 @@
 			}
 		}
 
-		public function changeTablePref() : void
+		public function changeAppPreferences() : void
 		{
-			var tablePrefPanel:TablePreferences = new TablePreferences();
-			PopUpManager.addPopUp(tablePrefPanel, _mainWindow, true /* modal */);
-			PopUpManager.centerPopUp(tablePrefPanel);
-			tablePrefPanel.setCurrentPreferences(_preferences);
+			var preferencesPanel:TablePreferences = new TablePreferences();
+			PopUpManager.addPopUp(preferencesPanel, _mainWindow, true /* modal */);
+			PopUpManager.centerPopUp(preferencesPanel);
+			preferencesPanel.preferences = ObjectUtil.copy(_preferences);
+			preferencesPanel.applyCurrentPreferences();
+			preferencesPanel.addEventListener("newPreferences", newPreferencesEventHandler);
 		}
 
-		public function updateTablePreferences(pref:Object) : void
+		private function newPreferencesEventHandler(event:Event) : void
 		{
-			var tableObj:Table = _getTable(_currentTableId);
-			if (tableObj) {
-				tableObj.updatePref(pref);
+			var preferencesPanel:TablePreferences = event.target as TablePreferences;
+			if ( preferencesPanel != null )
+			{
+				const pref:Object = preferencesPanel.preferences;
+
+				var table:Table = _getTable(_currentTableId);
+				if (table) {
+					table.updatePreferences(pref);
+				}
+				for (var key:String in pref) {
+					_preferences[key] = pref[key];
+				}
+				_saveCookie();
 			}
-			for (var key:String in pref) {
-				_preferences[key] = pref[key];
-			}
-			_saveCookie();
 		}
 
 		/**

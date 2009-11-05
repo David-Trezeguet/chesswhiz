@@ -53,7 +53,7 @@
 			<mx:AddChild relativeTo="{logoutButton}" position="before">
 				<mx:Button id="preferencesButton"
 					label="{resourceManager.getString('localization', 'preferences')}"
-					click="Global.app.changeTablePref()"/>
+					click="Global.app.changeAppPreferences()"/>
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{spacer1}" position="before">
 				<mx:Button id="closeButton"
