@@ -133,16 +133,17 @@
 
 		public function drawBoardAndPieces(bgColor:uint, lineColor:uint, pieceSkinIndex:int) : void
 		{
-			_bgColor        = bgColor;
-			_lineColor      = lineColor;
+			drawBoard(bgColor, lineColor);
+
 			_pieceSkinIndex = pieceSkinIndex;
-			
-			_drawBoard();
 			_displayPieces();	
 		}
 
-		private function _drawBoard() : void
+		public function drawBoard(bgColor:uint, lineColor:uint) : void
 		{
+			_bgColor        = bgColor;
+			_lineColor      = lineColor;
+
 			this.graphics.lineStyle(2, _lineColor);
 			this.graphics.beginFill(_bgColor);
 			this.graphics.drawRect(0, 0, this.width, this.height);

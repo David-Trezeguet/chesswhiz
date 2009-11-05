@@ -978,12 +978,12 @@
 			}
 		}
 
-		public function updatePref(newPref:Object) : void
+		public function updatePreferences(newPref:Object) : void
 		{
 			if (_curPref["boardcolor"] != newPref["boardcolor"]) {
-				this.view.redrawBoard(newPref["boardcolor"], _curPref["linecolor"], newPref["pieceskinindex"]);
+				this.view.redrawBoard(newPref["boardcolor"], _curPref["linecolor"]);
 			}
-			else if (_curPref["pieceskinindex"] != newPref["pieceskinindex"]) {
+			if (_curPref["pieceskinindex"] != newPref["pieceskinindex"]) {
 				this.view.changePieceSkin(newPref["pieceskinindex"]);
 			}
 			_curPref = newPref;

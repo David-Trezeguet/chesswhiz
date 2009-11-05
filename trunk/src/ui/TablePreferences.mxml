@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 	layout="horizontal" width="486" height="314"
-	title="Table Preferences"
+	title="Preferences"
 	initialize="init()"
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);">
+
+	<mx:Metadata>
+		[Event(name="newPreferences", type="flash.events.Event")]
+	</mx:Metadata>
 
 	<mx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;
 			import mx.containers.Canvas;
+
+			public var preferences:Object = null;
 
 			private var _selectedPieceSet:int = 1;
 			private var _bSound:Boolean = false;
@@ -22,7 +28,7 @@
 				pieceSet3.source = Global.BASE_URI + "res/images/pieces/3/rking.png";
 			}
 			
-			public function setCurrentPreferences(preferences:Object) : void
+			public function applyCurrentPreferences() : void
 			{
 				_bSound = preferences["sound"];
 				if (_bSound)  { rbSound.selected = true; }
@@ -34,9 +40,8 @@
 				else                             { rbPieseSet3.selected = true; }
 
 				colorPicker.selectedColor = preferences["boardcolor"];
-				
 				_lineColor = preferences["linecolor"];
-				
+
 				_displayPreview();
 			}
 
@@ -63,14 +68,12 @@
 
 			private function onOK(event:Event) : void 
 			{
-				const preferences:Object = {
-						"sound"          : _bSound,
-						"pieceskinindex" :  _selectedPieceSet,
-						"boardcolor"     : colorPicker.selectedColor,
-						"linecolor"      : _lineColor
-					};
+				preferences["sound"]          = _bSound;
+				preferences["pieceskinindex"] = _selectedPieceSet;
+				preferences["boardcolor"]     = colorPicker.selectedColor;
+				preferences["linecolor"]      = _lineColor;
 				PopUpManager.removePopUp(this);
-				Global.app.updateTablePreferences(preferences);
+				dispatchEvent( new Event("newPreferences", true /* bubble to parent */) );
 			}
 
 		]]>
