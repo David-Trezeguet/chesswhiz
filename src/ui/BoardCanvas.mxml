@@ -529,25 +529,24 @@
 			if (changeSet == null || changeSet.length == 0) {
 				return;
 			}
-			var i:int = 0;
 			var piece:Piece = null;
 			var captured:Boolean = false;
 			var pos1:Position = null;
 			var pos2:Position = null;
 			var color:String = "";
 			var index:int = 0;
-			for (var j:int = 0; j < changeSet.length; j++) {
-				color = changeSet[j][0];
-				index = parseInt(changeSet[j][1]);
+			for (var i:int = 0; i < changeSet.length; i++) {
+				color = changeSet[i][0];
+				index = parseInt(changeSet[i][1]);
 				if (color == "Red") {
 					piece = _redPieces[index];
 				}
 				else {
 					piece = _blackPieces[index];
 				}
-				captured = changeSet[j][4];
+				captured = changeSet[i][4];
 				pos1 = piece.getPosition();
-				pos2 = new Position(parseInt(changeSet[j][2]), parseInt(changeSet[j][3]));
+				pos2 = new Position(parseInt(changeSet[i][2]), parseInt(changeSet[i][3]));
 				if (!captured) {
 					if (piece.isCaptured()) {
 						piece.setPosition(pos2);
