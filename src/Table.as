@@ -388,7 +388,7 @@
 				var lastMove:String = _moveList[_moveList.length - 1];
 				if (lastMove != "") {
 					var fields:Array = lastMove.split(":");
-					var piece:Piece = this..view.board.getPieceByIndex(fields[0], fields[1]);
+					var piece:Piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
 					var move:String = fields[2];
 					var capturePiece:Piece = null;
 					if (fields[3] !== "") {
