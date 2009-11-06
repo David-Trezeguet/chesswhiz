@@ -371,11 +371,12 @@
 		private function _process_MOVE(event:Message) : void {
 			var tableObj:Table = null;
 			if (event.getCode() === "0") {
-				var moveData:MoveInfo = new MoveInfo();
-				moveData.parse(event.getContent());
-				tableObj = _getTable( moveData.getTableID());
+				const moveInfo:MoveInfo = new MoveInfo( event.getContent() );
+				tableObj = _getTable( moveInfo.tid );
 				if (tableObj) {
-					tableObj.movePiece(moveData);
+					const curPos:Position = new Position( moveInfo.fromRow, moveInfo.fromCol );
+					const newPos:Position = new Position( moveInfo.toRow, moveInfo.toCol );
+					tableObj.movePiece(curPos, newPos);
 				}
 			}
 			else {

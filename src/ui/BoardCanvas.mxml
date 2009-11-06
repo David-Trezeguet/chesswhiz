@@ -172,7 +172,6 @@
 
 			const offsetLeft:int = offset;
 	        const offsetTop:int = offset;
-			// Draw row headers.
 			const bDescending:Boolean = (_table.getTopSideColor() == "Red");
 			_drawHeaderRow(offsetLeft, offsetTop, bDescending);
 			_drawHeaderRow(offset + _cellWidth*9 + 15, offset, bDescending);
@@ -237,7 +236,7 @@
 			label.setStyle("color", color);
 			label.setStyle("fontFamily", font);
 			label.setStyle("fontSize", fontSize);
-			
+
 			this.addChild(label);
 		}
 
@@ -256,7 +255,6 @@
 				yRow = offset + _cellHeight * i;
 				if (Math.abs(this.mouseY-yRow) < radius)
 				{
-					trace("row"+i);
 					break;
 				}
 			}
@@ -265,7 +263,6 @@
 				xColumn = offset + _cellWidth * j;
 				if (Math.abs(this.mouseX - xColumn) < radius)
 				{					
-					trace("col"+j);
 					break;
 				}
 			}
@@ -523,7 +520,7 @@
 						}
 					}
 					else {
-						if (pos1.Compare(pos2) != 0) {
+						if (pos1.row != pos2.row || pos1.column != pos2.column) {
 							piece.removeImage();
 							piece.setPosition(pos2);
 							piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);

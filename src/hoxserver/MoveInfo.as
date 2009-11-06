@@ -1,44 +1,25 @@
-﻿package hoxserver {
-	
+﻿package hoxserver
+{
 	public class MoveInfo
 	{
-		private var tid: String;
-		private var pid: String;
-		private var move: String;
-		private var status: String;
-		public function MoveInfo() {
-			tid = "";
-			pid = "";
-			move = "";
-			status = "";
-		}
+		public var tid: String  = "";
+		public var pid: String  = "";
+		public var fromRow:int  = -1;
+		public var fromCol:int  = -1;
+		public var toRow:int    = -1;
+		public var toCol:int    = -1;
 
-		public function parse(entry:String):void {
-			var fields:Array = entry.split(';');
+		public function MoveInfo(info:String)
+		{
+			const fields:Array = info.split(';');
 			tid = fields[0];
 			pid = fields[1];
-			move = fields[2];
-			status = fields[3];
-		}
-		
-		public function getTableID():String {
-			return this.tid;
-		}
-		public function getPlayerID():String {
-			return this.pid;
-		}
-		public function getCurrentPosRow():int {
-			return parseInt(this.move.charAt(1));
 
-		}
-		public function getCurrentPosCol():int {
-			return parseInt(this.move.charAt(0));
-		}
-		public function getNewPosRow():int {
-			return parseInt(this.move.charAt(3));
-		}
-		public function getNewPosCol():int {
-			return parseInt(this.move.charAt(2));
+			const move:String = fields[2];
+			fromRow = parseInt( move.charAt(1) );
+			fromCol = parseInt( move.charAt(0) );
+			toRow   = parseInt( move.charAt(3) );
+			toCol   = parseInt( move.charAt(2) );		
 		}
 	}
 }
