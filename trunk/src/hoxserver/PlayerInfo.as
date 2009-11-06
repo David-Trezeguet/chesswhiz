@@ -1,4 +1,5 @@
-﻿package hoxserver {
+﻿package hoxserver
+{
 	public class PlayerInfo
 	{
 		public var pid:String   = "";
@@ -8,7 +9,7 @@
 		public function clone() : PlayerInfo
 		{
 			var player:PlayerInfo = new PlayerInfo();
-			player.pid = this.pid;
+			player.pid   = this.pid;
 			player.score = this.score;
 			player.color = this.color;
 			return player;

@@ -1,5 +1,5 @@
-﻿package hoxserver {
-
+﻿package hoxserver
+{
     public class LoginInfo
 	{
 		public var pid:String   = "";

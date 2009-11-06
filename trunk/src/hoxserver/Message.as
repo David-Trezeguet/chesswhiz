@@ -162,19 +162,17 @@
 			const entries:Array = this.params.content.split('\n');
 			for (var i:int = 0; i < entries.length; i++) {
 				const entry:String = entries[i];
-				if (entry !== "") {
+				if (entry != "") {
 				    trace("table entry: " + entry);
-					var table:TableInfo = new TableInfo();
-					table.parse(entry);
-					tables[table.getID()] = table;
+					var table:TableInfo = new TableInfo(entry);
+					tables[table.tid] = table;
 				}
 			}
 			return tables;
 		}
 		
 		public function parseTableResponse() : TableInfo {
-			var table:TableInfo = new TableInfo();
-			table.parse(this.params.content);
+			var table:TableInfo = new TableInfo(this.params.content);
 			return table;
 		}
 	}

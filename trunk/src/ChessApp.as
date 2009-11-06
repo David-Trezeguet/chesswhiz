@@ -334,7 +334,7 @@
 
 		private function _processResponse_ITABLE(response:Message) : void {
 			var tableData:TableInfo = response.parseTableResponse();
-			var tableId:String = tableData.getID();
+			var tableId:String = tableData.tid;
 			var tableObj:Table = _getTable(tableId);
 			if (tableObj == null) {
 				tableObj = new Table(tableId, _preferences);
@@ -355,16 +355,15 @@
 
 		private function _process_E_JOIN(event:Message) : void {
 			if (event.getCode() === "0") {
-				var joinData:JoinInfo = new JoinInfo();
-				joinData.parse(event.getContent());
-				var tableId:String = joinData.getTableID();
+				const joinInfo:JoinInfo = new JoinInfo(event.getContent());
+				const tableId:String = joinInfo.tid;
 				var tableObj:Table = _getTable(tableId);
 				if (tableObj == null) {
 					tableObj = new Table(tableId, _preferences);
 					_tableObjects[tableId] = tableObj;
 				}
 				_currentTableId = tableObj.tableId;
-				tableObj.joinTable(joinData.getPlayer());
+				tableObj.joinTable(joinInfo.getPlayer());
 			}
 	    }
 		
@@ -404,9 +403,8 @@
 		}
 
 		private function _processEvent_I_MOVES(event:Message) : void {
-			var moveList:MoveListInfo = new MoveListInfo();
-			moveList.parse(event.getContent());
-			var tableObj:Table = _getTable( moveList.getTableID());
+			var moveList:MoveListInfo = new MoveListInfo(event.getContent());
+			var tableObj:Table = _getTable( moveList.tid);
 			if (tableObj) {
 				tableObj.playMoveList(moveList);
 			}
@@ -431,7 +429,7 @@
 		private function _processEvent_E_END(event:Message) : void {
 			if (event.getCode() === "0") {
 				var endEvent:EndEvent = new EndEvent(event.getContent());
-				var tableObj:Table = _getTable(endEvent.getTableID());
+				var tableObj:Table = _getTable(endEvent.tid);
 				if (tableObj) {
 					tableObj.stopGame(endEvent.reason, endEvent.winner);
 	
@@ -442,9 +440,9 @@
 		private function _processEvent_DRAW(event:Message) : void {
 			if (event.getCode() === "0") {
 				var drawEvent:DrawEvent = new DrawEvent(event.getContent());
-				var tableObj:Table = _getTable(drawEvent.getTableID());
+				var tableObj:Table = _getTable(drawEvent.tid);
 				if (tableObj) {
-					tableObj.drawGame(drawEvent.getPlayerID());
+					tableObj.drawGame(drawEvent.pid);
 				}
 			}
 		}
@@ -463,7 +461,7 @@
 		}
 
 		private function _processEvent_UPDATE(event:Message) : void {
-			var fields:Array = event.getContent().split(';');
+			const fields:Array = event.getContent().split(';');
 			var tableId:String = fields[0];
 			var pid:String = fields[1];
 			var times:String = fields[3];

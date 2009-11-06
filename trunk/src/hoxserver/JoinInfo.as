@@ -1,32 +1,27 @@
-﻿package hoxserver {
+﻿package hoxserver
+{
 	public class JoinInfo
 	{
-		private var tid: String;
-		private var pid: String;
-		private var score: String;
-		private var color: String;
-		public function JoinInfo() {
-			tid = "";
-			pid = "";
-			score = "";
-			color = "";
+		public var tid:String     = "";
+		private var _pid:String   = "";
+		private var _score:String = "";
+		private var _color:String = "";
+
+		public function JoinInfo(info:String)
+		{
+			const fields:Array = info.split(';');
+			tid    = fields[0];
+			_pid   = fields[1];
+			_score = fields[2];
+			_color = fields[3];
 		}
 
-		public function parse(entry:String):void {
-			var fields:Array = entry.split(';');
-			tid = fields[0];
-			pid = fields[1];
-			score = fields[2];
-			color = fields[3];
-		}
-		public function getTableID():String {
-			return this.tid;
-		}
-		public function getPlayer():PlayerInfo {
+		public function getPlayer():PlayerInfo
+		{
 			var player:PlayerInfo = new PlayerInfo();
-			player.color = this.color;
-			player.pid = this.pid;
-			player.score = this.score;
+			player.color = _color;
+			player.pid   = _pid;
+			player.score = _score;
 			return player;
 		}
 	}

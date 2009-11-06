@@ -242,9 +242,8 @@
 		public function updateGameTimes(pid:String, times:String) : void
 		{
 			if (_moveList.length == 0) {
-				var timer:GameTimers = null;
 				_tableData.updateTimes(times);
-				timer = new GameTimers(times);
+				var timer:GameTimers = new GameTimers(times);
 				this.view.updateTimers(getTopSideColor(), timer);
 				this.view.updateTimers(getBottomSideColor(), timer);
 				var fields:Array = times.split("/");
@@ -257,11 +256,11 @@
 	
 		private function _startTimer() : void
 		{
-			_redTimes = new GameTimers(_tableData.getRedTime());
+			_redTimes = new GameTimers(_tableData.redtime);
 			_redTimer = new Timer(1000, _redTimes.gameTime);
 			_redTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
 
-			_blackTimes = new GameTimers(_tableData.getBlackTime());
+			_blackTimes = new GameTimers(_tableData.blacktime);
 			_blackTimer = new Timer(1000, _blackTimes.gameTime);
 			_blackTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
 
