@@ -28,14 +28,14 @@
 		public function getGameState()   : String     { return _state;       }
 
 		public function waitingForMyMove() : Boolean {
-	    	return (_state === "localmove");
+	    	return (_state == "localmove");
 		}
 
 		public function processEvent(event:String) : void {
-			if (_state === "idle") {
-				if (event === "start") {
+			if (_state == "idle") {
+				if (event == "start") {
 					this.start();
-					if (_localPlayer.color === "Red") {
+					if (_localPlayer.color == "Red") {
 						_state = "localmove";
 					}
 					else {
@@ -43,13 +43,13 @@
 					}
 				}
 			}
-			else if (_state === "localmove") {
-				if (event === "move") {
+			else if (_state == "localmove") {
+				if (event == "move") {
 					_state = "oppmove";
 				}
 			}
-			else if (_state === "oppmove") {
-				if (event === "move") {
+			else if (_state == "oppmove") {
+				if (event == "move") {
 					_state = "localmove";
 				}
 			}
@@ -64,7 +64,7 @@
 		}
 
 		private function _getOppPieces(type:String) : Array {
-			if (_localPlayer.color === "Black") {
+			if (_localPlayer.color == "Black") {
 				return _table.view.board.getPiece("Red", type);
 			}
 			return _table.view.board.getPiece("Black", type);
@@ -89,7 +89,7 @@
 			var result:Array = new Array();
 			var reason:String = "";
 			var curPiece:Piece = board.getPieceByPos(newPos);
-			if (curPiece && (curPiece.getColor() === piece.getColor())) {
+			if (curPiece && (curPiece.getColor() == piece.getColor())) {
 				// Invalid move
 				reason = "same color piece at " + newPos.toString();
 				result[0] = 0;
@@ -102,7 +102,7 @@
 			var curRow:int = piece.getPosition().row;
 			var curCol:int = piece.getPosition().column;
 			// Not moved from current cell
-			if (newRow === curRow && newCol === curCol) {
+			if (newRow == curRow && newCol == curCol) {
 				reason = "new position " + newPos.toString() + "same as current position";
 				result[0] = 0;
 				result[1] = reason;
@@ -116,13 +116,13 @@
 			var startColDiff:int = Math.abs(startCol - newCol);
 			var verticalDir:int = 0;
 			if ((curRow - newRow) > 0) {
-				if (piece.getColor() === "Black") {
+				if (piece.getColor() == "Black") {
 					verticalDir = -1;
 				} else {
 					verticalDir = 1;
 				}
 			} else if ((curRow - newRow) < 0){
-				if (piece.getColor() === "Black") {
+				if (piece.getColor() == "Black") {
 					verticalDir = 1; // forward move
 				} else {
 					verticalDir = -1; // backward move
@@ -140,9 +140,9 @@
 			var move:int = 0;
 			if (rowDiff > 0) {
 				if (colDiff > 0) {
-					if ((rowDiff === 1 && colDiff === 2) || (rowDiff === 2 && colDiff === 1)) {
+					if ((rowDiff == 1 && colDiff == 2) || (rowDiff == 2 && colDiff == 1)) {
 						move = 3; // L shape move
-					} else if (rowDiff === colDiff) {
+					} else if (rowDiff == colDiff) {
 						move = 2; // Diagnol move
 					}
 					else {
@@ -157,57 +157,57 @@
 			var curPos:Position = new Position(curRow, curCol);
 			var interveningPieces:int = board.getInterveningPiece(curPos, newPos);
 			var validMove:int = 0;
-			if (piece.getType() === "king") {
+			if (piece.getType() == "king") {
 				if ((startRowDiff <= 2 && startColDiff <= 2) &&
-					((move === 0 && colDiff === 1) || (move === 1 && rowDiff === 1))) {
+					((move == 0 && colDiff == 1) || (move == 1 && rowDiff == 1))) {
 					if (_isInsideFort(piece.getColor(), newPos)) {
 						validMove = 1;
 					}
 				}
-				else if (curPiece && curPiece.getType() === "king" && move === 1 && interveningPieces === 0) {
+				else if (curPiece && curPiece.getType() == "king" && move == 1 && interveningPieces == 0) {
 					// Flying king
 					validMove = 1;
 				}
-			} else if (piece.getType() === "advisor") {
+			} else if (piece.getType() == "advisor") {
 				if ((startRowDiff <= 2 && startColDiff <= 2) &&
-					(move === 2 && rowDiff === 1 && colDiff === 1)) {
+					(move == 2 && rowDiff == 1 && colDiff == 1)) {
 					if (_isInsideFort(piece.getColor(), newPos)) {
 						validMove = 1;
 					}
 				}
-			} else if (piece.getType() === "elephant") {
+			} else if (piece.getType() == "elephant") {
 				if ((startRowDiff <= 4) &&
-					(move === 2 && rowDiff === 2 && colDiff === 2)  && interveningPieces === 0) {
+					(move == 2 && rowDiff == 2 && colDiff == 2)  && interveningPieces == 0) {
 					validMove = 1;
 				}
-			} else if (piece.getType() === "horse") {
-				if (move === 3 && interveningPieces === 0) {
+			} else if (piece.getType() == "horse") {
+				if (move == 3 && interveningPieces == 0) {
 					validMove = 1;
 				}
-			} else if (piece.getType() === "chariot") {
-				if ((move === 0  || move === 1) && interveningPieces === 0) {
+			} else if (piece.getType() == "chariot") {
+				if ((move == 0  || move == 1) && interveningPieces == 0) {
 					validMove = 1;
 				}
-			} else if (piece.getType() === "cannon") {
-				if (move === 0 || move === 1) {
-					if (curPiece !== null) {
-						if (interveningPieces === 1) {
+			} else if (piece.getType() == "cannon") {
+				if (move == 0 || move == 1) {
+					if (curPiece != null) {
+						if (interveningPieces == 1) {
 							validMove = 1;
 						}
 					} else {
-						if (interveningPieces === 0) {
+						if (interveningPieces == 0) {
 							validMove = 1;
 						}
 					}
 				}
-			}  else if (piece.getType() === "pawn") {
+			}  else if (piece.getType() == "pawn") {
 				if (board.isMySide(piece.getColor(), newPos)) {
-					if (move === 1 && rowDiff === 1 && verticalDir === 1) {
+					if (move == 1 && rowDiff == 1 && verticalDir == 1) {
 						validMove = 1;
 					}
 				} else {
 					// Pawn is on the othser side of the board
-					if ((move === 1 && rowDiff === 1 && verticalDir === 1) || (move === 0 && colDiff === 1)) {
+					if ((move == 1 && rowDiff == 1 && verticalDir == 1) || (move == 0 && colDiff == 1)) {
 						validMove = 1;
 					}
 				}
