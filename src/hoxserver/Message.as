@@ -40,8 +40,7 @@
 				sid: sid,
 				tid: tableId,
 				time: time,
-				move: move,
-				status: "in_progress"
+				move: move
 			};
 		}
 		
