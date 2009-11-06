@@ -103,7 +103,7 @@
 				moveImage();
 			}
 			else {
-				var absPos:Position = _board.getAbsolutePosition(newPos);
+				var absPos:Position = _board.getViewPosition(newPos);
 				_board.getTable().moveLocalPiece(this, this.getPosition(), absPos);
 			}
 		}
@@ -134,7 +134,7 @@
 		public function removeImage() : void
 		{
 			if (_imageHolder != null) {
-				if (isEventsEnabled()) {
+				if (_enabled) {
 					_imageHolder.removeEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
 					_imageHolder.removeEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
 				}

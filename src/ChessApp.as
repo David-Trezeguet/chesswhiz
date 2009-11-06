@@ -144,7 +144,6 @@
 		}
 
 		public function getPlayerID():String  { return _playerId; }
-		public function getSessionID():String { return _sessionId; }
 
 		private function _initViewTablesPanel(tables:Object) : void
 		{
@@ -273,43 +272,42 @@
 		 */
 		public function handleServerEvent(event:DataEvent) : void
 		{
-			trace("Received data: " + event.data);
+			//trace("Received data: " + event.data);
 			const eventData:String = event.data;
 			const messages:Array = eventData.split("op");
 
 			for (var i:int = 0; i < messages.length; i++) {
 				if (messages[i] == "") continue;
 
-				trace("message: " + messages[i]);
+				//trace("message: " + messages[i]);
 				const line:Array = messages[i].split("\n\n");
 				const msg:Message = new Message();
 				trace("event: op" + line[0]);
 				msg.parse("op" + line[0]);
 
-				if      (msg.optype == "LOGIN")   { _processResponse_LOGIN(msg); }
-                else if (msg.optype == "LIST")    { _processResponse_LIST(msg); }
+				if      (msg.optype == "LOGIN")   { _processResponse_LOGIN(msg);  }
+                else if (msg.optype == "LIST")    { _processResponse_LIST(msg);   }
                 else if (msg.optype == "I_TABLE") { _processResponse_ITABLE(msg); }
-                else if (msg.optype == "E_JOIN")  { _process_E_JOIN(msg); }
-                else if (msg.optype == "MOVE")    { _process_MOVE(msg); }
-                else if (msg.optype == "E_END")   { _processEvent_E_END(msg);    }
+                else if (msg.optype == "E_JOIN")  { _process_E_JOIN(msg);         }
+                else if (msg.optype == "MOVE")    { _process_MOVE(msg);           }
+                else if (msg.optype == "E_END")   { _processEvent_E_END(msg);     }
                 else if (msg.optype == "LOGOUT")  { _processResponse_LOGOUT(msg); }
-                else if (msg.optype == "I_MOVES") { _processEvent_I_MOVES(msg); }
-                else if (msg.optype == "LEAVE")   { _processEvent_LEAVE(msg); }
-                else if (msg.optype == "DRAW")    { _processEvent_DRAW(msg); }
-                else if (msg.optype == "MSG")     { _processEvent_MSG(msg); }
-				else if (msg.optype == "UPDATE")  { _processEvent_UPDATE(msg); }
+                else if (msg.optype == "I_MOVES") { _processEvent_I_MOVES(msg);   }
+                else if (msg.optype == "LEAVE")   { _processEvent_LEAVE(msg);     }
+                else if (msg.optype == "DRAW")    { _processEvent_DRAW(msg);      }
+                else if (msg.optype == "MSG")     { _processEvent_MSG(msg);       }
+				else if (msg.optype == "UPDATE")  { _processEvent_UPDATE(msg);    }
 			}
 		}
 
 		private function _processResponse_LOGIN(response:Message) : void {
 			if (_bLoggedIn) return;
 
-			var loginData:LoginInfo = new LoginInfo();
 			if (response.getCode() === "0") {
 				_loginFailReason = "";
-				loginData.parse(response.getContent());
-				_sessionId = loginData.getSessionID();
-				_playerId = loginData.getPlayerID();
+				var loginData:LoginInfo = new LoginInfo( response.getContent() );
+				_sessionId = loginData.sid;
+				_playerId = loginData.pid;
 				trace("playerid: " + _playerId + " sessionid: " + _sessionId);
 				_bLoggedIn = true;
 				this.doViewTables();
@@ -352,7 +350,7 @@
 		}
 
 		public function playGame(tableId:String, color:String) : void {
-	        _session.sendJoinRequest(this.getPlayerID(), this.getSessionID(), tableId, color, '0');
+	        _session.sendJoinRequest(this.getPlayerID(), _sessionId, tableId, color, '0');
     	}
 
 		private function _process_E_JOIN(event:Message) : void {
@@ -389,15 +387,15 @@
 	    }
 
 		public function sendMoveRequest(player:PlayerInfo, piece:Piece, curPos:Position, newPos:Position, tid:String) : void {
-			_session.sendMoveRequest(this.getPlayerID(), this.getSessionID(), curPos, newPos, '1500', tid);
+			_session.sendMoveRequest(this.getPlayerID(), _sessionId, curPos, newPos, '1500', tid);
 		}
 		
 		public function resignGame(tableId:String) : void {
-			_session.sendResignRequest(this.getPlayerID(), this.getSessionID(), tableId);
+			_session.sendResignRequest(this.getPlayerID(), _sessionId, tableId);
 		}
 	
 		public function drawGame(tableId:String) : void {
-			_session.sendDrawRequest(this.getPlayerID(), this.getSessionID(), tableId);
+			_session.sendDrawRequest(this.getPlayerID(), _sessionId, tableId);
 		}
 
 		public function doUpdateTableSettings(tableId:String, times:String, bRated:Boolean) : void {
@@ -430,7 +428,6 @@
 		}
 	
 		private function _processEvent_E_END(event:Message) : void {
-			//op=E_END&code=0&content=2;black_win;Player resigned
 			if (event.getCode() === "0") {
 				var endEvent:EndEvent = new EndEvent(event.getContent());
 				var tableObj:Table = _getTable(endEvent.getTableID());
@@ -442,7 +439,6 @@
 		}
 	
 		private function _processEvent_DRAW(event:Message) : void {
-			//op=E_END&code=0&content=2;black_win;Player resigned
 			if (event.getCode() === "0") {
 				var drawEvent:DrawEvent = new DrawEvent(event.getContent());
 				var tableObj:Table = _getTable(drawEvent.getTableID());
@@ -453,7 +449,6 @@
 		}
 
 		private function _processEvent_MSG(event:Message) : void {
-			// op=MSG&code=0&tid=4&content=Guest#hox1454;hello
 			var tableId:String = event.getTableId();
 			var fields:Array = event.getContent().split(';');
 			var pid:String = fields[0];
@@ -467,7 +462,6 @@
 		}
 
 		private function _processEvent_UPDATE(event:Message) : void {
-			// op=UPDATE&code=0&content=1;Guest#hox8233;1;600/240/5
 			var fields:Array = event.getContent().split(';');
 			var tableId:String = fields[0];
 			var pid:String = fields[1];

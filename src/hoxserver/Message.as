@@ -1,42 +1,19 @@
-﻿package hoxserver {
-	public class Message {
-		public var optype:String;
-		public var params:Object;
-		public function Message() {
-			this.optype = "";
-			this.params = null;
+﻿package hoxserver
+{
+	public class Message
+	{
+		public var optype:String = "";
+		public var params:Object = null;
+
+		public function Message()
+		{
+			/* Empty */
 		}
-	
-		public function copy(arg:Message):void {
-			this.optype = arg.optype;
-			if (this.params === null) {
-				this.params = {};
-			}
-			for (var key:String in arg.params) {
-				if (key) {
-					this.params[key] = arg.params[key];
-				}
-			}
-		}
-		
-		public function setParam(key:String, value:String):void {
-			this.params[key] = value;
-		}
-		
-		public function getParam(key:String):String {
-			return this.params[key];
-		}
-		
-		public function getCode():String {
-			return this.getParam('code');
-		}
-		public function getTableId():String {
-			return this.getParam('tid');
-		}
-		public function getContent():String {
-			return this.getParam('content');
-		}
-		
+
+		public function getCode():String    { return this.params['code'];    }
+		public function getTableId():String { return this.params['tid'];     }
+		public function getContent():String { return this.params['content']; }
+
 		public function createListRequest(pid:String, sid:String):void {
 			this.optype = 'LIST';
 			this.params = {
@@ -44,6 +21,7 @@
 				sid: sid
 			}
 		}
+
 		public function createJoinRequest(pid:String, sid:String, tid:String, color:String, joined:String):void {
 			this.optype = "JOIN";
 			this.params = {
@@ -54,6 +32,7 @@
 				tid: tid
 			}
 		}
+
 		public function createMoveRequest(pid:String, sid:String, time:String, move:String, tableId:String):void {
 			this.optype = "MOVE";
 			this.params = {
@@ -65,14 +44,6 @@
 				status: "in_progress"
 			};
 		}
-	
-		public function createRegisterRequest(uname:String, passwd:String):void {
-			this.optype = "REGISTER";
-			this.params = {
-				pid: uname,
-				password: passwd
-			};
-		}
 		
 		public function createLoginRequest(uname:String, passwd:String, version:String):void {
 			this.optype = "LOGIN";
@@ -80,14 +51,6 @@
 				pid: uname,
 				password: passwd,
 				version: version
-			};
-		}
-		
-		public function createPollRequest(pid:String, sid:String):void {
-			this.optype = "POLL";
-			this.params = {
-				pid: pid,
-				sid: sid
 			};
 		}
 		
@@ -104,7 +67,7 @@
 			this.params = {
 				pid: pid,
 				sid: sid,
-				itimes:  '1200/240/20',
+				itimes: '1200/240/20',
 				color: color
 			};
 		}
@@ -138,15 +101,6 @@
 			};
 		}
 		
-		public function createEndRequest(pid:String, sid:String, tableId:String):void {
-			this.optype = "E_END";
-			this.params = {
-				pid: pid,
-				sid: sid,
-				tid: tableId
-			};
-		}
-		
 		public function createResignRequest(pid:String, sid:String, tableId:String):void {
 			this.optype = "RESIGN";
 			this.params = {
@@ -165,11 +119,20 @@
 				score: score
 			};
 		}
-		
+
+		public function createUpdateTableRequest(pid:String, tid:String, times:String, r:Boolean) : void {
+			this.optype = "UPDATE";
+			this.params = {
+				tid: tid,
+				pid: pid,
+				rated: (r ? 1 : 0),
+				itimes: times
+			};
+		}
+
 		public function getMessage():String {
 			var str:String = 'op=' + this.optype;
-			var i:String;
-			for (i in this.params) {
+			for (var i:String in this.params) {
 				if (i) {
 					str += "&" + i + "=" + this.params[i];
 				}
@@ -178,8 +141,8 @@
 			return str;
 		}
 		
-		public function parseMessage(str:String) : void {
-			var kvlist:Array = str.split('&');
+		public function parse(content:String) : void {
+			var kvlist:Array = content.split('&');
 			for (var i:int = 0; i < kvlist.length; i++) {
 				var kv:String = kvlist[i];
 				var pair:Array = kv.split('=');
@@ -193,10 +156,6 @@
 					this.params[pair[0]] = pair[1];
 				}
 			}
-		}
-		
-		public function parse(content:String) : void {
-			this.parseMessage(content);
 		}
 		
 		public function parseListResponse() : Object {
