@@ -149,7 +149,7 @@
 					this.optype = pair[1];
 				}
 				else {
-					if (this.params === null) {
+					if (this.params == null) {
 						this.params = {};
 					}
 					this.params[pair[0]] = pair[1];

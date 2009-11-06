@@ -67,15 +67,11 @@
 
 		private function _setSideColors(color:String) : void
 		{
-			if (color == "Red") {
-				_sides.top.color = "Black";
-				_sides.bottom.color = "Red";
-			}
-			else if (color == "Black") {
+			if (color == "Black") {
 				_sides.top.color = "Red";
 				_sides.bottom.color = "Black";
 			}
-			else if (color == "") {
+			else {
 				_sides.top.color = "Black";
 				_sides.bottom.color = "Red";
 			}
@@ -154,11 +150,11 @@
 			}
 			if (_redPlayer != null && _redPlayer.pid != "") {
 				this.view.displayPlayerData(_redPlayer);
-				this.view.displayMessage("" + _redPlayer.pid + " joined");
+				this.view.displayMessage(_redPlayer.pid + " joined");
 			}
 			if (_blackPlayer != null && _blackPlayer.pid != "") {
 				this.view.displayPlayerData(_blackPlayer);
-				this.view.displayMessage("" + _blackPlayer.pid + " joined");
+				this.view.displayMessage(_blackPlayer.pid + " joined");
 			}
 			trace("joinable color: " + joinColor);
 			Global.app.showObserverMenu(joinColor, this.tableId);
@@ -236,7 +232,7 @@
 		}
 		
 		public function drawGame(pid:String) : void {
-			this.view.displayMessage("" + pid + " offering draw");
+			this.view.displayMessage(pid + " offering draw");
 		}
 		
 		public function updateGameTimes(pid:String, times:String) : void
@@ -705,23 +701,18 @@
 
 		public function joinTable(player:PlayerInfo) : void
 		{
-			if (player.color == "Black") {
-				_setBlackPlayer(player);
-			}
-			else if (player.color == "Red") {
-				_setRedPlayer(player);
-			}
-			else {
-				_setObserver(player);
-			}
+			if      (player.color == "Black") { _setBlackPlayer(player); }
+			else if (player.color == "Red")   { _setRedPlayer(player);   }
+			else                              { _setObserver(player);    }
+
 			_processTableEvent("JOINTABLE_EVENT", player);
-			this.view.displayMessage("" + player.pid + " joined");
+			this.view.displayMessage(player.pid + " joined");
 		}
 
 		public function leaveTable(pid:String) : void
 		{
 			_processTableEvent("LEAVETABLE_EVENT", pid);
-			this.view.displayMessage("" + pid + " left");
+			this.view.displayMessage(pid + " left");
 		}
 
 		public function processEvent_LEAVE(pid:String) : void
@@ -783,7 +774,7 @@
 						_createNewTableView();
 						Global.app.showTableMenu(true, true);
 						_tableState = "NEWTABLE_STATE";
-						this.view.displayMessage("" + Global.app.getPlayerID() + " joined");
+						this.view.displayMessage(Global.app.getPlayerID() + " joined");
 					}
 					else {
 						joinColor = _getJoinColor();
@@ -802,7 +793,7 @@
 				if (type == "JOINTABLE_EVENT") {
 					if (data.color != "None") {
 						if (this.view != null) {
-							// TODO: Clear palyer data
+							// TODO: Clear player data
 							this.view.displayPlayerData(data);
 							if (_redPlayer.pid == Global.app.getPlayerID()) {
 								this.view.displayPlayerData(_redPlayer);
