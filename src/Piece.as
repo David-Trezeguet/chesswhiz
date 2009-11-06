@@ -75,7 +75,7 @@
 			_imageHolder = new Image();
 			_imageHolder.x = (offset + viewPos.column * width) - _centerX;
 			_imageHolder.y = (offset + viewPos.row * height) - _centerY;
-			_imageHolder.source =  Global.BASE_URI + "res/images/pieces/" + pieceSkinIndex + "/" + _imageSrc;
+			_imageHolder.load("assets/pieces/" + pieceSkinIndex + "/" + _imageSrc);
 			parentClip.addChild(_imageHolder);
 		}
 

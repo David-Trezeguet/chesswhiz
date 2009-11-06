@@ -23,9 +23,9 @@
 
 			private function init() : void
 			{
-				pieceSet1.source = Global.BASE_URI + "res/images/pieces/1/rking.png";
-				pieceSet2.source = Global.BASE_URI + "res/images/pieces/2/rking.png";
-				pieceSet3.source = Global.BASE_URI + "res/images/pieces/3/rking.png";
+				pieceSet1.load("assets/pieces/1/rking.png");
+				pieceSet2.load("assets/pieces/2/rking.png");
+				pieceSet3.load("assets/pieces/3/rking.png");
 			}
 			
 			public function applyCurrentPreferences() : void
@@ -63,7 +63,7 @@
 				previewCanvas.graphics.moveTo(0, size/2);
 				previewCanvas.graphics.lineTo(size, size/2);
 
-				previewPieceImage.source = Global.BASE_URI + "res/images/pieces/" + _selectedPieceSet + "/rking.png";
+				previewPieceImage.load("assets/pieces/" + _selectedPieceSet + "/rking.png");
 			}
 
 			private function onOK(event:Event) : void 
