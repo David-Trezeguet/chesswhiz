@@ -54,12 +54,6 @@
 			   Global.app.processSocketCloseEvent();
 			}
 		}
-
-		public function sendRegisterRequest(uname:String, passwd:String):void  {
-			var req:Message = new Message();
-			req.createRegisterRequest(uname, passwd);
-			_sendRequest(req);
-		}
 		
 		public function sendLoginRequest(uname:String, passwd:String, version:String):void  {
 			var req:Message = new Message();
@@ -92,16 +86,9 @@
 		}
 		
 		public function sendMoveRequest(pid:String, sid:String, curPos:Position, newPos:Position, time:String, tid:String):void  {
-			//op=MOVE&game_time=1486&move=2524&pid=bharat&status=in_progress&tid=1
 			var req:Message = new Message();
 			var move:String = "" + curPos.column + curPos.row + newPos.column + newPos.row;
 			req.createMoveRequest(pid, sid, time, move, tid);
-			_sendRequest(req);
-		}
-		
-		public function sendPollRequest(pid:String, sid:String):void  {
-			var req:Message = new Message();
-			req.createPollRequest(pid, sid);
 			_sendRequest(req);
 		}
 		
@@ -112,21 +99,18 @@
 		}
 		
 		public function sendResignRequest(pid:String, sid:String, tid:String):void  {
-			//op=RESIGN&pid=Guest#hox5870&tid=1
 			var req:Message = new Message();
 			req.createResignRequest(pid, sid, tid);
 			_sendRequest(req);
 		}
 		
 		public function sendDrawRequest(pid:String, sid:String, tid:String):void  {
-			//op=RESIGN&pid=Guest#hox5870&tid=1
 			var req:Message = new Message();
 			req.createDrawRequest(pid, sid, tid);
 			_sendRequest(req);
 		}
 
 		public function sendChatRequest(pid:String, sid:String, tid:String, msg:String):void  {
-			//op=RESIGN&pid=Guest#hox5870&tid=1
 			var req:Message = new Message();
 			req.createChatRequest(pid, sid, tid, msg);
 			_sendRequest(req);
@@ -134,13 +118,7 @@
 		
 		public function sendUpdateTableRequest(pid:String, tid:String, times:String, r:Boolean) : void {
 			var req:Message = new Message();
-			req.optype = "UPDATE";
-			req.params = {
-				tid: tid,
-				pid: pid,
-				rated: (r ? 1 : 0),
-				itimes: times
-			};
+			req.createUpdateTableRequest(pid, tid, times, r);
 			_sendRequest(req);
 		}
 	}

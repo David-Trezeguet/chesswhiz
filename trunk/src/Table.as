@@ -466,7 +466,6 @@
 				if (_game) {
 					_game.processEvent("move");
 				}
-				// Send request to the server
 				Global.app.sendMoveRequest(_game.getLocalPlayer(), piece, curPos, newPos, this.tableId);
 			}
 		}

@@ -467,28 +467,12 @@
 			}
 		}
 
-		private function _isNormalView() : Boolean {
-			return (_table.getBottomSideColor() == "Black");
-		}
-		
 		public function getViewPosition(pos:Position) : Position
 		{
-			if (_isNormalView()) {
-				var tRow:int = Math.abs(pos.row - 9);
-				var tColumn:int = Math.abs(pos.column - 8);
-				return new Position(tRow, tColumn);
+			if (_table.getBottomSideColor() == "Red") { // normal view?
+				return new Position(pos.row, pos.column);
 			}
-			return new Position(pos.row, pos.column);
-		}
-
-		public function getAbsolutePosition(pos:Position) : Position
-		{
-			if (_isNormalView()) {
-				var tRow:int = Math.abs(pos.row - 9);
-				var tColumn:int = Math.abs(pos.column - 8);
-				return new Position(tRow, tColumn);
-			}
-			return new Position(pos.row, pos.column);
+			return new Position( Math.abs(pos.row - 9), Math.abs(pos.column - 8) );
 		}
 
 		public function displayStatus(status:String) : void {
@@ -497,32 +481,18 @@
 
 		public function enableEvents(color:String) : void
 		{
-			var i:int;
-			if (color == "Red") {
-				for (i = 0; i < 16; i++) {
-					_redPieces[i].enableEvents();
-				}
-			}
-			else {
-				for (i = 0; i < 16; i++) {
-					_blackPieces[i].enableEvents();
-				}
+			var pieces:Array = (color == "Red" ? _redPieces : _blackPieces);
+			for (var i:int = 0; i < 16; i++) {
+				pieces[i].enableEvents();
 			}
 		}
 
 		public function disableEvents(color:String) : void
 		{
-			var i:int;
-			if (color == "Red") {
-				for (i = 0; i < 16; i++) {
-					_redPieces[i].disableEvents();
-				}
-			}
-			else {
-				for (i = 0; i < 16; i++) {
-					_blackPieces[i].disableEvents();
-				}
-			}			
+			var pieces:Array = (color == "Red" ? _redPieces : _blackPieces);
+			for (var i:int = 0; i < 16; i++) {
+				pieces[i].disableEvents();
+			}		
 		}
 
 		public function reDraw(changeSet:Array, focusPiece:Piece) : void
@@ -539,12 +509,8 @@
 			for (var i:int = 0; i < changeSet.length; i++) {
 				color = changeSet[i][0];
 				index = parseInt(changeSet[i][1]);
-				if (color == "Red") {
-					piece = _redPieces[index];
-				}
-				else {
-					piece = _blackPieces[index];
-				}
+				if (color == "Red") { piece = _redPieces[index]; }
+				else                { piece = _blackPieces[index]; }
 				captured = changeSet[i][4];
 				pos1 = piece.getPosition();
 				pos2 = new Position(parseInt(changeSet[i][2]), parseInt(changeSet[i][3]));
@@ -581,40 +547,6 @@
 				}
 				focusPiece.setFocus();
 				_lastPieceInFocus = focusPiece;
-			}
-		}
-
-		public function restoreState() : void
-		{
-			var i:int = 0;
-			var piece:Piece = null;
-			var pos1:Position = null;
-			var pos2:Position = null;
-			for (i = 0; i < _redPieces.length; i++) {
-				piece = _redPieces[i];
-				pos1 = piece.getPosition();
-				if (!(piece.isCaptured())) {
-					if (!(_redPieces[i].isCaptured())) {
-						_redPieces[i].removeImage();
-					}
-					piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
-					if (piece.isEventsEnabled()) {
-						piece.enableEvents();
-					}
-				}
-			}
-			for (i = 0; i < _blackPieces.length; i++) {
-				piece = _blackPieces[i];
-				pos1 = piece.getPosition();
-				if (!(piece.isCaptured())) {
-					if (!(_blackPieces[i].isCaptured())) {
-						_blackPieces[i].removeImage();
-					}
-					piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
-					if (piece.isEventsEnabled()) {
-						piece.enableEvents();
-					}
-				}
 			}
 		}
 		
