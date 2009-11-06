@@ -108,7 +108,7 @@
 				result[1] = reason;
 				return result;
 			}
-			var startRow:int = piece.getInitialPosition().row	;
+			var startRow:int = piece.getInitialPosition().row;
 			var startCol:int = piece.getInitialPosition().column;
 			var rowDiff:int = Math.abs(curRow - newRow);
 			var colDiff:int = Math.abs(curCol - newCol);
@@ -165,7 +165,7 @@
 					}
 				}
 				else if (curPiece && curPiece.getType() === "king" && move === 1 && interveningPieces === 0) {
-					// Flying kin
+					// Flying king
 					validMove = 1;
 				}
 			} else if (piece.getType() === "advisor") {
@@ -232,10 +232,10 @@
 				}
 			}
 			var types:Array = ["cannon", "horse", "chariot", "king"];
-			for (var j:int = 0; j < types.length; j++) {
-				var pieces:Array = _getOppPieces(types[j]);
-				for (var i:int = 0; i < pieces.length; i++) {
-					var oPiece:Piece = pieces[i];
+			for (var i:int = 0; i < types.length; i++) {
+				var pieces:Array = _getOppPieces(types[i]);
+				for (var j:int = 0; j < pieces.length; j++) {
+					var oPiece:Piece = pieces[j];
 					if (oPiece && !oPiece.isCaptured()) {
 						resultObj = this.validateMove(_table.view.board, myKingPos, oPiece);
 						if (resultObj[0]) {

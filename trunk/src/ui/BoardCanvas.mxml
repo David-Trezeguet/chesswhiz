@@ -40,38 +40,38 @@
 
 			var index:int = 0;
 			var color:String = "Red";
-			_redPieces[0] = new Piece(index++, "chariot", 9, 0, "rchariot.png", color, this);
-			_redPieces[1] = new Piece(index++, "horse", 9, 1, "rhorse.png", color, this);
-			_redPieces[2] = new Piece(index++, "elephant", 9, 2, "relephant.png", color, this);
-			_redPieces[3] = new Piece(index++, "advisor", 9, 3, "radvisor.png", color, this);
-			_redPieces[4] = new Piece(index++, "king", 9, 4, "rking.png", color, this);
-			_redPieces[5] = new Piece(index++, "advisor", 9, 5, "radvisor.png", color, this);
-			_redPieces[6] = new Piece(index++, "elephant", 9, 6, "relephant.png", color, this);
-			_redPieces[7] = new Piece(index++, "horse", 9, 7, "rhorse.png", color, this);
-			_redPieces[8] = new Piece(index++, "chariot", 9, 8, "rchariot.png", color, this);
-			_redPieces[9] = new Piece(index++, "cannon", 7, 1, "rcannon.png", color, this);
-			_redPieces[10] = new Piece(index++, "cannon", 7, 7, "rcannon.png", color, this);
+			_redPieces[0]  = new Piece(index++, "chariot",  color, 9, 0, this);
+			_redPieces[1]  = new Piece(index++, "horse",    color, 9, 1, this);
+			_redPieces[2]  = new Piece(index++, "elephant", color, 9, 2, this);
+			_redPieces[3]  = new Piece(index++, "advisor",  color, 9, 3, this);
+			_redPieces[4]  = new Piece(index++, "king",     color, 9, 4, this);
+			_redPieces[5]  = new Piece(index++, "advisor",  color, 9, 5, this);
+			_redPieces[6]  = new Piece(index++, "elephant", color, 9, 6, this);
+			_redPieces[7]  = new Piece(index++, "horse",    color, 9, 7, this);
+			_redPieces[8]  = new Piece(index++, "chariot",  color, 9, 8, this);
+			_redPieces[9]  = new Piece(index++, "cannon",   color, 7, 1, this);
+			_redPieces[10] = new Piece(index++, "cannon",   color, 7, 7, this);
 
   			for (var pawn:int = 0; pawn < 5; pawn++) {
-	        	_redPieces[11 + pawn] = new Piece(index++, "pawn", 6, 2*pawn, "rpawn.png", color, this);
+	        	_redPieces[11 + pawn] = new Piece(index++, "pawn", color, 6, 2*pawn, this);
 			}
 			
 			index = 0;
 			color = "Black";
-			_blackPieces[0] = new Piece(index++, "chariot", 0, 0, "bchariot.png", color, this);
-			_blackPieces[1] = new Piece(index++, "horse", 0, 1, "bhorse.png", color, this);
-			_blackPieces[2] = new Piece(index++, "elephant", 0, 2, "belephant.png", color, this);
-			_blackPieces[3] = new Piece(index++, "advisor", 0, 3, "badvisor.png", color, this);
-			_blackPieces[4] = new Piece(index++, "king", 0, 4, "bking.png", color, this);
-			_blackPieces[5] = new Piece(index++, "advisor", 0, 5, "badvisor.png", color, this);
-			_blackPieces[6] = new Piece(index++, "elephant", 0, 6, "belephant.png", color, this);
-			_blackPieces[7] = new Piece(index++, "horse", 0, 7, "bhorse.png", color, this);
-			_blackPieces[8] = new Piece(index++, "chariot", 0, 8, "bchariot.png", color, this);
-			_blackPieces[9] = new Piece(index++, "cannon", 2, 1, "bcannon.png", color, this);
-			_blackPieces[10] = new Piece(index++, "cannon", 2, 7, "bcannon.png", color, this);
+			_blackPieces[0]  = new Piece(index++, "chariot",  color, 0, 0, this);
+			_blackPieces[1]  = new Piece(index++, "horse",    color, 0, 1, this);
+			_blackPieces[2]  = new Piece(index++, "elephant", color, 0, 2, this);
+			_blackPieces[3]  = new Piece(index++, "advisor",  color, 0, 3, this);
+			_blackPieces[4]  = new Piece(index++, "king",     color, 0, 4, this);
+			_blackPieces[5]  = new Piece(index++, "advisor",  color, 0, 5, this);
+			_blackPieces[6]  = new Piece(index++, "elephant", color, 0, 6, this);
+			_blackPieces[7]  = new Piece(index++, "horse",    color, 0, 7, this);
+			_blackPieces[8]  = new Piece(index++, "chariot",  color, 0, 8, this);
+			_blackPieces[9]  = new Piece(index++, "cannon",   color, 2, 1, this);
+			_blackPieces[10] = new Piece(index++, "cannon",   color, 2, 7, this);
 	
   			for (pawn = 0; pawn < 5; pawn++) {
-	        	_blackPieces[11 + pawn] = new Piece(index++, "pawn", 3, 2*pawn, "bpawn.png", color, this);
+	        	_blackPieces[11 + pawn] = new Piece(index++, "pawn", color, 3, 2*pawn, this);
 			}
 
  			// --- Initialize piece map.
