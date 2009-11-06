@@ -11,7 +11,7 @@
 
 	public class Piece
 	{
-		private const _imageRadius:int = 22;
+		private const _imageRadius:int = 22; // TODO: Assuming Piece's size = 44 px.
 
 		private var _type:String;
 		private var _imageSrc:String;
@@ -26,8 +26,6 @@
 		private var _captured:Boolean = false;
 		private var _parentClip:Canvas = null;
 		private var _enabled:Boolean = false;
-		private var _centerX:int;
-		private var _centerY:int;
 		
 		public function Piece(id:int, type:String, row:int, column:int,
 							  src:String, color:String, board:BoardCanvas) : void
@@ -39,7 +37,7 @@
 			_imageSrc = src;
 			_color = color;
 			_board = board;
-			_centerX = _centerY = 22;
+			_parentClip = board;
 		}
 
 		public function getIndex():int { return _id; }
@@ -62,28 +60,21 @@
 			_curColumn = newPos.column;
 		}
 
-		public function setImageCenter(x:int, y:int) : void
+		public function draw(offset:int, width:int, height:int, pieceSkinIndex:int) : void
 		{
-			_centerX = x;
-			_centerY = y;
-		}
-
-		public function draw(parentClip:Canvas, offset:int, width:int, height:int, pieceSkinIndex:int) : void
-		{
-			_parentClip = parentClip;
 			var viewPos:Position = _board.getViewPosition(getPosition());
 			_imageHolder = new Image();
-			_imageHolder.x = (offset + viewPos.column * width) - _centerX;
-			_imageHolder.y = (offset + viewPos.row * height) - _centerY;
+			_imageHolder.x = (offset + viewPos.column * width) - _imageRadius;
+			_imageHolder.y = (offset + viewPos.row * height) - _imageRadius;
 			_imageHolder.load("assets/pieces/" + pieceSkinIndex + "/" + _imageSrc);
-			parentClip.addChild(_imageHolder);
+			_parentClip.addChild(_imageHolder);
 		}
 
 		public function enableEvents() : void
 		{
 			if (_imageHolder != null) {
-				_imageHolder.addEventListener(MouseEvent.MOUSE_DOWN, startDragHandler);
-				_imageHolder.addEventListener(MouseEvent.MOUSE_UP, stopDragHandler);
+				_imageHolder.addEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
+				_imageHolder.addEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
 				_enabled = true;
 			}
 		}
@@ -91,20 +82,20 @@
 		public function disableEvents() : void
 		{
 			if (_imageHolder != null) {
-				_imageHolder.removeEventListener(MouseEvent.MOUSE_DOWN, startDragHandler);
-				_imageHolder.removeEventListener(MouseEvent.MOUSE_UP, stopDragHandler);
+				_imageHolder.removeEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
+				_imageHolder.removeEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
 				_enabled = false;
 			}
 		}
 
-		private function startDragHandler(evt:MouseEvent) : void 
+		private function _startDragHandler(evt:MouseEvent) : void 
 		{
 			var maxDepth:int = _parentClip.numChildren - 1;
 			_parentClip.setChildIndex(_imageHolder, maxDepth);
 			_imageHolder.startDrag();
 		}
 
-		private function stopDragHandler(evt:MouseEvent) : void 
+		private function _stopDragHandler(evt:MouseEvent) : void 
 		{
 			_imageHolder.stopDrag();
 			var newPos:Position = _board.getNearestCell(evt.stageX, evt.stageY, 30);
@@ -140,12 +131,12 @@
 			}
 		}
 
-		public function removeImage(parentClip:Canvas) : void
+		public function removeImage() : void
 		{
 			if (_imageHolder != null) {
 				if (isEventsEnabled()) {
-					_imageHolder.removeEventListener(MouseEvent.MOUSE_DOWN, startDragHandler);
-					_imageHolder.removeEventListener(MouseEvent.MOUSE_UP, stopDragHandler);
+					_imageHolder.removeEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
+					_imageHolder.removeEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
 				}
 				if (_imageHolder.parent) {
 					_imageHolder.parent.removeChild(_imageHolder);
