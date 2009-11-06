@@ -8,8 +8,7 @@
 	{
 		public static var app:ChessApp = null;
 
-		public static const VERSION:String    = "0.9.1.0";
-		public static const BASE_URI:String   = "http://www.playxiangqi.com/chesswhiz/";
+		public static const VERSION:String    = "0.9.1.1";
 
 		/**
 		 * The internal name known only to the PlayXiangqi server.
