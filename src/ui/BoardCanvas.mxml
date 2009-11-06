@@ -183,8 +183,8 @@
 		private function _displayPieces() : void
 		{
 			for (var i:int = 0; i < 16; i++) {
-				_redPieces[i].draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
-				_blackPieces[i].draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+				_redPieces[i].draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+				_blackPieces[i].draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 			}
 		}
 
@@ -415,7 +415,7 @@
 			_pieceMap[oldPos.row][oldPos.column] = null;
 			if (curPiece) {
 				curPiece.setCapture(true);
-				curPiece.removeImage(this);
+				curPiece.removeImage();
 			}
 			piece.setPosition(newPos);
 		}
@@ -457,7 +457,7 @@
 			if (capturedPiece) {
 				capturedPiece.setCapture(false);
 				capturedPiece.setPosition(curPos);
-				capturedPiece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+				capturedPiece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 				capturedPiece.setFocus();
 				_lastPieceInFocus = capturedPiece;
 			}
@@ -551,16 +551,16 @@
 				if (!captured) {
 					if (piece.isCaptured()) {
 						piece.setPosition(pos2);
-						piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+						piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 						if (piece.isEventsEnabled()) {
 							piece.enableEvents();
 						}
 					}
 					else {
 						if (pos1.Compare(pos2) != 0) {
-							piece.removeImage(this);
+							piece.removeImage();
 							piece.setPosition(pos2);
-							piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+							piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 							if (piece.isEventsEnabled()) {
 								piece.enableEvents();
 							}
@@ -569,7 +569,7 @@
 					piece.setCapture(false);
 				} else {
 					if (!piece.isCaptured()) {
-						piece.removeImage(this);
+						piece.removeImage();
 					}
 					piece.setPosition(pos2);
 					piece.setCapture(true);
@@ -595,9 +595,9 @@
 				pos1 = piece.getPosition();
 				if (!(piece.isCaptured())) {
 					if (!(_redPieces[i].isCaptured())) {
-						_redPieces[i].removeImage(this);
+						_redPieces[i].removeImage();
 					}
-					piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+					piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 					if (piece.isEventsEnabled()) {
 						piece.enableEvents();
 					}
@@ -608,9 +608,9 @@
 				pos1 = piece.getPosition();
 				if (!(piece.isCaptured())) {
 					if (!(_blackPieces[i].isCaptured())) {
-						_blackPieces[i].removeImage(this);
+						_blackPieces[i].removeImage();
 					}
-					piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+					piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 					if (piece.isEventsEnabled()) {
 						piece.enableEvents();
 					}
@@ -695,13 +695,8 @@
 
 		private function _changeSkinOfPiece(piece:Piece) : void
 		{
-			piece.removeImage(this);
-			if (_pieceSkinIndex == 3) {
-				piece.setImageCenter(22, 28);
-			} else {
-				piece.setImageCenter(22, 22);
-			}
-			piece.draw(this, offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+			piece.removeImage();
+			piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
 			if (piece.isEventsEnabled()) {
 				piece.enableEvents();
 			}
