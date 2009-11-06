@@ -470,11 +470,9 @@
 			}
 		}
 
-		public function movePiece(moveData:MoveInfo) : void
+		public function movePiece(curPos:Position, newPos:Position) : void
 		{
 			Global.app.playMoveSound();
-			var curPos:Position = new Position(moveData.getCurrentPosRow(), moveData.getCurrentPosCol());
-			var newPos:Position = new Position(moveData.getNewPosRow(), moveData.getNewPosCol());
 			var piece:Piece = this.view.board.getPieceByPos(curPos);
 			if (piece) {
 				_processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
