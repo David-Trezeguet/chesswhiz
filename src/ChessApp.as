@@ -199,7 +199,7 @@
 			_session.sendChatRequest(_playerId, _sessionId, _currentTableId, msg);
 		}
 
-		public function showTableMenu(showSettings:Boolean, showPref:Boolean) : void
+		public function showTableMenu(showSettings:Boolean) : void
 		{
 			if (showSettings) { _menu.currentState = "newTableState"; }
 			else              { _menu.currentState = "observerState"; }
