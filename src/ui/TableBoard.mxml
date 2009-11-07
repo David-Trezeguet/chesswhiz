@@ -70,10 +70,9 @@
 			this.taMessages.text += msg + "\n";		
 		}
 
-		private function reviewMove(event:Event) : void
+		private function reviewMove(cmd:String) : void
 		{
-			var button:Button = Button(event.target);
-			_table.reviewMove(button.name);
+			_table.reviewMove(cmd);
 		}
 		
 		public function displayChatMessage(pid:String, chatMsg:String) : void 
@@ -164,10 +163,10 @@
 		
 		<mx:HBox id="mcMoves" x="150" y="638" width="100%" horizontalGap="3">
 			<mx:Spacer width="170" />
-			<mx:Button name="start" label="|&lt;" enabled="false" click="reviewMove(event)" />
-			<mx:Button name="rewind" label="&lt;" enabled="false" click="reviewMove(event)" />
-			<mx:Button name="forward" label="&gt;" enabled="false" click="reviewMove(event)" />
-			<mx:Button name="end" label="&gt;|" enabled="false" click="reviewMove(event)" />
+			<mx:Button label="|&lt;" enabled="false" click="reviewMove('start')" />
+			<mx:Button label="&lt;" enabled="false" click="reviewMove('rewind')" />
+			<mx:Button label="&gt;" enabled="false" click="reviewMove('forward')" />
+			<mx:Button label="&gt;|" enabled="false" click="reviewMove('end')" />
 		</mx:HBox>
 	</mx:VBox>
 

@@ -171,9 +171,9 @@
 			return tables;
 		}
 		
-		public function parseTableResponse() : TableInfo {
-			var table:TableInfo = new TableInfo(this.params.content);
-			return table;
+		public function parseTableResponse() : TableInfo
+		{
+			return new TableInfo(this.params.content);
 		}
 	}
 }

@@ -6,13 +6,16 @@
 		public var color:String = "";
 		public var score:String = "";
 
+		public function PlayerInfo(pid:String, color:String, score:String)
+		{
+			this.pid   = pid;
+			this.color = color;
+			this.score = score;
+		}
+
 		public function clone() : PlayerInfo
 		{
-			var player:PlayerInfo = new PlayerInfo();
-			player.pid   = this.pid;
-			player.score = this.score;
-			player.color = this.color;
-			return player;
+			return new PlayerInfo( pid, color, score );
 		}
 	}
 }

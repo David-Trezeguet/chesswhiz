@@ -18,11 +18,7 @@
 
 		public function getPlayer():PlayerInfo
 		{
-			var player:PlayerInfo = new PlayerInfo();
-			player.color = _color;
-			player.pid   = _pid;
-			player.score = _score;
-			return player;
+			return new PlayerInfo(_pid, _color, _score);
 		}
 	}
 }

@@ -49,20 +49,12 @@
 			
 		public function getRedPlayer():PlayerInfo
 		{
-			var player:PlayerInfo = new PlayerInfo();
-			player.color = "Red";
-			player.pid = this.redid;
-			player.score = this.redscore;
-			return player;
+			return new PlayerInfo(redid, "Red", redscore);
 		}
 		
 		public function getBlackPlayer():PlayerInfo
 		{
-			var player:PlayerInfo = new PlayerInfo();
-			player.color = "Black";
-			player.pid = this.blackid;
-			player.score = this.blackscore;
-			return player;
+			return new PlayerInfo(blackid, "Black", blackscore);
 		}
 		
 		public function getTime(color:String):String
