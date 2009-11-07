@@ -49,10 +49,7 @@
 		public function getPosition():Position { return new Position(_row, _column); }
 		public function getInitialPosition():Position { return new Position(_initialRow, _initialColumn); }
 
-		public function setCapture(flag:Boolean) : void
-		{
-			_captured = flag;
-		}
+		public function setCapture(flag:Boolean) : void { _captured = flag;}
 		
 		public function setPosition(newPos:Position) : void
 		{
@@ -60,18 +57,26 @@
 			_column = newPos.column;
 		}
 
-		public function draw(offset:int, width:int, height:int, pieceSkinIndex:int) : void
+		public function draw(offset:int, width:int, height:int, skinIndex:int) : void
 		{
 			var viewPos:Position = _board.getViewPosition(getPosition());
-			if (_image == null || _skinIndex != pieceSkinIndex)
+			if (_image == null || _skinIndex != skinIndex)
 			{
-				_skinIndex = pieceSkinIndex;
 				_image = new Image();
-				_image.load("assets/pieces/" + _skinIndex + "/" + _imageSrc);
+				this.changeSkinIndex(skinIndex);
 			}
 			_image.x = (offset + viewPos.column * width) - _imageRadius;
 			_image.y = (offset + viewPos.row * height) - _imageRadius;
 			_board.addChild(_image);
+		}
+
+		public function changeSkinIndex(skinIndex:int) : void
+		{
+			if ( _image != null && _skinIndex != skinIndex )
+			{
+				_skinIndex = skinIndex;
+				_image.load("assets/pieces/" + _skinIndex + "/" + _imageSrc);
+			}
 		}
 
 		public function enableEvents() : void
@@ -107,8 +112,9 @@
 				moveImage();
 			}
 			else {
-				var absPos:Position = _board.getViewPosition(newPos);
-				_board.getTable().moveLocalPiece(this, this.getPosition(), absPos);
+				const viewPos:Position = _board.getViewPosition(newPos);
+				// Notify the "parent" board of this new Piece Movement.
+				_board.getTable().onLocalPieceMoved(this, this.getPosition(), viewPos);
 			}
 		}
 		

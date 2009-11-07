@@ -7,8 +7,8 @@
 	{
 		private var _table:Table;
 		private var _localPlayer:PlayerInfo = null
-		private var _oppPlayer:PlayerInfo = null;
-		private var _state:String = "idle";
+		private var _oppPlayer:PlayerInfo   = null;
+		private var _state:String           = "idle";
 
 		public function Game(table:Table)
 		{

@@ -255,40 +255,33 @@
 		private function _startTimer() : void
 		{
 			_redTimes = new GameTimers(_tableData.redtime);
-			_redTimer = new Timer(1000, _redTimes.gameTime);
+			_redTimer = new Timer(1000 /* 1 second */, _redTimes.gameTime);
 			_redTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
 
 			_blackTimes = new GameTimers(_tableData.blacktime);
-			_blackTimer = new Timer(1000, _blackTimes.gameTime);
+			_blackTimer = new Timer(1000 /* 1 second */, _blackTimes.gameTime);
 			_blackTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
 
-			if (_getMoveColor() == "Red") {
-				_redTimer.start();
-			} else {
-				_blackTimer.start();
-			}
+			if (_getMoveColor() == "Red") { _redTimer.start();   }
+			else                          { _blackTimer.start(); }
 		}
 
 		private function _getMoveColor() : String
 		{
 			var color:String = "";
+
 			if (_game != null) {
-				if (_game.waitingForMyMove()) {
-					color = _game.getLocalPlayer().color;
-				}
-				else {
-					color = _game.getOppPlayer().color;
+				color = ( _game.waitingForMyMove() ? _game.getLocalPlayer().color
+												   : _game.getOppPlayer().color );
+			}
+			else if (_moveList.length > 0) {
+				var lastMove:String = _moveList[_moveList.length - 1];
+				if (lastMove != "") {
+					var fields:Array = lastMove.split(":");
+					color = (fields[0] == "Red" ? "Black" : "Red");
 				}
 			}
-			else {
-				if (_moveList.length > 0) {
-					var lastMove:String = _moveList[_moveList.length - 1];
-					if (lastMove != "") {
-						var fields:Array = lastMove.split(":");
-						color = (fields[0] == "Red") ? "Black" : "Red";
-					}
-				}
-			}
+
 			return color;
 		}
 
@@ -302,7 +295,7 @@
 			}
 		}
 
-		private function _resetTimer() : void
+		private function _resetMoveTimer() : void
 		{
 			if (_getMoveColor() == "Red") {
 				_blackTimes.resetMoveTime();
@@ -372,28 +365,29 @@
 		
 		private function _rewindLastMove() : void
 		{
-			if (_moveList.length > 0) {
-				var lastMove:String = _moveList[_moveList.length - 1];
+			if (_moveList.length == 0) {
+				return;
+			}
+
+			var lastMove:String = _moveList.pop();
+			var fields:Array = lastMove.split(":");
+			var piece:Piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
+			var move:String = fields[2];
+			var capturePiece:Piece = null;
+			if (fields[3] != "") {
+				capturePiece = this.view.board.getPieceByIndex((fields[0] == "Red" ? "Black" : "Red"), fields[3]);
+			}
+			var prevPos:Position = new Position(parseInt(move.charAt(0)), parseInt(move.charAt(1)));
+			var curPos:Position = new Position(parseInt(move.charAt(2)), parseInt(move.charAt(3)));
+			this.view.board.rewindPieceByPos(piece, curPos, prevPos, capturePiece);
+
+			// Restore the focus on the previous Move, if any.
+			if (_moveList.length > 1) {
+				lastMove = _moveList[_moveList.length - 1];
 				if (lastMove != "") {
-					var fields:Array = lastMove.split(":");
-					var piece:Piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
-					var move:String = fields[2];
-					var capturePiece:Piece = null;
-					if (fields[3] != "") {
-						capturePiece = this.view.board.getPieceByIndex((fields[0] == "Red") ? "Black" : "Red", fields[3]);
-					}
-					var prevPos:Position = new Position(parseInt(move.charAt(0)), parseInt(move.charAt(1)));
-					var curPos:Position = new Position(parseInt(move.charAt(2)), parseInt(move.charAt(3)));
-					this.view.board.rewindPieceByPos(piece, curPos, prevPos, capturePiece);
-					_moveList.splice(_moveList.length - 1, 1);
-					if (_moveList.length > 1) {
-						lastMove = _moveList[_moveList.length - 1];
-						if (lastMove != "") {
-							fields = lastMove.split(":");
-							piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
-							this.view.board.setFocusOnPiece(piece);
-						}
-					}
+					fields = lastMove.split(":");
+					piece = this.view.board.getPieceByIndex(fields[0], fields[1]);
+					this.view.board.setFocusOnPiece(piece);
 				}
 			}
 		}
@@ -419,38 +413,42 @@
 			return [piece, move, capturePiece];
 		}
 
-		public function moveLocalPiece(piece:Piece, curPos:Position, newPos:Position) : void
+		/**
+		 * Callback function when a local Piece is moved by human. 
+		 */
+		public function onLocalPieceMoved(piece:Piece, curPos:Position, newPos:Position) : void
 		{
-			if (_tableState == "MOVEREVIEW_STATE" && _curMoveIndex != _moveList.length) {
-				this.view.displayMessage("In review mode");
+			if ( _tableState == "MOVEREVIEW_STATE" && _curMoveIndex != _moveList.length ) {
+				trace("Piece cannot be moved: In review mode");
 				piece.moveImage();
 				return;
 			}
-			if (   _tableState == "MOVEREVIEW_STATE" && _stateBeforeReview == "GAMEPLAY_STATE"
-				&& _game.getLocalPlayer().color == piece.getColor() )
-			{
-				_stopReview();
-				_tableState = _stateBeforeReview;
-			}
-			if (!_game.waitingForMyMove()) {
-				this.view.displayMessage("Invalid move. Waiting for " + _game.getOppPlayer().color + " move");
+
+			if ( ! _game.waitingForMyMove() ) {
+				trace("Piece cannot be moved: Waiting for move from the opponent.");
 				piece.moveImage();
 				return;
 			}
-			var resultObj:Array = _game.validateMove(this.view.board, newPos, piece);
-			if (resultObj[0] != 1) {
-				this.view.displayMessage("Invalid move. " + resultObj[1]);
+
+			var validationResult:Array = _game.validateMove(this.view.board, newPos, piece);
+			if ( validationResult[0] != 1 ) {
+				trace("Piece cannot be moved: Invalid move: [" + validationResult[1] + "]");
 				piece.moveImage();
 				return;
 			}
+
+			// Apply the Move and then check if the 'own' King is in danger.
+			// If yes, then undo the Move.
 			_processMoveEvent([piece, curPos, newPos]);
-			if (_game.isCheckMate(null)) {
-				this.view.displayMessage("Invalid move. Check active");
+			if ( _game.isCheckMate(null) ) {
+				trace("Piece cannot be moved: 'Own' King is in danger.");
 				_rewindLastMove();
 				return;
 			}
+			
+			// Upon reaching here, the Move has been determined to be valid.
 			Global.app.playMoveSound();
-			if (_tableState == "GAMEPLAY_STATE") {
+			if ( _tableState == "GAMEPLAY_STATE" ) {
 				if (_game) {
 					_game.processEvent("move");
 				}
@@ -731,7 +729,7 @@
 					this.view.board.movePieceByPos(piece, data[2], true);
 				}
 				if (_moveList.length > 2) {
-					_resetTimer();
+					_resetMoveTimer();
 				}
 			}
 		}

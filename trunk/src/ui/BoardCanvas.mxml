@@ -459,10 +459,9 @@
 
 		public function getViewPosition(pos:Position) : Position
 		{
-			if (_table.getTopSideColor() == "Black") { // normal view?
-				return new Position(pos.row, pos.column);
-			}
-			return new Position( Math.abs(pos.row - 9), Math.abs(pos.column - 8) );
+			return ( _table.getTopSideColor() == "Black" // normal view?
+					? new Position( pos.row, pos.column )
+					: new Position( Math.abs(pos.row - 9), Math.abs(pos.column - 8) ) );
 		}
 
 		public function displayStatus(status:String) : void {
@@ -604,25 +603,16 @@
 			{
 				piece = _redPieces[i];
 				if ( ! piece.isCaptured() ) {
-					_changeSkinOfPiece(piece);
+					piece.changeSkinIndex(_pieceSkinIndex);
 				}
 				piece = _blackPieces[i];
 				if ( ! piece.isCaptured() ) {
-					_changeSkinOfPiece(piece);
+					piece.changeSkinIndex(_pieceSkinIndex);
 				}
 			}
 
 			if (_lastPieceInFocus) {
 				_lastPieceInFocus.setFocus();
-			}
-		}
-
-		private function _changeSkinOfPiece(piece:Piece) : void
-		{
-			piece.removeImage();
-			piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
-			if (piece.isEventsEnabled()) {
-				piece.enableEvents();
 			}
 		}
 
