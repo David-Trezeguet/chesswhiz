@@ -55,7 +55,7 @@
 		}
 		
 		private function _setObserver(player:PlayerInfo) : void {
-			_observers[_observers.length] = player.clone();
+			_observers[_observers.length] = player;
 		}
 		
 		public function getTopSideColor():String { return _isTopSideBlack ? "Black" : "Red"; }
@@ -196,8 +196,6 @@
 
 		private function _displayPlayers() : void
 		{
-			if (this.view == null) return;
-
 			this.view.displayPlayerData(_redPlayer);
 			this.view.displayPlayerData(_blackPlayer);
 		}
@@ -367,7 +365,7 @@
 				var newPos:Position = new Position(parseInt(moveList.moves[i].charAt(3)), parseInt(moveList.moves[i].charAt(2)));
 				var piece:Piece = this.view.board.getPieceByPos(curPos);
 				if (piece) {
-					_processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
+					_processMoveEvent([piece, curPos, newPos]);
 				}
 			}
 		};
@@ -445,7 +443,7 @@
 				piece.moveImage();
 				return;
 			}
-			_processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
+			_processMoveEvent([piece, curPos, newPos]);
 			if (_game.isCheckMate(null)) {
 				this.view.displayMessage("Invalid move. Check active");
 				_rewindLastMove();
@@ -465,7 +463,7 @@
 			Global.app.playMoveSound();
 			var piece:Piece = this.view.board.getPieceByPos(curPos);
 			if (piece) {
-				_processTableEvent("MOVEPIECE_EVENT", [piece, curPos, newPos]);
+				_processMoveEvent([piece, curPos, newPos]);
 			}
 			if (_tableState == "GAMEPLAY_STATE" || _tableState == "MOVEREVIEW_STATE"  ) {
                 if (_game) {
@@ -700,7 +698,29 @@
 			else if (player.color == "Red")   { _setRedPlayer(player);   }
 			else                              { _setObserver(player);    }
 
-			_processTableEvent("JOINTABLE_EVENT", player);
+			if (_tableState == "NEWTABLE_STATE")
+			{
+				if (player.color != "None") {
+					this.view.displayPlayerData(player);
+					_startGame();
+					_tableState = "GAMEPLAY_STATE";
+				}
+			}
+			else if (_tableState == "VIEWTABLE_STATE")
+			{
+				this.view.displayPlayerData(player);
+				Global.app.showTableMenu(true);
+				if (   _redPlayer.pid   == Global.app.getPlayerID()
+					|| _blackPlayer.pid == Global.app.getPlayerID() )
+				{
+					_startGame();
+					_tableState = "GAMEPLAY_STATE";
+				}
+				else {
+					_tableState = "OBSERVER_STATE";
+				}
+			}
+
 			this.view.displayMessage(player.pid + " joined");
 		}
 
@@ -723,86 +743,20 @@
 			this.view.displayMessage(pid + " left");
 		}
 
-		/**
-		 * @TODO: The 'data' parameter 'data' has type = "*" 
-		 *         - meaning "untyped" under ActionScript 3.
-		 *           This is a not a good practice and should be fixed
-		 *           as soon as possbile.
-		 */
-		private function _processTableEvent(type:String, data:*) : void
+		private function _processMoveEvent(data:Array) : void
 		{
-			if (_tableState == "NEWTABLE_STATE")
+			if (   _tableState == "OBSERVER_STATE" || _tableState == "GAMEPLAY_STATE"
+			    || _tableState == "MOVEREVIEW_STATE" )
 			{
-				if (type == "JOINTABLE_EVENT") {
-					if (data.color != "None") {
-						if (this.view != null) {
-							this.view.displayPlayerData(data);
-						}
-						_startGame();
-						_tableState = "GAMEPLAY_STATE";
-					}
+				var piece:Piece = data[0];
+				_updateMove(piece, data[1], data[2]);
+				if (_tableState == "MOVEREVIEW_STATE") {
+					this.view.board.updatePieceMapState(piece, data[1], data[2]);
+				} else {
+					this.view.board.movePieceByPos(piece, data[2], true);
 				}
-			}
-			else if (_tableState == "VIEWTABLE_STATE")
-			{
-				if (type == "JOINTABLE_EVENT") {
-					if (this.view != null) {
-						_displayPlayers();
-						Global.app.showTableMenu(true);
-					}
-					if (   _redPlayer.pid   == Global.app.getPlayerID()
-						|| _blackPlayer.pid == Global.app.getPlayerID() )
-					{
-						_startGame();
-						_tableState = "GAMEPLAY_STATE";
-					}
-					else {
-						_tableState = "OBSERVER_STATE";
-					}
-				}
-			}
-			else if (_tableState == "OBSERVER_STATE" || _tableState == "GAMEPLAY_STATE")
-			{
-				if (type == "MOVEPIECE_EVENT") {
-					var piece:Piece = data[0];
-					_updateMove(piece, data[1], data[2]);
-					if (this.view != null) {
-						this.view.board.movePieceByPos(piece, data[2], (this.view == null) ? false : true);
-					}
-					if (_moveList.length > 2) {
-						_resetTimer();
-					}
-				}
-			}
-			else if (_tableState == "MOVEREVIEW_STATE")
-			{
-				if (type == "MOVEPIECE_EVENT") {
-					piece = data[0];
-					if (_stateBeforeReview == "GAMEPLAY_STATE") {
-						_updateMove(piece, data[1], data[2]);
-						if (this.view != null) {
-							this.view.board.updatePieceMapState(piece, data[1], data[2]);
-						}
-						if (_moveList.length > 2) {
-							_resetTimer();
-						}
-					}
-					else if (_stateBeforeReview == "OBSERVER_STATE") {
-						if (_curMoveIndex == _moveList.length) {
-							_stopReview();
-							_tableState = _stateBeforeReview;
-							_processTableEvent(type, data);
-						}
-						else {
-							_updateMove(piece, data[1], data[2]);
-							if (this.view != null) {
-								this.view.board.updatePieceMapState(piece, data[1], data[2]);
-							}
-							if (_moveList.length > 2) {
-								_resetTimer();
-							}							
-						}
-					}
+				if (_moveList.length > 2) {
+					_resetTimer();
 				}
 			}
 		}
