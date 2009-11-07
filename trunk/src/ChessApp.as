@@ -331,15 +331,15 @@
 		}
 
 		private function _processResponse_ITABLE(response:Message) : void {
-			var tableData:TableInfo = response.parseTableResponse();
-			var tableId:String = tableData.tid;
+			var tableInfo:TableInfo = response.parseTableResponse();
+			var tableId:String = tableInfo.tid;
 			var table:Table = _getTable(tableId);
 			if (table == null) {
 				table = new Table(tableId, _preferences);
 				_tableObjects[tableId] = table;
 			}
 			_currentTableId = table.tableId;
-			table.newTable(tableData);
+			table.newTable(tableInfo);
 		}
 
 		private function _getTable(tableId:String) : Table 
