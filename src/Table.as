@@ -748,7 +748,7 @@
 					}
 					else {
 						joinColor = _getJoinColor();
-						_isTopSideBlack = (joinColor == "Red");
+						_isTopSideBlack = (joinColor != "Black");
 						_createObserveTableView(joinColor);
 						if (joinColor == "") {
 							_tableState = "OBSERVER_STATE";
