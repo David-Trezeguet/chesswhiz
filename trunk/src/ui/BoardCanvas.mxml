@@ -242,38 +242,31 @@
 
 		public function getNearestCell(x:int, y:int, radius:int):Position
 		{
-			var i:int;
-			var j:int; 
-			var yRow:int;
-			var xColumn:int;
-			
-			trace("x: " + x + " y: " + y);
-			trace("panel mouse x: " + this.mouseX + " y: " + this.mouseY);
+			trace("x: " + x + " y: " + y + ", mouse x: " + this.mouseX + " y: " + this.mouseY);
+			var pos:Position = new Position(-1, -1);
 
-			for (i = 0; i < 10; i++)
+			var yRow:int;
+			for (var i:int = 0; i < 10; i++)
 			{
 				yRow = offset + _cellHeight * i;
-				if (Math.abs(this.mouseY-yRow) < radius)
+				if (Math.abs(this.mouseY - yRow) < radius)
 				{
+					pos.row = i;
 					break;
 				}
 			}
-			for (j = 0; j < 9; j++)
+			
+			var xColumn:int;
+			for (i = 0; i < 9; i++)
 			{
-				xColumn = offset + _cellWidth * j;
+				xColumn = offset + _cellWidth * i;
 				if (Math.abs(this.mouseX - xColumn) < radius)
-				{					
+				{
+					pos.column = i;				
 					break;
 				}
 			}
-			var pos:Position = new Position(0, 0);
-			if (i >= 10 || j >= 9) {
-				pos.row = pos.column = -1;
-			}
-			else {
-				pos.row = i;
-				pos.column = j;
-			}
+
 			return pos;
 		}
 
@@ -466,7 +459,7 @@
 
 		public function getViewPosition(pos:Position) : Position
 		{
-			if (_table.getBottomSideColor() == "Red") { // normal view?
+			if (_table.getTopSideColor() == "Black") { // normal view?
 				return new Position(pos.row, pos.column);
 			}
 			return new Position( Math.abs(pos.row - 9), Math.abs(pos.column - 8) );

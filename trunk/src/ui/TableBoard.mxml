@@ -30,10 +30,10 @@
 
 		public function displayPlayerData(player:PlayerInfo) : void
 		{
-			var playerLabel:Label = (player.color === _table.getTopSideColor() ? topLabel : bottomLabel);
+			var playerLabel:Label = (player.color == _table.getTopSideColor() ? topLabel : bottomLabel);
 			playerLabel.text = player.pid + "(" + player.score + ")";
 
-			var playerImage:Image = (player.color === _table.getTopSideColor() ? topImage : bottomImage);
+			var playerImage:Image = (player.color == _table.getTopSideColor() ? topImage : bottomImage);
 			playerImage.source = (player.color == "Red" ? Global.redPlayerImgClass
 													    : Global.blackPlayerImgClass);
 			
@@ -43,7 +43,7 @@
 
 		public function removePlayerData(color:String) : void 
 		{
-			var playerLabel:Label = (color === _table.getTopSideColor() ? topLabel : bottomLabel);
+			var playerLabel:Label = (color == _table.getTopSideColor() ? topLabel : bottomLabel);
 			playerLabel.text = "";
 
 			// NOTE: There is not need to clear/reset the timer for now.
@@ -51,7 +51,7 @@
 		
 		public function updateTimers(color:String, timer:GameTimers) : void
 		{
-			if (color === _table.getTopSideColor())
+			if (color == _table.getTopSideColor())
 			{
 				topTimerGame.text = timer.getTimer("game");
 				topTimerMove.text = timer.getTimer("move");
