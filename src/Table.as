@@ -17,7 +17,7 @@
 		private var _blackPlayer:PlayerInfo = null;
 		private var _observers:Array = [];
 		private var _game:Game = null;
-		private var _sides:Object;
+		private var _isTopSideBlack:Boolean = true;
 		private var _tableState:String = "IDLE_STATE";
 		private var _tableData:TableInfo = null;
 		private var _redTimes:GameTimers = null;
@@ -33,15 +33,12 @@
 		public function Table(tableId:String, pref:Object)
 		{
 			this.tableId = tableId;
-			_sides = {
-				top:  new Side("top", "Red", null),
-				bottom: new Side("bottom", "Black", null)
-			};
-			_settings = {};
-			_settings["gametime"] = 1200;
-			_settings["movetime"] = 300;
-			_settings["extratime"] = 20;
-			_settings["rated"] = false;
+			_settings = {
+					"gametime"  : 1200,
+					"movetime"  : 300,
+					"extratime" : 20,
+					"rated"     : false
+				};
 			_curPref = pref;
 		}
 
@@ -61,21 +58,8 @@
 			_observers[_observers.length] = player.clone();
 		}
 		
-		public function getTopSideColor():String { return _sides.top.color; }
-		public function getBottomSideColor():String { return _sides.bottom.color; }		
+		public function getTopSideColor():String { return _isTopSideBlack ? "Black" : "Red"; }
 		public function getGame():Game { return _game; }
-
-		private function _setSideColors(color:String) : void
-		{
-			if (color == "Black") {
-				_sides.top.color = "Red";
-				_sides.bottom.color = "Black";
-			}
-			else {
-				_sides.top.color = "Black";
-				_sides.bottom.color = "Red";
-			}
-		}
 
 		public function getTimers(color:String) : GameTimers {
 			return new GameTimers(_tableData.getTime(color));			
@@ -83,16 +67,17 @@
 
 		private function _getJoinColor():String
 		{
-			var joinColor:String = "";
 			if ( (_redPlayer != null && _redPlayer.pid != "") && 
-				 (_blackPlayer == null || _blackPlayer.pid == "") ) {
-				joinColor = "Black";
+				 (_blackPlayer == null || _blackPlayer.pid == "") )
+			{
+				return "Black";
 			}
 			else if ( (_blackPlayer != null && _blackPlayer.pid != "") &&
-					  (_redPlayer == null || _redPlayer.pid == "") ) {
-				joinColor = "Red";
+					  (_redPlayer == null || _redPlayer.pid == "") )
+			{
+				return "Red";
 			}
-			return joinColor;
+			return "";
 		}
 
 		public function newTable(tableData:TableInfo) : void
@@ -183,21 +168,10 @@
 
 		private function _displayPlayers() : void
 		{
-			if (this.view == null) {
-				return;
-			}
-			if (_sides.top.color == "Red") {
-				this.view.displayPlayerData(_redPlayer);
-			}
-			else {
-				this.view.displayPlayerData(_blackPlayer);
-			}
-			if (_sides.bottom.color == "Red") {
-				this.view.displayPlayerData(_redPlayer);
-			}
-			else {
-				this.view.displayPlayerData(_blackPlayer);
-			}
+			if (this.view == null) return;
+
+			this.view.displayPlayerData(_redPlayer);
+			this.view.displayPlayerData(_blackPlayer);
 		}
 
 		private function _startGame() : void
@@ -240,8 +214,8 @@
 			if (_moveList.length == 0) {
 				_tableData.updateTimes(times);
 				var timer:GameTimers = new GameTimers(times);
-				this.view.updateTimers(getTopSideColor(), timer);
-				this.view.updateTimers(getBottomSideColor(), timer);
+				this.view.updateTimers("Red", timer);
+				this.view.updateTimers("Black", timer);
 				var fields:Array = times.split("/");
 				_settings["gametime"] = fields[0];
 				_settings["movetime"] = fields[1];
@@ -745,13 +719,13 @@
 				if (type == "JOINTABLE_EVENT") {
 					if (data.pid == Global.app.getPlayerID()) {
 						if (data.color != "None") {
-							_setSideColors(data.color);
+							_isTopSideBlack = (data.color == "Red");
 							_createNewTableView();
 							_tableState = "NEWTABLE_STATE";
 						}
 						else {
 							var joinColor:String = _getJoinColor();
-							_setSideColors(joinColor);
+							_isTopSideBlack = true; // (joinColor == "Red");
 							_createObserveTableView(joinColor);
 							if (joinColor == "") {
 								_tableState = "OBSERVER_STATE";
@@ -764,13 +738,9 @@
 				}
 				else if (type == "TABLEINFO_EVENT") {
 					if (data.getRedPlayer().pid == Global.app.getPlayerID() ||
-						data.getBlackPlayer().pid == Global.app.getPlayerID()) {
-						if (data.getRedPlayer().pid == Global.app.getPlayerID()) {
-							_setSideColors("Red");
-						}
-						else if (data.getBlackPlayer().pid == Global.app.getPlayerID()) {
-							_setSideColors("Black");
-						}
+						data.getBlackPlayer().pid == Global.app.getPlayerID())
+					{
+						_isTopSideBlack = (data.getRedPlayer().pid == Global.app.getPlayerID());
 						_createNewTableView();
 						Global.app.showTableMenu(true, true);
 						_tableState = "NEWTABLE_STATE";
@@ -778,7 +748,7 @@
 					}
 					else {
 						joinColor = _getJoinColor();
-						_setSideColors(joinColor);
+						_isTopSideBlack = (joinColor == "Red");
 						_createObserveTableView(joinColor);
 						if (joinColor == "") {
 							_tableState = "OBSERVER_STATE";

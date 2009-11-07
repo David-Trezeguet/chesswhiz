@@ -34,13 +34,8 @@
 		public function processEvent(event:String) : void {
 			if (_state == "idle") {
 				if (event == "start") {
-					this.start();
-					if (_localPlayer.color == "Red") {
-						_state = "localmove";
-					}
-					else {
-						_state = "oppmove";
-					}
+					_table.view.board.enableEvents(_localPlayer.color);
+					_state = (_localPlayer.color == "Red" ? "localmove" : "oppmove");
 				}
 			}
 			else if (_state == "localmove") {
@@ -53,10 +48,6 @@
 					_state = "localmove";
 				}
 			}
-		}
-
-		public function start() : void {
-			_table.view.board.enableEvents(_localPlayer.color);
 		}
 
 		private function _getMyPieces(type:String) : Array {
