@@ -23,6 +23,7 @@
 		private var _initialColumn:int;
 		private var _imageSrc:String;
 		private var _image:Image      = null;
+		private var _skinIndex:int    = -1;
 		private var _captured:Boolean = false;
 		private var _enabled:Boolean  = false;
 		
@@ -44,7 +45,6 @@
 		public function getColor():String { return _color; }
 		public function isEventsEnabled() : Boolean { return _enabled; }
 		public function getType():String { return _type; }
-		public function getImageHolder() : Image { return _image; }
 		public function isCaptured():Boolean { return _captured; }
 		public function getPosition():Position { return new Position(_row, _column); }
 		public function getInitialPosition():Position { return new Position(_initialRow, _initialColumn); }
@@ -63,8 +63,12 @@
 		public function draw(offset:int, width:int, height:int, pieceSkinIndex:int) : void
 		{
 			var viewPos:Position = _board.getViewPosition(getPosition());
-			_image = new Image();
-			_image.load("assets/pieces/" + pieceSkinIndex + "/" + _imageSrc);
+			if (_image == null || _skinIndex != pieceSkinIndex)
+			{
+				_skinIndex = pieceSkinIndex;
+				_image = new Image();
+				_image.load("assets/pieces/" + _skinIndex + "/" + _imageSrc);
+			}
 			_image.x = (offset + viewPos.column * width) - _imageRadius;
 			_image.y = (offset + viewPos.row * height) - _imageRadius;
 			_board.addChild(_image);
@@ -141,7 +145,7 @@
 				if (_image.parent) {
 					_image.parent.removeChild(_image);
 				}
-				_image = null;
+				//_image = null;
 			}
 		}
 

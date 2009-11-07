@@ -512,25 +512,18 @@
 			}
 
 			var moveIndex:int = 0;
-			if (cmd == "start") {
-				moveIndex = 0;
-			} else if (cmd == "end") {
-				moveIndex = _moveList.length;
-			} else if (cmd == "rewind") {
-				moveIndex = _curMoveIndex - 1;
-				if (moveIndex < 0) {
-					return;
-				}
-			} else {
-				moveIndex = _curMoveIndex + 1;
-				if (moveIndex > _moveList.length) {
-					return;
-				}
-			}
 
-			if (_curMoveIndex == moveIndex ) {
+			if      (cmd == "start")  { moveIndex = 0;                 }
+			else if (cmd == "end")    { moveIndex = _moveList.length;  }
+			else if (cmd == "rewind") { moveIndex = _curMoveIndex - 1; }
+			else                      { moveIndex = _curMoveIndex + 1; }
+
+			if (    moveIndex < 0 || moveIndex > _moveList.length 
+			     || moveIndex == _curMoveIndex )
+			{
 				return;
 			}
+
 			_applyChangeSet(moveIndex);
 		}
 
@@ -539,7 +532,6 @@
 			var i:int = 0;
 			var changeSet:Array = new Array();
 			var focusPiece:Piece = null;
-			var mov:String = "";
 			var fields:Array = null;
 			var color:String = "";
 			var pieceIndex:String = "";
@@ -550,8 +542,7 @@
 			var capturedIndex:String = "";
 			if (moveIndex < _curMoveIndex) {
 				for (i = _curMoveIndex - 1; i >= moveIndex; i--) {
-					mov = _moveList[i];
-					fields = mov.split(":");
+					fields = _moveList[i].split(":");
 					color = fields[0];
 					pieceIndex = fields[1];
 					oldRow = parseInt(fields[2].charAt(0));
@@ -559,22 +550,14 @@
 					newRow = parseInt(fields[2].charAt(2));
 					newCol = parseInt(fields[2].charAt(3));
 					capturedIndex = fields[3];
-					if (color == "Red") {
-						changeSet[changeSet.length] = [color, pieceIndex, oldRow, oldCol, false];
-						if (capturedIndex != "") {
-							changeSet[changeSet.length] = ["Black", capturedIndex, newRow, newCol, false];
-						}
-					}
-					else {
-						changeSet[changeSet.length] = [color, pieceIndex, oldRow, oldCol, false];
-						if (capturedIndex != "") {
-							changeSet[changeSet.length] = ["Red", capturedIndex, newRow, newCol, false];
-						}
+					changeSet[changeSet.length] = [color, pieceIndex, oldRow, oldCol, false];
+					if (capturedIndex != "") {
+						changeSet[changeSet.length] = [ (color == "Red" ? "Black" : "Red"),
+						                                capturedIndex, newRow, newCol, false ];
 					}
 					_curMoveIndex--;
 					if (_curMoveIndex < _moveList.length && _curMoveIndex > 0) {
-						mov = _moveList[_curMoveIndex - 1];
-						fields = mov.split(":");
+						fields = _moveList[_curMoveIndex - 1].split(":");
 						color = fields[0];
 						pieceIndex = fields[1];
 						focusPiece = this.view.board.getPieceByIndex(color, pieceIndex);
@@ -586,8 +569,7 @@
 			}
 			else {
 				for (i = _curMoveIndex; i < moveIndex; i++) {
-					mov = _moveList[i];
-					fields = mov.split(":");
+					fields = _moveList[i].split(":");
 					color = fields[0];
 					pieceIndex = fields[1];
 					oldRow = parseInt(fields[2].charAt(0));
@@ -595,17 +577,10 @@
 					newRow = parseInt(fields[2].charAt(2));
 					newCol = parseInt(fields[2].charAt(3));
 					capturedIndex = fields[3];
-					if (color == "Red") {
-						changeSet[changeSet.length] = [color, pieceIndex, newRow, newCol, false];
-						if (capturedIndex != "") {
-							changeSet[changeSet.length] = ["Black", capturedIndex, newRow, newCol, true];
-						}
-					}
-					else {
-						changeSet[changeSet.length] = [color, pieceIndex, newRow, newCol, false];
-						if (capturedIndex != "") {
-							changeSet[changeSet.length] = ["Red", capturedIndex, newRow, newCol, true];
-						}
+					changeSet[changeSet.length] = [color, pieceIndex, newRow, newCol, false];
+					if (capturedIndex != "") {
+						changeSet[changeSet.length] = [ (color == "Red" ? "Black" : "Red"),
+						                                capturedIndex, newRow, newCol, true ];
 					}
 					_curMoveIndex++;
 					focusPiece = this.view.board.getPieceByIndex(color, pieceIndex);
