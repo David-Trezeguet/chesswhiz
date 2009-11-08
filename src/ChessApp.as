@@ -21,29 +21,35 @@
 
 	public class ChessApp
 	{
-		private var _preferences:Object = {};
+		private var _preferences:Object;
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
 		private var _playerId:String = "";
 		private var _sessionId:String = "";
 		private var _bLoggedIn:Boolean = false;
 		private var _session:Session = new Session();
-		private var _currentTableId:String = "";
-		private var _tableObjects:Object = {};
+
+		private var _table:Table = null;  // THE table.
+
 		private var _moveSound:Sound;
 		private var _loginFailReason:String = "";
 		private var _cookie:SharedObject;
 
 		public function ChessApp(menu:TopControlBar, window:Container)
 		{
-			_menu = menu;
+			_menu       = menu;
 			_mainWindow = window;
+
 			_moveSound = new Global.moveSoundClass() as Sound;
-			_preferences["pieceskinindex"] = 1;
-			_preferences["boardcolor"] = 0x5b5d5b;
-			_preferences["linecolor"] = 0xa09e9e;
-			_preferences["sound"] = true;
+			_preferences = {
+					"pieceskinindex" : 1,
+					"boardcolor"     : 0x5b5d5b,
+					"linecolor"      : 0xa09e9e,
+					"sound"          : true
+				};
 			_loadCookie();
+
+			_startApp();
 		}
 
 		private function _loadCookie() : void
@@ -52,9 +58,9 @@
 				_cookie = SharedObject.getLocal("flashchess");
 				if (_cookie.data.persist == 0xFFDDFF) {
 					_preferences["pieceskinindex"] = _cookie.data.pieceskinindex;
-					_preferences["boardcolor"] = _cookie.data.boardcolor;
-					_preferences["linecolor"] = _cookie.data.linecolor;
-					_preferences["sound"] = _cookie.data.sound;
+					_preferences["boardcolor"]     = _cookie.data.boardcolor;
+					_preferences["linecolor"]      = _cookie.data.linecolor;
+					_preferences["sound"]          = _cookie.data.sound;
 				}
 			}
 			catch (error:Error) {
@@ -64,37 +70,28 @@
 
 		private function _saveCookie() : void
 		{
-			if (!_cookie) {
-				_cookie = SharedObject.getLocal("flashchess");
+			_cookie.data.persist        = 0xFFDDFF; // "Present" flag.
+			_cookie.data.pieceskinindex = _preferences["pieceskinindex"];
+			_cookie.data.boardcolor     = _preferences["boardcolor"];
+			_cookie.data.linecolor      = _preferences["linecolor"];
+			_cookie.data.sound          = _preferences["sound"];
+
+			var flushStatus:String = null;
+            try {
+				flushStatus = _cookie.flush( 10*1024 /* minDiskSpace */ );
+			}
+			catch (error:Error) {
+				trace("Error: Failed to flush the shared object: " + error);
 			}
 
-			if (_cookie) {
-				_cookie.data.persist = 0xFFDDFF;
-				_cookie.data.pieceskinindex = _preferences["pieceskinindex"];
-				_cookie.data.boardcolor = _preferences["boardcolor"];
-				_cookie.data.linecolor = _preferences["linecolor"];
-				_cookie.data.sound = _preferences["sound"];
-
-				var flushStatus:String = null;
-	            try {
-					flushStatus = _cookie.flush( 10*1024 /* minDiskSpace */ );
-				}
-				catch (error:Error) {
-					trace("Error: Failed to flush the shared object: " + error);
-				}
-
-				if (flushStatus != null)
-				{
-					switch (flushStatus) {
-						case SharedObjectFlushStatus.PENDING:
-							trace("Flush-Status: Requesting permission to save object...");
-							_cookie.addEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
-							break;
-						case SharedObjectFlushStatus.FLUSHED:
-							trace("Flush-Status: Shared object successfully flushed to disk.");
-							break;
-					}
-				}
+			switch (flushStatus) {
+				case SharedObjectFlushStatus.PENDING:
+					trace("Flush-Status: Requesting permission to save object...");
+					_cookie.addEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
+					break;
+				case SharedObjectFlushStatus.FLUSHED:
+					trace("Flush-Status: Shared object successfully flushed to disk.");
+					break;
 			}
 		}
 
@@ -112,9 +109,19 @@
             _cookie.removeEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
         }
 
-		public function startApp() : void
+		private function _startApp() : void
 		{
 			_session.openSocket();
+		}
+
+		private function _stopApp() : void
+		{
+			_session.closeSocket();
+			_table     = null;
+			_bLoggedIn = false;
+			_sessionId = "";
+			_playerId  = "";
+			_mainWindow.removeAllChildren();
 		}
 
 		public function addBoardToWindow(board:TableBoard) : void
@@ -125,7 +132,7 @@
 
 		public function processSocketConnectEvent() : void
 		{
-			trace("Successfully connected to server");
+			trace("Connection to server established.");
 			_menu.currentState = "";
 
 			var loginPanel:LoginPanel = new LoginPanel();
@@ -133,42 +140,30 @@
 			_mainWindow.addChild(loginPanel);
 		}
 
-		private function _stopApp() : void
+		public function processSocketCloseEvent() : void
 		{
-			_session.closeSocket();
-			_tableObjects = {};
-			_bLoggedIn = false;
-			_sessionId = "";
-			_playerId = "";
-			_mainWindow.removeAllChildren();
+			trace("Connection to server lost.");
 		}
 
 		public function getPlayerID():String  { return _playerId; }
 
-		private function _initViewTablesPanel(tables:Object) : void
+		public function doLogin(uname:String, passwd:String = "") : void
 		{
-			_mainWindow.removeAllChildren();
-			var tableListPanel:TableList = new TableList();
-			tableListPanel.setTableList(tables);
-			_mainWindow.addChild(tableListPanel);
-			_menu.currentState = "viewTablesState";
-		}
-
-		public function doLogin(uname:String, passwd:String) : void {
 			_playerId = uname;
 			_session.sendLoginRequest(uname, passwd, Global.LOGIN_VERSION);
 		}
 
-		public function doGuestLogin() : void {
-			const rand_no:Number = Math.ceil( 9999*Math.random() );
-			const uname:String  = 'Guest#fl' + rand_no;
-			this.doLogin(uname, '');
+		public function doGuestLogin() : void
+		{
+			const randNumber:Number = Math.ceil( 9999*Math.random() );
+			this.doLogin( "Guest#Fl" + randNumber );
 		}
 
-		public function doLogout() : void {
+		public function doLogout() : void
+		{
 			_session.sendLogoutRequest(_playerId, _sessionId);
 			_stopApp();
-			startApp();
+			_startApp();
 		}
 
 		public function doViewTables() : void {
@@ -183,20 +178,32 @@
 			_session.sendJoinRequest(_playerId, _sessionId, tableId, color, "0");
 		}
 
-		public function doCloseTable() : void {
-			_session.sendLeaveRequest(_playerId, _sessionId, _currentTableId);
+		public function doCloseTable() : void
+		{
+			if ( _table ) {
+				_session.sendLeaveRequest(_playerId, _sessionId, _table.tableId);
+			}
 		}
 
-		public function doResignTable() : void {
-			_session.sendResignRequest(_playerId, _sessionId, _currentTableId);
+		public function doResignTable() : void
+		{
+			if ( _table ) {
+				_session.sendResignRequest(_playerId, _sessionId, _table.tableId);
+			}
 		}
 
-		public function doDrawTable() : void {
-			_session.sendDrawRequest(_playerId, _sessionId, _currentTableId);
+		public function doDrawTable() : void
+		{
+			if ( _table ) {
+				_session.sendDrawRequest(_playerId, _sessionId, _table.tableId);
+			}
 		}
 
-		public function doTableChat(msg:String) : void {
-			_session.sendChatRequest(_playerId, _sessionId, _currentTableId, msg);
+		public function doTableChat(msg:String) : void
+		{
+			if ( _table ) {
+				_session.sendChatRequest(_playerId, _sessionId, _table.tableId, msg);
+			}
 		}
 
 		public function showTableMenu(showSettings:Boolean) : void
@@ -224,18 +231,16 @@
 			PopUpManager.addPopUp(settingsPanel, _mainWindow, true /* modal */);
 			PopUpManager.centerPopUp(settingsPanel);
 			
-			var table:Table = _getTable(_currentTableId);
-			if (table) {
-				var settings:Object = table.getSettings();
+			if (_table) {
+				var settings:Object = _table.getSettings();
 				settingsPanel.setCurrentSettings(settings);
 			}
 		}
 
 		public function updateTableSettings(settings:Object) : void
 		{
-			var table:Table = _getTable(_currentTableId);
-			if (table) {
-				table.updateSettings(settings);
+			if (_table) {
+				_table.updateSettings(settings);
 			}
 		}
 
@@ -255,10 +260,8 @@
 			if ( preferencesPanel != null )
 			{
 				const pref:Object = preferencesPanel.preferences;
-
-				var table:Table = _getTable(_currentTableId);
-				if (table) {
-					table.updatePreferences(pref);
+				if (_table) {
+					_table.updatePreferences(pref);
 				}
 				for (var key:String in pref) {
 					_preferences[key] = pref[key];
@@ -298,7 +301,8 @@
 			}
 		}
 
-		private function _processResponse_LOGIN(response:Message) : void {
+		private function _processResponse_LOGIN(response:Message) : void
+		{
 			if (_bLoggedIn) return;
 
 			if (response.getCode() == "0") {
@@ -313,110 +317,125 @@
 			else {
 				_loginFailReason = response.getContent();
 				_session.closeSocket();
-				startApp();
+				_startApp();
 			}
 		}
 
-		private function _processResponse_LOGOUT(response:Message) : void {
-			if (   !_bLoggedIn && response.getCode() == "0"
-				&& response.getContent() == _playerId )
+		private function _processResponse_LOGOUT(response:Message) : void
+		{
+			if (    _bLoggedIn
+				 && response.getCode() == "0"
+				 && response.getContent() == _playerId )
 			{
 				_stopApp();
 			}
         }
 
-		private function _processResponse_LIST(response:Message) : void {
-			const tables:Object = response.parseListResponse();
-			_initViewTablesPanel(tables);
-		}
-
-		private function _processResponse_ITABLE(response:Message) : void {
-			var tableInfo:TableInfo = new TableInfo( response.getContent() );
-			var tableId:String = tableInfo.tid;
-			var table:Table = _getTable(tableId);
-			if (table == null) {
-				table = new Table(tableId, _preferences);
-				_tableObjects[tableId] = table;
-			}
-			_currentTableId = table.tableId;
-			table.newTable(tableInfo);
-		}
-
-		private function _getTable(tableId:String) : Table
+		private function _processResponse_LIST(response:Message) : void
 		{
-			return _tableObjects[tableId]; 
+			const tables:Object = response.parseListResponse();
+			
+			// Display the Tables view.
+			_mainWindow.removeAllChildren();
+			var tableListPanel:TableList = new TableList();
+			tableListPanel.setTableList(tables);
+			_mainWindow.addChild(tableListPanel);
+			_menu.currentState = "viewTablesState";
 		}
 
-		private function _process_E_JOIN(event:Message) : void {
-			if (event.getCode() == "0") {
-				const joinInfo:JoinInfo = new JoinInfo(event.getContent());
-				const tableId:String = joinInfo.tid;
-				var table:Table = _getTable(tableId);
-				if (table == null) {
-					table = new Table(tableId, _preferences);
-					_tableObjects[tableId] = table;
-				}
-				_currentTableId = table.tableId;
-				if ( joinInfo.pid != "" )
-				{
-					table.joinTable( new PlayerInfo(joinInfo.pid, joinInfo.color, joinInfo.score) );
-				}
+		private function _processResponse_ITABLE(response:Message) : void
+		{
+			var tableInfo:TableInfo = new TableInfo( response.getContent() );
+			const tableId:String = tableInfo.tid;
+
+			if ( _table == null || _table.tableId != tableId )
+			{
+				_table = new Table(tableId, _preferences);
 			}
+
+			// NOTE: Update my table with the *new* info coming from the server.
+			_table.newTable(tableInfo);
+		}
+
+		private function _process_E_JOIN(event:Message) : void
+		{
+			if ( event.getCode() != "0" ) {
+				return;
+			}
+
+			const joinInfo:JoinInfo = new JoinInfo( event.getContent() );
+			const tableId:String = joinInfo.tid;
+
+			if ( _table == null || _table.tableId != tableId )
+			{
+				_table = new Table(tableId, _preferences);
+			}
+			
+			_table.joinTable( new PlayerInfo(joinInfo.pid, joinInfo.color, joinInfo.score) );
 	    }
 		
 		private function _process_MOVE(event:Message) : void
 		{
-			var table:Table = null;
-			if (event.getCode() == "0") {
+			if ( ! _table ) {
+				return;
+			}
+
+			if ( event.getCode() == "0" )
+			{
 				const moveInfo:MoveInfo = new MoveInfo( event.getContent() );
-				table = _getTable( moveInfo.tid );
-				if (table) {
-					const curPos:Position = new Position( moveInfo.fromRow, moveInfo.fromCol );
-					const newPos:Position = new Position( moveInfo.toRow, moveInfo.toCol );
-					table.movePiece(curPos, newPos);
+				if ( _table.tableId == moveInfo.tid )
+				{
+					_table.movePiece( new Position(moveInfo.fromRow, moveInfo.fromCol),
+									  new Position(moveInfo.toRow, moveInfo.toCol) );
 				}
 			}
-			else {
-				table = _getTable(_currentTableId);
-				if (table) {
-					table.processWrongMove(event.getContent());
-				}
+			else
+			{
+				_table.processWrongMove(event.getContent());
 			}
 	    }
 
-		public function sendMoveRequest(player:PlayerInfo, piece:Piece, curPos:Position, newPos:Position, tid:String) : void {
+		public function sendMoveRequest(player:PlayerInfo, piece:Piece, curPos:Position, newPos:Position, tid:String) : void
+		{
 			_session.sendMoveRequest(_playerId, _sessionId, curPos, newPos, '1500', tid);
 		}
 		
-		public function resignGame(tableId:String) : void {
+		public function resignGame(tableId:String) : void
+		{
 			_session.sendResignRequest(_playerId, _sessionId, tableId);
 		}
 	
-		public function drawGame(tableId:String) : void {
+		public function drawGame(tableId:String) : void
+		{
 			_session.sendDrawRequest(_playerId, _sessionId, tableId);
 		}
 
-		public function doUpdateTableSettings(tableId:String, times:String, bRated:Boolean) : void {
+		public function doUpdateTableSettings(tableId:String, times:String, bRated:Boolean) : void
+		{
 			_session.sendUpdateTableRequest(_playerId, tableId, times, bRated)
 		}
 
-		private function _processEvent_I_MOVES(event:Message) : void {
-			var moveList:MoveListInfo = new MoveListInfo(event.getContent());
-			var table:Table = _getTable( moveList.tid);
-			if (table) {
-				table.playMoveList(moveList.moves);
+		private function _processEvent_I_MOVES(event:Message) : void
+		{
+			const moveList:MoveListInfo = new MoveListInfo( event.getContent() );
+			if (_table && _table.tableId == moveList.tid)
+			{
+				_table.playMoveList(moveList.moves);
 			}
 		}
 	
-		private function _processEvent_LEAVE(event:Message) : void {
+		private function _processEvent_LEAVE(event:Message) : void
+		{
 			var fields:Array = event.getContent().split(';');
-			var tid:String = fields[0];
-			var pid:String = fields[1];
-			var table:Table = _getTable(tid);
-			if (table) {
-				table.leaveTable(pid);
-				if (pid == _playerId) {
-					_removeTable(tid);
+			const tid:String = fields[0];
+			const pid:String = fields[1];
+
+			if ( _table && _table.tableId == tid )
+			{
+				_table.leaveTable(pid);
+				if (pid == _playerId)
+				{
+					_table = null;
 					_mainWindow.removeAllChildren();
 					_menu.currentState = "viewTablesState";
 					doViewTables();
@@ -424,63 +443,62 @@
 			}
 		}
 	
-		private function _processEvent_E_END(event:Message) : void {
-			if (event.getCode() == "0") {
-				var endEvent:EndEvent = new EndEvent(event.getContent());
-				var table:Table = _getTable(endEvent.tid);
-				if (table) {
-					table.stopGame(endEvent.reason, endEvent.winner);
-				}
+		private function _processEvent_E_END(event:Message) : void
+		{
+			if ( event.getCode() != "0" ) {
+				return;
+			}
+
+			const endEvent:EndEvent = new EndEvent( event.getContent() );
+			if ( _table && _table.tableId == endEvent.tid )
+			{
+				_table.stopGame(endEvent.reason, endEvent.winner);
 			}
 		}
 	
-		private function _processEvent_DRAW(event:Message) : void {
-			if (event.getCode() == "0") {
-				var drawEvent:DrawEvent = new DrawEvent(event.getContent());
-				var table:Table = _getTable(drawEvent.tid);
-				if (table) {
-					table.drawGame(drawEvent.pid);
-				}
-			}
-		}
-
-		private function _processEvent_MSG(event:Message) : void {
-			var tableId:String = event.getTableId();
-			var fields:Array = event.getContent().split(';');
-			var pid:String = fields[0];
-			var chatMsg:String = fields[1];
-			if (event.getCode() == "0") {
-				var table:Table = _getTable(tableId);
-				if (table) {
-					table.displayChatMessage(pid, chatMsg);
-				}
-			}
-		}
-
-		private function _processEvent_UPDATE(event:Message) : void {
-			const fields:Array = event.getContent().split(';');
-			var tableId:String = fields[0];
-			var pid:String = fields[1];
-			var times:String = fields[3];
-			if (event.getCode() == "0") {
-				var table:Table = _getTable(tableId);
-				if (table) {
-					table.updateGameTimes(pid, times);
-				}
-			}			
-		}
-
-		public function processSocketCloseEvent() : void
+		private function _processEvent_DRAW(event:Message) : void
 		{
-			trace("Connection to server lost.");
+			if ( event.getCode() != "0" ) {
+				return;
+			}
+
+			const drawEvent:DrawEvent = new DrawEvent(event.getContent());
+			if ( _table && _table.tableId == drawEvent.tid )
+			{
+				_table.drawGame(drawEvent.pid);
+			}
 		}
 
-		private function _removeTable(tableId:String) : void { 
-			var table:Table = _tableObjects[tableId];
-			if (table) {
-				_tableObjects[tableId] = null;
+		private function _processEvent_MSG(event:Message) : void
+		{
+			if ( event.getCode() != "0" ) {
+				return;
 			}
-			_currentTableId = "";
+
+			const tableId:String = event.getTableId();
+			var fields:Array = event.getContent().split(';');
+			const pid:String = fields[0];
+			const chatMsg:String = fields[1];
+			if ( _table && _table.tableId == tableId )
+			{
+				_table.displayChatMessage(pid, chatMsg);
+			}
+		}
+
+		private function _processEvent_UPDATE(event:Message) : void
+		{
+			if ( event.getCode() != "0" ) {
+				return;
+			}
+
+			const fields:Array = event.getContent().split(';');
+			const tableId:String = fields[0];
+			const pid:String = fields[1];
+			const times:String = fields[3];
+			if ( _table && _table.tableId == tableId )
+			{
+				_table.updateGameTimes(pid, times);
+			}
 		}
 
 		public function playMoveSound() : void
@@ -489,6 +507,5 @@
 				_moveSound.play();
 			}
 		}
-		
 	}
 }

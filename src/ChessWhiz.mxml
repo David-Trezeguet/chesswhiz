@@ -26,7 +26,6 @@
 	    private function initComplete() : void
 	    {
 			Global.app = new ChessApp(topControlBar, mainWindow);
-			Global.app.startApp();
 		}
 	
 	]]>

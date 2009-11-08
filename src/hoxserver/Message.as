@@ -10,12 +10,12 @@
 			/* Empty */
 		}
 
-		public function getCode():String    { return this.params['code'];    }
-		public function getTableId():String { return this.params['tid'];     }
-		public function getContent():String { return this.params['content']; }
+		public function getCode():String    { return this.params["code"];    }
+		public function getTableId():String { return this.params["tid"];     }
+		public function getContent():String { return this.params["content"]; }
 
 		public function createListRequest(pid:String, sid:String):void {
-			this.optype = 'LIST';
+			this.optype = "LIST";
 			this.params = {
 				pid: pid,
 				sid: sid
@@ -66,7 +66,7 @@
 			this.params = {
 				pid: pid,
 				sid: sid,
-				itimes: '1200/240/20',
+				itimes: "1200/240/20",
 				color: color
 			};
 		}
@@ -77,7 +77,7 @@
 				pid: pid,
 				sid: sid,
 				tid: tableId,
-				draw_response: '1'
+				draw_response: "1"
 			};
 		}
 
