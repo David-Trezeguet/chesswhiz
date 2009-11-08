@@ -179,8 +179,8 @@
 			_session.sendNewTableRequest(_playerId, _sessionId, "Red");
 		}
 		
-		public function doJoinTable(tid:String) : void {
-			_session.sendJoinRequest(_playerId, _sessionId, tid, "None", "0");
+		public function doJoinTable(tableId:String, color:String = "None") : void {
+			_session.sendJoinRequest(_playerId, _sessionId, tableId, color, "0");
 		}
 
 		public function doCloseTable() : void {
@@ -331,7 +331,7 @@
 		}
 
 		private function _processResponse_ITABLE(response:Message) : void {
-			var tableInfo:TableInfo = response.parseTableResponse();
+			var tableInfo:TableInfo = new TableInfo( response.getContent() );
 			var tableId:String = tableInfo.tid;
 			var table:Table = _getTable(tableId);
 			if (table == null) {
@@ -342,14 +342,10 @@
 			table.newTable(tableInfo);
 		}
 
-		private function _getTable(tableId:String) : Table 
+		private function _getTable(tableId:String) : Table
 		{
 			return _tableObjects[tableId]; 
 		}
-
-		public function playGame(tableId:String, color:String) : void {
-	        _session.sendJoinRequest(_playerId, _sessionId, tableId, color, '0');
-    	}
 
 		private function _process_E_JOIN(event:Message) : void {
 			if (event.getCode() == "0") {
@@ -361,11 +357,15 @@
 					_tableObjects[tableId] = table;
 				}
 				_currentTableId = table.tableId;
-				table.joinTable(joinInfo.getPlayer());
+				if ( joinInfo.pid != "" )
+				{
+					table.joinTable( new PlayerInfo(joinInfo.pid, joinInfo.color, joinInfo.score) );
+				}
 			}
 	    }
 		
-		private function _process_MOVE(event:Message) : void {
+		private function _process_MOVE(event:Message) : void
+		{
 			var table:Table = null;
 			if (event.getCode() == "0") {
 				const moveInfo:MoveInfo = new MoveInfo( event.getContent() );
@@ -404,7 +404,7 @@
 			var moveList:MoveListInfo = new MoveListInfo(event.getContent());
 			var table:Table = _getTable( moveList.tid);
 			if (table) {
-				table.playMoveList(moveList);
+				table.playMoveList(moveList.moves);
 			}
 		}
 	
