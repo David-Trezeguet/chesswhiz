@@ -30,43 +30,6 @@
 				blackscore = fields[9];
 			}
         }
-
-		public function clone():TableInfo
-		{
-			var tableData:TableInfo = new TableInfo();
-			tableData.tid = tid;
-			tableData.group = group;
-			tableData.gametype = gametype;
-			tableData.initialtime = initialtime;
-			tableData.redtime = redtime;
-			tableData.blacktime = blacktime;
-			tableData.redid = redid;
-			tableData.redscore = redscore;
-			tableData.blackid = blackid;
-			tableData.blackscore = blackscore;
-			return tableData;
-		}
-			
-		public function getRedPlayer():PlayerInfo
-		{
-			return new PlayerInfo(redid, "Red", redscore);
-		}
-		
-		public function getBlackPlayer():PlayerInfo
-		{
-			return new PlayerInfo(blackid, "Black", blackscore);
-		}
-		
-		public function getTime(color:String):String
-		{
-			return (color == "Red" ? this.redtime : this.blacktime);
-		}
-		
-		public function updateTimes(times:String):void
-		{
-			this.redtime = times;
-			this.blacktime = times;
-		}
     }
 
 }

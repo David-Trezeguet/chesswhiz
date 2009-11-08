@@ -72,14 +72,14 @@
 			<mx:AddChild relativeTo="{spacer1}" position="before">
 				<mx:Button id="playRedButton"
 					label="{resourceManager.getString('localization', 'play_red')}"
-					click="Global.app.playGame(tableId, 'Red');"/>
+					click="Global.app.doJoinTable(tableId, 'Red');"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="openBlackState" basedOn="observerState">
 			<mx:AddChild relativeTo="{spacer1}" position="before">
 				<mx:Button id="playBlackButton"
 					label="{resourceManager.getString('localization', 'play_black')}"
-					click="Global.app.playGame(tableId, 'Black');"/>
+					click="Global.app.doJoinTable(tableId, 'Black');"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="inGameState" basedOn="observerState">

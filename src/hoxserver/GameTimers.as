@@ -2,11 +2,11 @@
 {
 	public class GameTimers
 	{
-		public var gameTime:int;
-		public var moveTime:int;
-		public var extraTime:int;
+		public var gameTime:int  = 0;
+		public var moveTime:int  = 0;
+		public var extraTime:int = 0;
 
-		public var _initialMoveTime:int = 0;
+		private var _initialMoveTime:int = 0;
 
 		public function GameTimers(time:String) : void
 		{
@@ -29,8 +29,7 @@
 		{
 			if (type == "game")  { return _formatTime(this.gameTime);  }
 			if (type == "move")  { return _formatTime(this.moveTime);  }
-			if (type == "extra") { return _formatTime(this.extraTime); }
-			return "";
+			/* "extra" */          return _formatTime(this.extraTime);
 		}
 
 		private function _formatTime(seconds:int) : String
