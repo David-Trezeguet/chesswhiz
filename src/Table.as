@@ -222,7 +222,7 @@
 		
 		public function stopGame(reason:String, winner:String) : void {
 			if (_game) {
-				this.view.board.disableEvents(_game.getLocalPlayer().color);
+				this.view.board.disablePieceEvents(_game.getLocalPlayer().color);
 				_game = null;
 			}
 			this.view.board.displayStatus("Game Over (" + reason + ")");
@@ -528,16 +528,17 @@
 		private function _applyChangeSet(moveIndex:int) : void
 		{
 			var i:int = 0;
-			var changeSet:Array = new Array();
+			var changeSet:Array = [];
 			var focusPiece:Piece = null;
-			var fields:Array = null;
-			var color:String = "";
-			var pieceIndex:String = "";
-			var oldRow:int = 0;
-			var oldCol:int = 0;
-			var newRow:int = 0;
-			var newCol:int = 0;
-			var capturedIndex:String = "";
+			var fields:Array;
+			var color:String;
+			var pieceIndex:String;
+			var oldRow:int;
+			var oldCol:int;
+			var newRow:int;
+			var newCol:int;
+			var capturedIndex:String;
+
 			if (moveIndex < _curMoveIndex) {
 				for (i = _curMoveIndex - 1; i >= moveIndex; i--) {
 					fields = _moveList[i].split(":");
@@ -548,10 +549,10 @@
 					newRow = parseInt(fields[2].charAt(2));
 					newCol = parseInt(fields[2].charAt(3));
 					capturedIndex = fields[3];
-					changeSet[changeSet.length] = [color, pieceIndex, oldRow, oldCol, false];
+					changeSet.push( [color, pieceIndex, oldRow, oldCol, false] );
 					if (capturedIndex != "") {
-						changeSet[changeSet.length] = [ (color == "Red" ? "Black" : "Red"),
-						                                capturedIndex, newRow, newCol, false ];
+						changeSet.push( [ (color == "Red" ? "Black" : "Red"),
+						                  capturedIndex, newRow, newCol, false ] );
 					}
 					_curMoveIndex--;
 					if (_curMoveIndex < _moveList.length && _curMoveIndex > 0) {
@@ -575,10 +576,10 @@
 					newRow = parseInt(fields[2].charAt(2));
 					newCol = parseInt(fields[2].charAt(3));
 					capturedIndex = fields[3];
-					changeSet[changeSet.length] = [color, pieceIndex, newRow, newCol, false];
+					changeSet.push( [color, pieceIndex, newRow, newCol, false] );
 					if (capturedIndex != "") {
-						changeSet[changeSet.length] = [ (color == "Red" ? "Black" : "Red"),
-						                                capturedIndex, newRow, newCol, true ];
+						changeSet.push( [ (color == "Red" ? "Black" : "Red"),
+						                  capturedIndex, newRow, newCol, true ] );
 					}
 					_curMoveIndex++;
 					focusPiece = this.view.board.getPieceByIndex(color, pieceIndex);
@@ -726,7 +727,7 @@
 				if (_tableState == "MOVEREVIEW_STATE") {
 					this.view.board.updatePieceMapState(piece, data[1], data[2]);
 				} else {
-					this.view.board.movePieceByPos(piece, data[2], true);
+					this.view.board.movePieceByPos(piece, data[2]);
 				}
 				if (_moveList.length > 2) {
 					_resetMoveTimer();

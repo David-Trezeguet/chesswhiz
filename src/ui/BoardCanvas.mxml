@@ -422,16 +422,15 @@
 			}
 		}
 
-		public function movePieceByPos(piece:Piece, newPos:Position, moveImage:Boolean) : void
+		public function movePieceByPos(piece:Piece, newPos:Position) : void
 		{
 			updatePieceMap(newPos, piece);
-			if (moveImage) {
-				piece.moveImage();
-				if (_lastPieceInFocus) {
-					_lastPieceInFocus.clearFocus();
-				}
-				piece.setFocus();
+			piece.moveImage();
+
+			if (_lastPieceInFocus) {
+				_lastPieceInFocus.clearFocus();
 			}
+			piece.setFocus();
 			_lastPieceInFocus = piece;
 		}
 
@@ -468,20 +467,20 @@
 			_addTextField(status, this.getX(1), this.getY(4) + 10, 0x33CCFF, 18);
 		}
 
-		public function enableEvents(color:String) : void
+		public function enablePieceEvents(color:String) : void
 		{
 			var pieces:Array = (color == "Red" ? _redPieces : _blackPieces);
-			for (var i:int = 0; i < 16; i++) {
-				pieces[i].enableEvents();
+			for each (var piece:Piece in pieces) {
+				piece.enableEvents();
 			}
 		}
 
-		public function disableEvents(color:String) : void
+		public function disablePieceEvents(color:String) : void
 		{
 			var pieces:Array = (color == "Red" ? _redPieces : _blackPieces);
-			for (var i:int = 0; i < 16; i++) {
-				pieces[i].disableEvents();
-			}		
+			for each (var piece:Piece in pieces) {
+				piece.disableEvents();
+			}	
 		}
 
 		public function reDraw(changeSet:Array, focusPiece:Piece) : void
@@ -489,37 +488,30 @@
 			if (changeSet.length == 0) {
 				return;
 			}
-			var piece:Piece = null;
-			var captured:Boolean = false;
-			var pos1:Position = null;
-			var pos2:Position = null;
-			var color:String = "";
-			var index:int = 0;
+			var piece:Piece;
+			var captured:Boolean;
+			var pos1:Position;
+			var pos2:Position;
+			var color:String;
+			var index:int;
 
 			for (var i:int = 0; i < changeSet.length; i++) {
 				color = changeSet[i][0];
 				index = parseInt(changeSet[i][1]);
-				if (color == "Red") { piece = _redPieces[index]; }
-				else                { piece = _blackPieces[index]; }
+				piece = (color == "Red" ? _redPieces[index] : _blackPieces[index]);
 				captured = changeSet[i][4];
 				pos1 = piece.getPosition();
-				pos2 = new Position(parseInt(changeSet[i][2]), parseInt(changeSet[i][3]));
+				pos2 = new Position(changeSet[i][2], changeSet[i][3]);
 				if (!captured) {
 					if (piece.isCaptured()) {
 						piece.setPosition(pos2);
 						piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
-						if (piece.isEventsEnabled()) {
-							piece.enableEvents();
-						}
 					}
 					else {
 						if (pos1.row != pos2.row || pos1.column != pos2.column) {
 							piece.removeImage();
 							piece.setPosition(pos2);
 							piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
-							if (piece.isEventsEnabled()) {
-								piece.enableEvents();
-							}
 						}
 					}
 					piece.setCapture(false);

@@ -22,10 +22,9 @@
 		private var _initialRow:int;
 		private var _initialColumn:int;
 		private var _imageSrc:String;
-		private var _image:Image      = null;
+		private var _image:Image      = new Image();
 		private var _skinIndex:int    = -1;
 		private var _captured:Boolean = false;
-		private var _enabled:Boolean  = false;
 		
 		public function Piece(id:int, type:String, color:String, row:int, column:int, board:BoardCanvas) : void
 		{
@@ -43,7 +42,6 @@
 
 		public function getIndex():int { return _id; }
 		public function getColor():String { return _color; }
-		public function isEventsEnabled() : Boolean { return _enabled; }
 		public function getType():String { return _type; }
 		public function isCaptured():Boolean { return _captured; }
 		public function getPosition():Position { return new Position(_row, _column); }
@@ -60,9 +58,8 @@
 		public function draw(offset:int, width:int, height:int, skinIndex:int) : void
 		{
 			var viewPos:Position = _board.getViewPosition(getPosition());
-			if (_image == null || _skinIndex != skinIndex)
+			if (_skinIndex != skinIndex)
 			{
-				_image = new Image();
 				this.changeSkinIndex(skinIndex);
 			}
 			_image.x = (offset + viewPos.column * width) - _imageRadius;
@@ -72,7 +69,7 @@
 
 		public function changeSkinIndex(skinIndex:int) : void
 		{
-			if ( _image != null && _skinIndex != skinIndex )
+			if ( _skinIndex != skinIndex )
 			{
 				_skinIndex = skinIndex;
 				_image.load("assets/pieces/" + _skinIndex + "/" + _imageSrc);
@@ -81,20 +78,14 @@
 
 		public function enableEvents() : void
 		{
-			if (_image != null) {
-				_image.addEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
-				_image.addEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
-				_enabled = true;
-			}
+			_image.addEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
+			_image.addEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
 		}
 
 		public function disableEvents() : void
 		{
-			if (_image != null) {
-				_image.removeEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
-				_image.removeEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
-				_enabled = false;
-			}
+			_image.removeEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
+			_image.removeEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
 		}
 
 		private function _startDragHandler(evt:MouseEvent) : void 
@@ -120,48 +111,34 @@
 		
 		public function setFocus() : void
 		{
-			if (_image != null)
-			{	
-	            const glowFilter:GlowFilter = new GlowFilter( 0x33CCFF /* color */,
-							                                  0.8      /* alpha */,
-							                                  10       /* blurX */,
-							                                  10       /* blurY */,
-							                                  2        /* strength */,
-							                                  BitmapFilterQuality.HIGH,
-							                                  false   /* inner */,
-							                                  false   /* knockout */ );
-				_image.filters = [glowFilter];
-			}
+            const glowFilter:GlowFilter = new GlowFilter( 0x33CCFF /* color */,
+						                                  0.8      /* alpha */,
+						                                  10       /* blurX */,
+						                                  10       /* blurY */,
+						                                  2        /* strength */,
+						                                  BitmapFilterQuality.HIGH,
+						                                  false   /* inner */,
+						                                  false   /* knockout */ );
+			_image.filters = [glowFilter];
 		}
 
 		public function clearFocus() : void
 		{
-			if (_image != null) {
-				_image.filters = [];
-			}
+			_image.filters = [];
 		}
 
 		public function removeImage() : void
 		{
-			if (_image != null) {
-				if (_enabled) {
-					_image.removeEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
-					_image.removeEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
-				}
-				if (_image.parent) {
-					_image.parent.removeChild(_image);
-				}
-				//_image = null;
+			if (_image.parent) {
+				_image.parent.removeChild(_image);
 			}
 		}
 
 		public function moveImage() : void
 		{
-			if (_image != null) {
-				const viewPos:Position = _board.getViewPosition(getPosition());
-				_image.x = _board.getX(viewPos.column) - _imageRadius;
-				_image.y = _board.getY(viewPos.row) - _imageRadius;
-			}
+			const viewPos:Position = _board.getViewPosition(getPosition());
+			_image.x = _board.getX(viewPos.column) - _imageRadius;
+			_image.y = _board.getY(viewPos.row) - _imageRadius;
 		}
 	}
 }

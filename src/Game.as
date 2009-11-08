@@ -1,4 +1,5 @@
-﻿package {
+﻿package
+{
 	import hoxserver.*;
 	
 	import ui.BoardCanvas;
@@ -34,7 +35,7 @@
 		public function processEvent(event:String) : void {
 			if (_state == "idle") {
 				if (event == "start") {
-					_table.view.board.enableEvents(_localPlayer.color);
+					_table.view.board.enablePieceEvents(_localPlayer.color);
 					_state = (_localPlayer.color == "Red" ? "localmove" : "oppmove");
 				}
 			}
