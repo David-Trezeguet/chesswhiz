@@ -91,7 +91,7 @@
 				<mx:Image source="{Global.volumeOffImageClass}"/>
 			</mx:HBox>
 		</mx:Panel>
-		<mx:Panel layout="vertical" title="Board Color" height="95" width="126" paddingTop="5" paddingLeft="5">
+		<mx:Panel layout="vertical" title="Board Color" height="100%" width="126" paddingTop="5" paddingLeft="5">
 			<mx:ColorPicker id="colorPicker" change="_displayPreview()" width="40" height="40"/>
 		</mx:Panel>
 	</mx:VBox>

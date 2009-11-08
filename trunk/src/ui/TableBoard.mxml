@@ -7,6 +7,7 @@
 
 <mx:Script>
 	<![CDATA[
+		import mx.utils.StringUtil;
 		import mx.controls.Label;
 		import mx.controls.Image;
 		import hoxserver.*;
@@ -17,6 +18,10 @@
 		{
 			topTimerImage.source = Global.timerImgClass;
 			bottomTimerImage.source = topTimerImage.source;
+			
+			infoPanel.title = resourceManager.getString('localization', 'Information');
+			chatPanel.title = resourceManager.getString('localization', 'Chat');
+			chatInput.text = resourceManager.getString('localization', 'chat_prompt');
 		}
 
 		public function display(table:Table) : void
@@ -77,33 +82,23 @@
 		
 		public function displayChatMessage(pid:String, chatMsg:String) : void 
 		{
-			this.taChat.text  += "[" + pid + "] " + chatMsg + "\n";
+			chatArea.text  += "[" + pid + "] " + chatMsg + "\n";
 		}
 
-        public function postChatMessage(event:KeyboardEvent) : void
+        public function onEnterInput(event:Event) : void
         {
-        	if (event.keyCode != Keyboard.ENTER) {
-        		return;
-        	}
-        	var temp:String;
-			var chatMsg:String = this.taChatInput.text
-			if (chatMsg.charAt(chatMsg.length - 1) == "\n") {
-				temp = chatMsg.substr(0, chatMsg.length - 1);
-				chatMsg = temp;
-			}
-			if (chatMsg.charAt(chatMsg.length - 1) == "\r") {
-				temp = chatMsg.substr(0, chatMsg.length - 1);
-				chatMsg = temp;
-			}
+			const chatMsg:String = StringUtil.trim( chatInput.text );
+			chatInput.text = "";
 
-			if (chatMsg.search("/debug") == 0) {
+			if ( chatMsg.search("/debug") == 0 )
+			{
 				_table.handleDebugCmd(chatMsg);
-				this.taChatInput.text = "";
-				return;
 			}
-			Global.app.doTableChat(chatMsg);
-			this.taChatInput.text = "";
-			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
+			else
+			{
+				Global.app.doTableChat(chatMsg);
+				this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
+			}
         }
 
 		public function redrawBoard(boardColor:uint, lineColor:uint) : void 
@@ -118,12 +113,15 @@
 
 		public function enableReviewButtons(flag:Boolean) : void 
 		{
-			for (var i:int = 0; i < this.mcMoves.numChildren; i++) {
-				if (this.mcMoves.getChildAt(i) is Button) {
-					var button:Button = (Button)(this.mcMoves.getChildAt(i));
-					button.enabled = flag;
-				}
-			}
+			startButton.enabled   = flag;
+			rewindButton.enabled  = flag;
+			forwardButton.enabled = flag;
+			endButton.enabled     = flag;
+		}
+
+		private function onChatInputFocusIn(event:FocusEvent) : void
+		{
+			chatInput.text = "";
 		}
 
 	]]>
@@ -161,12 +159,12 @@
 			</mx:HBox>
 		</mx:HBox>
 		
-		<mx:HBox id="mcMoves" x="150" y="638" width="100%" horizontalGap="3">
+		<mx:HBox x="150" y="638" width="100%" horizontalGap="3">
 			<mx:Spacer width="170" />
-			<mx:Button label="|&lt;" enabled="false" click="reviewMove('start')" />
-			<mx:Button label="&lt;" enabled="false" click="reviewMove('rewind')" />
-			<mx:Button label="&gt;" enabled="false" click="reviewMove('forward')" />
-			<mx:Button label="&gt;|" enabled="false" click="reviewMove('end')" />
+			<mx:Button id="startButton" label="|&lt;" enabled="false" click="reviewMove('start')" />
+			<mx:Button id="rewindButton" label="&lt;" enabled="false" click="reviewMove('rewind')" />
+			<mx:Button id="forwardButton" label="&gt;" enabled="false" click="reviewMove('forward')" />
+			<mx:Button id="endButton" label="&gt;|" enabled="false" click="reviewMove('end')" />
 		</mx:HBox>
 	</mx:VBox>
 
@@ -174,13 +172,15 @@
 
 	<mx:VBox height="654" width="270">
 		<mx:Spacer height="26" />
-		<mx:Panel title="Messages" width="100%" height="242" layout="absolute">
+		<mx:Panel id="infoPanel" title="Information" width="100%" height="242" layout="absolute">
 			<mx:TextArea id="taMessages" width="100%" height="100%" editable="false" />
 		</mx:Panel>
 
-		<mx:Panel title="Chat" width="100%" height="298" layout="vertical">
-			<mx:TextArea id="taChat" width="100%" height="204" editable="false"/>
-			<mx:TextInput id="taChatInput" width="100%" height="40" keyDown="postChatMessage(event)" />
+		<mx:Panel id="chatPanel" title="Chat" width="100%" height="300" layout="vertical" verticalGap="0">
+			<mx:TextArea id="chatArea" width="100%" height="230" editable="false" backgroundColor="#F8F6F1"/>
+			<mx:TextInput id="chatInput" width="100%" height="100%"
+				enter="onEnterInput(event)"
+				focusIn="onChatInputFocusIn(event)"/>
 		</mx:Panel>
 	</mx:VBox>
 
