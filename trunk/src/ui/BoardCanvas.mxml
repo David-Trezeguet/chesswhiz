@@ -524,10 +524,11 @@
 				}
 			}
 
+			if (_lastPieceInFocus) {
+				_lastPieceInFocus.clearFocus();
+				_lastPieceInFocus = null;
+			}
 			if (focusPiece != null) {
-				if (_lastPieceInFocus) {
-					_lastPieceInFocus.clearFocus();
-				}
 				focusPiece.setFocus();
 				_lastPieceInFocus = focusPiece;
 			}
