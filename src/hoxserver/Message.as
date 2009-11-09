@@ -5,9 +5,22 @@
 		public var optype:String = "";
 		public var params:Object = null;
 
-		public function Message()
+		public function Message(content:String = "")
 		{
-			/* Empty */
+			if ( content != "" )
+			{
+				this.params = {};
+				var kvlist:Array = content.split('&');
+				for (var i:int = 0; i < kvlist.length; i++) {
+					var pair:Array = kvlist[i].split('=');
+					if (pair[0] == 'op') {
+						this.optype = pair[1];
+					}
+					else {
+						this.params[pair[0]] = pair[1];
+					}
+				}
+			}
 		}
 
 		public function getCode():String    { return this.params["code"];    }
@@ -139,23 +152,6 @@
 			}
 			str += "\n";
 			return str;
-		}
-		
-		public function parse(content:String) : void {
-			var kvlist:Array = content.split('&');
-			for (var i:int = 0; i < kvlist.length; i++) {
-				var kv:String = kvlist[i];
-				var pair:Array = kv.split('=');
-				if (pair[0] == 'op') {
-					this.optype = pair[1];
-				}
-				else {
-					if (this.params == null) {
-						this.params = {};
-					}
-					this.params[pair[0]] = pair[1];
-				}
-			}
 		}
 		
 		public function parseListResponse() : Object {
