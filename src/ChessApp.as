@@ -400,8 +400,8 @@
 				const moveInfo:MoveInfo = new MoveInfo( event.getContent() );
 				if ( _table.tableId == moveInfo.tid )
 				{
-					_table.movePiece( new Position(moveInfo.fromRow, moveInfo.fromCol),
-									  new Position(moveInfo.toRow, moveInfo.toCol) );
+					_table.handleRemoteMove( new Position(moveInfo.fromRow, moveInfo.fromCol),
+									  		 new Position(moveInfo.toRow, moveInfo.toCol) );
 				}
 			}
 			else

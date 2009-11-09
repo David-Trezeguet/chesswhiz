@@ -16,6 +16,7 @@
 		private var _redPlayer:PlayerInfo = null;
 		private var _blackPlayer:PlayerInfo = null;
 		private var _observers:Array = [];
+
 		private var _game:Game = null;
 		private var _isTopSideBlack:Boolean = true; // Normal view of Table.
 
@@ -144,23 +145,6 @@
 			this.view.displayChatMessage(pid, chatMsg);
 		}
 
-		private function _getMoveListInfo() : String
-		{
-			var result:String = "movelist: \n";
-			var mov:String = "";
-			var line:String = "";
-			for (var i:int = 0; i < _moveList.length; i++) {
-				mov = _moveList[i];
-				var fields:Array = mov.split(":");
-				line = fields[0] + " " + this.view.board.getPieceByIndex(fields[0], fields[1]).getType()
-					+ " " + fields[2].charAt(0) + ","
-					+ String.fromCharCode(97 + parseInt(fields[2].charAt(1)))
-					+ "->" + fields[2].charAt(2) + "," + String.fromCharCode(97 + parseInt(fields[2].charAt(3))) + "\n";
-				result += line;
-			}
-			return result;
-		}
-
 		private function _displayPlayers() : void
 		{
 			this.view.displayPlayerData(_redPlayer);
@@ -169,20 +153,19 @@
 
 		private function _startGame() : void
 		{
-			if ( _redPlayer && _blackPlayer )
+			if (_redPlayer.pid == Global.app.getPlayerID())
 			{
-				if (_redPlayer.pid == Global.app.getPlayerID()) {
-					_game = new Game(this);
-					_game.setLocalPlayer(_redPlayer);
-					_game.setOppPlayer(_blackPlayer);
-					_game.processEvent("start");
-				}
-				else if (_blackPlayer.pid == Global.app.getPlayerID()) {
-					_game = new Game(this);
-					_game.setLocalPlayer(_blackPlayer);
-					_game.setOppPlayer(_redPlayer);
-					_game.processEvent("start");
-				}
+				_game = new Game(this);
+				_game.setLocalPlayer(_redPlayer);
+				_game.setOppPlayer(_blackPlayer);
+				_game.processEvent("start");
+			}
+			else if (_blackPlayer.pid == Global.app.getPlayerID())
+			{
+				_game = new Game(this);
+				_game.setLocalPlayer(_blackPlayer);
+				_game.setOppPlayer(_redPlayer);
+				_game.processEvent("start");
 			}
 		}
 		
@@ -302,14 +285,15 @@
 
 		public function playMoveList(moves:Array) : void
 		{
-			for (var i:int = 0; i < moves.length; i++) {
+			for (var i:int = 0; i < moves.length; i++)
+			{
 				var curPos:Position = new Position( parseInt(moves[i].charAt(1)),
 													parseInt(moves[i].charAt(0)) );
 				var newPos:Position = new Position( parseInt(moves[i].charAt(3)),
 													parseInt(moves[i].charAt(2)) );
 				var piece:Piece = this.view.board.getPieceByPos(curPos);
 				if (piece) {
-					_processMoveEvent([piece, curPos, newPos]);
+					_processMoveEvent(piece, curPos, newPos);
 				}
 			}
 		}
@@ -390,8 +374,8 @@
 
 			// Apply the Move and then check if the 'own' King is in danger.
 			// If yes, then undo the Move.
-			_processMoveEvent([piece, curPos, newPos]);
-			if ( _game.isCheckMate(null) ) {
+			_processMoveEvent(piece, curPos, newPos);
+			if ( _game.isMyKingBeingChecked() ) {
 				trace("Piece cannot be moved: 'Own' King is in danger.");
 				_rewindLastMove();
 				return;
@@ -399,46 +383,23 @@
 			
 			// Upon reaching here, the Move has been determined to be valid.
 			Global.app.playMoveSound();
-			if (_game) {
-				_game.processEvent("move");
-			}
+			_game.processEvent("move");
 			Global.app.doSendMove(piece, curPos, newPos, this.tableId);
 		}
 
-		public function movePiece(curPos:Position, newPos:Position) : void
+		/**
+		 * Function to handle a Move coming from the remote server. 
+		 */
+		public function handleRemoteMove(curPos:Position, newPos:Position) : void
 		{
-			Global.app.playMoveSound();
-			var piece:Piece = this.view.board.getPieceByPos(curPos);
-			if (piece) {
-				_processMoveEvent([piece, curPos, newPos]);
-			}
-            if (_game) {
-			    _game.processEvent("move");
-            }
-		}
-
-		private function _updateMove(piece:Piece, curPos:Position, newPos:Position) : void
-		{
-			var curPiece:Piece = this.view.board.getPieceByPos(newPos);
-			const mov:String = "" + piece.getColor() + ":" + piece.getIndex()
-				+ ":" + curPos.row + curPos.column + newPos.row + newPos.column
-				+ ":" + ((curPiece != null) ? curPiece.getIndex() : "");
-			_moveList[_moveList.length] = mov;
-
-			if (_moveList.length == 1)
+			const piece:Piece = this.view.board.getPieceByPos(curPos);
+			if (piece)
 			{
-				this.view.enableReviewButtons(true);
-				Global.app.showObserverMenu();
-			}
-			else if (_moveList.length == 2)
-			{
-				_startTimer();
-				if (    ( _redPlayer && _blackPlayer )
-					 && (     _redPlayer.pid   == Global.app.getPlayerID()
-				 	       || _blackPlayer.pid == Global.app.getPlayerID() ) )
-				{
-					Global.app.showInGameMenu();
-				}
+				Global.app.playMoveSound();
+				_processMoveEvent(piece, curPos, newPos);
+	            if (_game) {
+				    _game.processEvent("move");
+	            }
 			}
 		}
 
@@ -529,7 +490,7 @@
 
 		private function _stopReview() : void
 		{
-			var moveIndex:int = _moveList.length;
+			const moveIndex:int = _moveList.length;
 			if (_curMoveIndex == moveIndex ) {
 				return;
 			}
@@ -577,23 +538,52 @@
 			this.view.displayMessage(pid + " left");
 		}
 
-		private function _processMoveEvent(data:Array) : void
+		/**
+		 * Function to perform common tasks on each new Move.
+		 */
+		private function _processMoveEvent(piece:Piece, curPos:Position, newPos:Position) : void
 		{
-			var piece:Piece = data[0];
-			_updateMove(piece, data[1], data[2]);
+			// Store the new Move in the Move-List.
+			const capturedPiece:Piece = this.view.board.getPieceByPos(newPos);
+			const move:String = piece.getColor() + ":" + piece.getIndex()
+				+ ":" + curPos.row + curPos.column + newPos.row + newPos.column
+				+ ":" + (capturedPiece ? capturedPiece.getIndex() : "");
+
+			const nMoves:uint = _moveList.push(move);
+
+			// Update the Piece Map.
 			if ( _inReviewMode ) {
-				this.view.board.updatePieceMapState(piece, data[1], data[2]);
+				this.view.board.updatePieceMapState(piece, curPos, newPos);
 			} else {
-				this.view.board.movePieceByPos(piece, data[2]);
+				this.view.board.movePieceByPos(piece, newPos);
 			}
-			if (_moveList.length > 2) {
+
+			// Update the menu.
+			if (nMoves == 1)
+			{
+				this.view.enableReviewButtons(true);
+				Global.app.showObserverMenu();
+			}
+			else if (nMoves == 2)
+			{
+				_startTimer();
+				if (    ( _redPlayer && _blackPlayer )
+					 && (    _redPlayer.pid   == Global.app.getPlayerID()
+				 	      || _blackPlayer.pid == Global.app.getPlayerID() ) )
+				{
+					Global.app.showInGameMenu();
+				}
+			}
+
+			// Reset Move-time.
+			if (nMoves > 2)
+			{
 				_resetMoveTimer( piece.getColor() );
 			}
 		}
 
 		public function getSettings() : Object { return _settings; }
 		public function getPreferences() : Object { return _curPref; }
-		public function getMoveList() : Array { return _moveList; }
 
 		public function updateSettings(newSettings:Object) : void
 		{
