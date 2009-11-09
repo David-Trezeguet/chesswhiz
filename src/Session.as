@@ -12,13 +12,17 @@
 		private const _port:int        = 80;
 
 		private var _socket:XMLSocket  = null;
+		private var _sid:String         = "";   // The session-ID.
 
 		public function Session()
 		{
 			Security.allowDomain("games.playxiangqi.com");
 		}
 
-		public function openSocket() : void
+		public function getSid() : String { return _sid; }
+		public function setSid(id:String) : void { _sid = id; }
+
+		public function open() : void
 		{
 			_socket = new XMLSocket(); // Default connection timeout = 20 sec.
 
@@ -36,11 +40,12 @@
 			_socket.connect(_hostName, _port);
 		}
 
-		public function closeSocket() : void
+		public function close() : void
 		{
 			if (_socket.connected) {
 				_socket.close();
 			}
+			_sid = "";
 		}
 
 		private function _sendRequest(req:Message) : void
@@ -61,64 +66,64 @@
 			_sendRequest(req);
 		}
 		
-		public function sendLogoutRequest(pid:String, sid:String):void  {
+		public function sendLogoutRequest(pid:String):void {
 			var req:Message = new Message();
-			req.createLogoutRequest(pid, sid);
+			req.createLogoutRequest(pid, _sid);
 			_sendRequest(req);
 		}
 		
-		public function sendTableListRequest(pid:String, sid:String):void  {
+		public function sendTableListRequest(pid:String):void {
 			var req:Message = new Message();
-			req.createListRequest(pid, sid);
+			req.createListRequest(pid, _sid);
 			_sendRequest(req);
 		}
 		
-		public function sendJoinRequest(pid:String, sid:String, tid:String, color:String, joined:String):void  {
+		public function sendJoinRequest(pid:String, tid:String, color:String, joined:String):void {
 			var req:Message = new Message();
-			req.createJoinRequest(pid, sid, tid, color, joined);
+			req.createJoinRequest(pid, _sid, tid, color, joined);
 			_sendRequest(req);
 		}
 		
-		public function sendNewTableRequest(pid:String, sid:String, color:String):void  {
+		public function sendNewTableRequest(pid:String, color:String):void  {
 			var req:Message = new Message();
-			req.createNewTableRequest(pid, sid, color);
+			req.createNewTableRequest(pid, _sid, color);
 			_sendRequest(req);
 		}
 		
-		public function sendMoveRequest(pid:String, sid:String, curPos:Position, newPos:Position, time:String, tid:String):void  {
+		public function sendMoveRequest(pid:String, curPos:Position, newPos:Position, time:String, tid:String):void  {
 			var req:Message = new Message();
 			var move:String = "" + curPos.column + curPos.row + newPos.column + newPos.row;
-			req.createMoveRequest(pid, sid, time, move, tid);
+			req.createMoveRequest(pid, _sid, time, move, tid);
 			_sendRequest(req);
 		}
 		
-		public function sendLeaveRequest(pid:String, sid:String, tid:String):void  {
+		public function sendLeaveRequest(pid:String, tid:String):void  {
 			var req:Message = new Message();
-			req.createLeaveRequest(pid, sid, tid);
+			req.createLeaveRequest(pid, _sid, tid);
 			_sendRequest(req);
 		}
 		
-		public function sendResignRequest(pid:String, sid:String, tid:String):void  {
+		public function sendResignRequest(pid:String, tid:String):void  {
 			var req:Message = new Message();
-			req.createResignRequest(pid, sid, tid);
+			req.createResignRequest(pid, _sid, tid);
 			_sendRequest(req);
 		}
 		
-		public function sendDrawRequest(pid:String, sid:String, tid:String):void  {
+		public function sendDrawRequest(pid:String, tid:String):void  {
 			var req:Message = new Message();
-			req.createDrawRequest(pid, sid, tid);
+			req.createDrawRequest(pid, _sid, tid);
 			_sendRequest(req);
 		}
 
-		public function sendChatRequest(pid:String, sid:String, tid:String, msg:String):void  {
+		public function sendChatRequest(pid:String, tid:String, msg:String):void  {
 			var req:Message = new Message();
-			req.createChatRequest(pid, sid, tid, msg);
+			req.createChatRequest(pid, _sid, tid, msg);
 			_sendRequest(req);
 		}
 		
 		public function sendUpdateTableRequest(pid:String, tid:String, times:String, r:Boolean) : void {
 			var req:Message = new Message();
-			req.createUpdateTableRequest(pid, tid, times, r);
+			req.createUpdateTableRequest(pid, _sid, tid, times, r);
 			_sendRequest(req);
 		}
 	}

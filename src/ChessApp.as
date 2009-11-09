@@ -29,7 +29,6 @@
 		private var _sharedObject:SharedObject;
 
 		private var _playerId:String  = "";
-		private var _sessionId:String = "";
 		private var _session:Session  = new Session();
 		private var _loginFailReason:String = "";
 
@@ -111,14 +110,13 @@
 
 		private function _startApp() : void
 		{
-			_session.openSocket();
+			_session.open();
 		}
 
 		private function _stopApp() : void
 		{
-			_session.closeSocket();
+			_session.close();
 			_playerId  = "";
-			_sessionId = "";
 			_table     = null;
 			_mainWindow.removeAllChildren();
 		}
@@ -160,51 +158,51 @@
 
 		public function doLogout() : void
 		{
-			_session.sendLogoutRequest(_playerId, _sessionId);
+			_session.sendLogoutRequest(_playerId);
 			_stopApp();
 			_startApp();
 		}
 
 		public function doViewTables() : void
 		{
-			_session.sendTableListRequest(_playerId, _sessionId);
+			_session.sendTableListRequest(_playerId);
 		}
 
 		public function doNewTable() : void
 		{
-			_session.sendNewTableRequest(_playerId, _sessionId, "Red");
+			_session.sendNewTableRequest(_playerId, "Red");
 		}
 		
 		public function doJoinTable(tableId:String, color:String = "None") : void
 		{
-			_session.sendJoinRequest(_playerId, _sessionId, tableId, color, "0");
+			_session.sendJoinRequest(_playerId, tableId, color, "0");
 		}
 
 		public function doCloseTable() : void
 		{
 			if ( _table ) {
-				_session.sendLeaveRequest(_playerId, _sessionId, _table.tableId);
+				_session.sendLeaveRequest(_playerId, _table.tableId);
 			}
 		}
 
 		public function doResignTable() : void
 		{
 			if ( _table ) {
-				_session.sendResignRequest(_playerId, _sessionId, _table.tableId);
+				_session.sendResignRequest(_playerId, _table.tableId);
 			}
 		}
 
 		public function doDrawTable() : void
 		{
 			if ( _table ) {
-				_session.sendDrawRequest(_playerId, _sessionId, _table.tableId);
+				_session.sendDrawRequest(_playerId, _table.tableId);
 			}
 		}
 
 		public function doTableChat(msg:String) : void
 		{
 			if ( _table ) {
-				_session.sendChatRequest(_playerId, _sessionId, _table.tableId, msg);
+				_session.sendChatRequest(_playerId, _table.tableId, msg);
 			}
 		}
 
@@ -312,7 +310,7 @@
 			if (response.getCode() != "0")
 			{
 				_loginFailReason = response.getContent();
-				_session.closeSocket();
+				_session.close();
 				_startApp();
 				return;
 			}
@@ -322,7 +320,7 @@
 			{
 				trace("My LOGIN = " + loginInfo.pid + "(" + loginInfo.score + ")"
 									+ ", sessionid: " + loginInfo.sid);
-				_sessionId = loginInfo.sid;
+				_session.setSid( loginInfo.sid );
 				_loginFailReason = "";
 				this.doViewTables(); // By default, get the List of Tables.
 			}
@@ -334,7 +332,7 @@
 
 		private function _processResponse_LOGOUT(response:Message) : void
 		{
-			if (    _sessionId != ""
+			if (    _session.getSid() != ""
 				 && response.getCode() == "0"
 				 && response.getContent() == _playerId )
 			{
@@ -408,17 +406,17 @@
 
 		public function sendMoveRequest(player:PlayerInfo, piece:Piece, curPos:Position, newPos:Position, tid:String) : void
 		{
-			_session.sendMoveRequest(_playerId, _sessionId, curPos, newPos, '1500', tid);
+			_session.sendMoveRequest(_playerId, curPos, newPos, '1500', tid);
 		}
 		
 		public function resignGame(tableId:String) : void
 		{
-			_session.sendResignRequest(_playerId, _sessionId, tableId);
+			_session.sendResignRequest(_playerId, tableId);
 		}
 	
 		public function drawGame(tableId:String) : void
 		{
-			_session.sendDrawRequest(_playerId, _sessionId, tableId);
+			_session.sendDrawRequest(_playerId, tableId);
 		}
 
 		public function doUpdateTableSettings(tableId:String, times:String, bRated:Boolean) : void
