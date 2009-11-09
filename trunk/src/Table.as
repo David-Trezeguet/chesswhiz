@@ -18,8 +18,9 @@
 		private var _observers:Array = [];
 		private var _game:Game = null;
 		private var _isTopSideBlack:Boolean = true;
-		private var _tableState:String = "IDLE_STATE";
-		private var _stateBeforeReview:String = "IDLE_STATE";
+
+		private var _inReviewMode:Boolean = false;
+
 		private var _tableInfo:TableInfo = null;
 		private var _redTimes:GameTimers = null;
 		private var _blackTimes:GameTimers = null;
@@ -77,24 +78,21 @@
 				_isTopSideBlack = (tableInfo.redid == myPID);
 				_createTableView();
 				Global.app.showNewTableMenu();
-				_tableState = "NEWTABLE_STATE";
 			}
 			else {
 				const openColor:String = _getOpenColor();
 				_isTopSideBlack = (openColor != "Black");
 				_createTableView();
 				Global.app.showOpenTableMenu(openColor, this.tableId);
-				_tableState = (openColor == "None" ? "OBSERVER_STATE" : "VIEWTABLE_STATE");
 			}
 		}
 
 		public function reviewMove(cmd:String) : void
 		{
-			if (_tableState != "MOVEREVIEW_STATE")
+			if ( !_inReviewMode )
 			{
 				if (_moveList.length > 0 && cmd != "end" && cmd != "forward") {
 					_curMoveIndex = _moveList.length;
-					_stateBeforeReview = _tableState;
 				}
 				else {
 					return;
@@ -103,15 +101,15 @@
 
 			_processReviewMove(cmd);
 
-			if (_tableState != "MOVEREVIEW_STATE")
+			if ( !_inReviewMode )
 			{
-				_tableState = "MOVEREVIEW_STATE";
+				_inReviewMode = true;
 			}
 			else if (     cmd == "end"
 					  || (cmd == "forward" && _curMoveIndex == _moveList.length) )
 			{
 				_stopReview();
-				_tableState = _stateBeforeReview;
+				_inReviewMode = false;
 			}
 		}
 		
@@ -190,7 +188,6 @@
 			_stopTimer();
 
 			Global.app.showObserverMenu();
-			_tableState = "ENDGAME_STATE";
 		}
 		
 		public function drawGame(pid:String) : void {
@@ -308,7 +305,6 @@
 			this.view.displayMessage(color + " timeout");
 			Global.app.showObserverMenu();
             _stopTimer();
-			_tableState = "ENDGAME_STATE";
 		}
 
 		public function playMoveList(moves:Array) : void
@@ -380,7 +376,7 @@
 		 */
 		public function onLocalPieceMoved(piece:Piece, curPos:Position, newPos:Position) : void
 		{
-			if ( _tableState == "MOVEREVIEW_STATE" && _curMoveIndex != _moveList.length ) {
+			if ( _inReviewMode ) {
 				trace("Piece cannot be moved: In review mode");
 				piece.moveImage();
 				return;
@@ -410,12 +406,10 @@
 			
 			// Upon reaching here, the Move has been determined to be valid.
 			Global.app.playMoveSound();
-			if ( _tableState == "GAMEPLAY_STATE" ) {
-				if (_game) {
-					_game.processEvent("move");
-				}
-				Global.app.doSendMove(piece, curPos, newPos, this.tableId);
+			if (_game) {
+				_game.processEvent("move");
 			}
+			Global.app.doSendMove(piece, curPos, newPos, this.tableId);
 		}
 
 		public function movePiece(curPos:Position, newPos:Position) : void
@@ -425,14 +419,9 @@
 			if (piece) {
 				_processMoveEvent([piece, curPos, newPos]);
 			}
-			if (_tableState == "GAMEPLAY_STATE" || _tableState == "MOVEREVIEW_STATE"  ) {
-                if (_game) {
-				    if (_game.isCheckMate(piece)) {
-					    this.view.displayMessage("Check by " + piece.getColor() + " " + piece.getType());
-				    }
-				    _game.processEvent("move");
-                }
-			}
+            if (_game) {
+			    _game.processEvent("move");
+            }
 		}
 
 		private function _updateMove(piece:Piece, curPos:Position, newPos:Position) : void
@@ -442,24 +431,21 @@
 				+ ":" + curPos.row + curPos.column + newPos.row + newPos.column
 				+ ":" + ((curPiece != null) ? curPiece.getIndex() : "");
 			_moveList[_moveList.length] = mov;
-			if (_tableState == "GAMEPLAY_STATE" || _tableState == "MOVEREVIEW_STATE") {
-				if (_moveList.length == 2) {
-					if (this.view != null) {
-						Global.app.showInGameMenu();
-					}
-					_startTimer();
-				}
-				else if (_moveList.length == 1) {
-					this.view.enableReviewButtons(true);
-				}
-	    	} else if (_tableState == "OBSERVER_STATE") {
+
+			if (_moveList.length == 1)
+			{
 				this.view.enableReviewButtons(true);
-				if (_moveList.length == 2) {
-					_startTimer();
-				}
-			}
-			if (_moveList.length == 1) {
 				Global.app.showObserverMenu();
+			}
+			else if (_moveList.length == 2)
+			{
+				_startTimer();
+				if (    ( _redPlayer && _blackPlayer )
+					 && (     _redPlayer.pid   == Global.app.getPlayerID()
+				 	       || _blackPlayer.pid == Global.app.getPlayerID() ) )
+				{
+					Global.app.showInGameMenu();
+				}
 			}
 		}
 
@@ -564,30 +550,19 @@
 			else if (player.color == "Black") { _blackPlayer = player;   }
 			else    /* "None" */              { _observers.push(player); }
 
-			if (_tableState == "NEWTABLE_STATE")
-			{
-				if (player.color != "None") {
-					this.view.displayPlayerData(player);
-					_startGame();
-					_tableState = "GAMEPLAY_STATE";
-				}
-			}
-			else if (_tableState == "VIEWTABLE_STATE")
-			{
+			if (player.color == "Red" || player.color == "Black") {
 				this.view.displayPlayerData(player);
-				Global.app.showNewTableMenu();
-				if (   _redPlayer.pid   == Global.app.getPlayerID()
-					|| _blackPlayer.pid == Global.app.getPlayerID() )
-				{
-					_startGame();
-					_tableState = "GAMEPLAY_STATE";
-				}
-				else {
-					_tableState = "OBSERVER_STATE";
-				}
 			}
-
 			this.view.displayMessage(player.pid + " joined");
+
+			if (   !_game
+				&& ( _redPlayer && _blackPlayer )
+				&& (     _redPlayer.pid   == Global.app.getPlayerID()
+				 	  || _blackPlayer.pid == Global.app.getPlayerID() ) )
+			{
+				_startGame();
+				Global.app.showNewTableMenu();
+			}
 		}
 
 		public function leaveTable(pid:String) : void
@@ -611,19 +586,15 @@
 
 		private function _processMoveEvent(data:Array) : void
 		{
-			if (   _tableState == "OBSERVER_STATE" || _tableState == "GAMEPLAY_STATE"
-			    || _tableState == "MOVEREVIEW_STATE" )
-			{
-				var piece:Piece = data[0];
-				_updateMove(piece, data[1], data[2]);
-				if (_tableState == "MOVEREVIEW_STATE") {
-					this.view.board.updatePieceMapState(piece, data[1], data[2]);
-				} else {
-					this.view.board.movePieceByPos(piece, data[2]);
-				}
-				if (_moveList.length > 2) {
-					_resetMoveTimer( piece.getColor() );
-				}
+			var piece:Piece = data[0];
+			_updateMove(piece, data[1], data[2]);
+			if ( _inReviewMode ) {
+				this.view.board.updatePieceMapState(piece, data[1], data[2]);
+			} else {
+				this.view.board.movePieceByPos(piece, data[2]);
+			}
+			if (_moveList.length > 2) {
+				_resetMoveTimer( piece.getColor() );
 			}
 		}
 
