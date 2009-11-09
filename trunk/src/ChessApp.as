@@ -488,11 +488,11 @@
 
 			const fields:Array = event.getContent().split(';');
 			const tableId:String = fields[0];
-			const pid:String = fields[1];
+			const pid:String = fields[1];  // Available but not used!
 			const times:String = fields[3];
 			if ( _table && _table.tableId == tableId )
 			{
-				_table.updateGameTimes(pid, times);
+				_table.updateGameTimes(times);
 			}
 		}
 
