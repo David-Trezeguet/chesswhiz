@@ -44,10 +44,10 @@
 			};
 		}
 		
-		public function createLoginRequest(uname:String, passwd:String, version:String):void {
+		public function createLoginRequest(pid:String, passwd:String, version:String):void {
 			this.optype = "LOGIN";
 			this.params = {
-				pid: uname,
+				pid: pid,
 				password: passwd,
 				version: version
 			};
