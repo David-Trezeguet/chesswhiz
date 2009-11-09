@@ -21,46 +21,46 @@
 
 	public class ChessApp
 	{
-		private var _preferences:Object;
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
-		private var _playerId:String = "";
+		private var _moveSound:Sound = new Global.moveSoundClass() as Sound;
+
+		private var _preferences:Object;
+		private var _sharedObject:SharedObject;
+
+		private var _playerId:String  = "";
 		private var _sessionId:String = "";
-		private var _bLoggedIn:Boolean = false;
-		private var _session:Session = new Session();
-
-		private var _table:Table = null;  // THE table.
-
-		private var _moveSound:Sound;
+		private var _session:Session  = new Session();
 		private var _loginFailReason:String = "";
-		private var _cookie:SharedObject;
+
+		private var _table:Table      = null;  // THE table.
 
 		public function ChessApp(menu:TopControlBar, window:Container)
 		{
 			_menu       = menu;
 			_mainWindow = window;
 
-			_moveSound = new Global.moveSoundClass() as Sound;
 			_preferences = {
 					"pieceskinindex" : 1,
 					"boardcolor"     : 0x5b5d5b,
 					"linecolor"      : 0xa09e9e,
 					"sound"          : true
 				};
-			_loadCookie();
+			_loadPreferencesFromLocalSharedObject();
 
 			_startApp();
 		}
 
-		private function _loadCookie() : void
+		private function _loadPreferencesFromLocalSharedObject() : void
 		{
 			try {
-				_cookie = SharedObject.getLocal("flashchess");
-				if (_cookie.data.persist == 0xFFDDFF) {
-					_preferences["pieceskinindex"] = _cookie.data.pieceskinindex;
-					_preferences["boardcolor"]     = _cookie.data.boardcolor;
-					_preferences["linecolor"]      = _cookie.data.linecolor;
-					_preferences["sound"]          = _cookie.data.sound;
+				_sharedObject = SharedObject.getLocal("flashchess");
+				if (_sharedObject.data.persist == 0xFFDDFF)
+				{
+					_preferences["pieceskinindex"] = _sharedObject.data.pieceskinindex;
+					_preferences["boardcolor"]     = _sharedObject.data.boardcolor;
+					_preferences["linecolor"]      = _sharedObject.data.linecolor;
+					_preferences["sound"]          = _sharedObject.data.sound;
 				}
 			}
 			catch (error:Error) {
@@ -70,15 +70,15 @@
 
 		private function _saveCookie() : void
 		{
-			_cookie.data.persist        = 0xFFDDFF; // "Present" flag.
-			_cookie.data.pieceskinindex = _preferences["pieceskinindex"];
-			_cookie.data.boardcolor     = _preferences["boardcolor"];
-			_cookie.data.linecolor      = _preferences["linecolor"];
-			_cookie.data.sound          = _preferences["sound"];
+			_sharedObject.data.persist        = 0xFFDDFF; // "Present" flag.
+			_sharedObject.data.pieceskinindex = _preferences["pieceskinindex"];
+			_sharedObject.data.boardcolor     = _preferences["boardcolor"];
+			_sharedObject.data.linecolor      = _preferences["linecolor"];
+			_sharedObject.data.sound          = _preferences["sound"];
 
 			var flushStatus:String = null;
             try {
-				flushStatus = _cookie.flush( 10*1024 /* minDiskSpace */ );
+				flushStatus = _sharedObject.flush( 10*1024 /* minDiskSpace */ );
 			}
 			catch (error:Error) {
 				trace("Error: Failed to flush the shared object: " + error);
@@ -87,7 +87,7 @@
 			switch (flushStatus) {
 				case SharedObjectFlushStatus.PENDING:
 					trace("Flush-Status: Requesting permission to save object...");
-					_cookie.addEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
+					_sharedObject.addEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
 					break;
 				case SharedObjectFlushStatus.FLUSHED:
 					trace("Flush-Status: Shared object successfully flushed to disk.");
@@ -106,7 +106,7 @@
                     break;
             }
 
-            _cookie.removeEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
+            _sharedObject.removeEventListener(NetStatusEvent.NET_STATUS, _onFlushStatus);
         }
 
 		private function _startApp() : void
@@ -117,10 +117,9 @@
 		private function _stopApp() : void
 		{
 			_session.closeSocket();
-			_table     = null;
-			_bLoggedIn = false;
-			_sessionId = "";
 			_playerId  = "";
+			_sessionId = "";
+			_table     = null;
 			_mainWindow.removeAllChildren();
 		}
 
@@ -156,7 +155,7 @@
 		public function doGuestLogin() : void
 		{
 			const randNumber:Number = Math.ceil( 9999*Math.random() );
-			this.doLogin( "Guest#Fl" + randNumber );
+			this.doLogin( "Guest#fx" + randNumber );
 		}
 
 		public function doLogout() : void
@@ -166,15 +165,18 @@
 			_startApp();
 		}
 
-		public function doViewTables() : void {
+		public function doViewTables() : void
+		{
 			_session.sendTableListRequest(_playerId, _sessionId);
 		}
 
-		public function doNewTable() : void {
+		public function doNewTable() : void
+		{
 			_session.sendNewTableRequest(_playerId, _sessionId, "Red");
 		}
 		
-		public function doJoinTable(tableId:String, color:String = "None") : void {
+		public function doJoinTable(tableId:String, color:String = "None") : void
+		{
 			_session.sendJoinRequest(_playerId, _sessionId, tableId, color, "0");
 		}
 
@@ -254,6 +256,10 @@
 			preferencesPanel.addEventListener("newPreferences", newPreferencesEventHandler);
 		}
 
+		/**
+		 * Callback function to handle the "newPreferences" event generated
+		 * by the 'TablePreferences' window.
+		 */
 		private function newPreferencesEventHandler(event:Event) : void
 		{
 			var preferencesPanel:TablePreferences = event.target as TablePreferences;
@@ -303,27 +309,32 @@
 
 		private function _processResponse_LOGIN(response:Message) : void
 		{
-			if (_bLoggedIn) return;
-
-			if (response.getCode() == "0") {
-				_loginFailReason = "";
-				var loginData:LoginInfo = new LoginInfo( response.getContent() );
-				_sessionId = loginData.sid;
-				_playerId = loginData.pid;
-				trace("playerid: " + _playerId + " sessionid: " + _sessionId);
-				_bLoggedIn = true;
-				this.doViewTables();
-			}
-			else {
+			if (response.getCode() != "0")
+			{
 				_loginFailReason = response.getContent();
 				_session.closeSocket();
 				_startApp();
+				return;
+			}
+			
+			const loginInfo:LoginInfo = new LoginInfo( response.getContent() );
+			if ( loginInfo.pid == _playerId ) // My own Login success?
+			{
+				trace("My LOGIN = " + loginInfo.pid + "(" + loginInfo.score + ")"
+									+ ", sessionid: " + loginInfo.sid);
+				_sessionId = loginInfo.sid;
+				_loginFailReason = "";
+				this.doViewTables(); // By default, get the List of Tables.
+			}
+			else
+			{
+				trace("Other LOGIN = " + loginInfo.pid + "(" + loginInfo.score + ")");
 			}
 		}
 
 		private function _processResponse_LOGOUT(response:Message) : void
 		{
-			if (    _bLoggedIn
+			if (    _sessionId != ""
 				 && response.getCode() == "0"
 				 && response.getContent() == _playerId )
 			{
