@@ -220,23 +220,16 @@
 			}
 		}
 
-		public function showTableMenu(showSettings:Boolean) : void
-		{
-			if (showSettings) { _menu.currentState = "newTableState"; }
-			else              { _menu.currentState = "observerState"; }
-		}
+		public function showNewTableMenu() : void { _menu.currentState = "newTableState"; }
+		public function showObserverMenu() : void { _menu.currentState = "observerState"; }
+		public function showInGameMenu()   : void { _menu.currentState = "inGameState";   }
 
-		public function showObserverMenu(color:String, tid:String) : void
+		public function showOpenTableMenu(color:String, tid:String) : void
 		{
 			_menu.tableId = tid;
 			if      (color == "Red")   { _menu.currentState = "openRedState";   }
 			else if (color == "Black") { _menu.currentState = "openBlackState"; }
 			else                       { _menu.currentState = "observerState";  }
-		}
-
-		public function showGameMenu() : void
-		{
-			_menu.currentState = "inGameState";
 		}
 
 		public function changeTableSettings() : void
@@ -293,16 +286,15 @@
 		 */
 		public function handleServerEvent(event:DataEvent) : void
 		{
-			const eventData:String = event.data;
-			const messages:Array = eventData.split("op");
+			const messages:Array = event.data.split("op");
 
-			for (var i:int = 0; i < messages.length; i++) {
+			for (var i:int = 0; i < messages.length; i++)
+			{
 				if (messages[i] == "") continue;
 
 				const line:Array = messages[i].split("\n\n");
-				const msg:Message = new Message();
 				trace("event: op" + line[0]);
-				msg.parse("op" + line[0]);
+				const msg:Message = new Message( "op" + line[0] );
 
 				if      (msg.optype == "LOGIN")   { _processResponse_LOGIN(msg);  }
                 else if (msg.optype == "LIST")    { _processResponse_LIST(msg);   }

@@ -73,7 +73,7 @@
 			{
 				_isTopSideBlack = (tableInfo.redid == myPID);
 				_createNewTableView();
-				Global.app.showTableMenu(true);
+				Global.app.showNewTableMenu();
 				_tableState = "NEWTABLE_STATE";
 				this.view.displayMessage(myPID + " joined");
 			}
@@ -146,7 +146,7 @@
 				this.view.displayMessage(_blackPlayer.pid + " joined");
 			}
 			trace("joinable color: [" + joinColor + "]");
-			Global.app.showObserverMenu(joinColor, this.tableId);
+			Global.app.showOpenTableMenu(joinColor, this.tableId);
 		}
 
 		public function displayChatMessage(pid:String, chatMsg:String) : void {
@@ -201,10 +201,9 @@
 				_game = null;
 			}
 			this.view.board.displayStatus("Game Over (" + reason + ")");
-			this.view.displayMessage(winner);
 			_stopTimer();
 
-			Global.app.showTableMenu(false);
+			Global.app.showObserverMenu();
 			_tableState = "ENDGAME_STATE";
 		}
 		
@@ -321,7 +320,7 @@
 		private function _handleTimeout(color:String) : void
 		{
 			this.view.displayMessage(color + " timeout");
-			Global.app.showTableMenu(false);
+			Global.app.showObserverMenu();
             _stopTimer();
 			_tableState = "ENDGAME_STATE";
 		}
@@ -460,7 +459,7 @@
 			if (_tableState == "GAMEPLAY_STATE" || _tableState == "MOVEREVIEW_STATE") {
 				if (_moveList.length == 2) {
 					if (this.view != null) {
-						Global.app.showGameMenu();
+						Global.app.showInGameMenu();
 					}
 					_startTimer();
 				}
@@ -474,7 +473,7 @@
 				}
 			}
 			if (_moveList.length == 1) {
-				Global.app.showTableMenu(false);
+				Global.app.showObserverMenu();
 			}
 		}
 
@@ -658,7 +657,7 @@
 			else if (_tableState == "VIEWTABLE_STATE")
 			{
 				this.view.displayPlayerData(player);
-				Global.app.showTableMenu(true);
+				Global.app.showNewTableMenu();
 				if (   _redPlayer.pid   == Global.app.getPlayerID()
 					|| _blackPlayer.pid == Global.app.getPlayerID() )
 				{
