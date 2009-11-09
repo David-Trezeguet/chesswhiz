@@ -6,23 +6,53 @@
 		public var moveTime:int  = 0;
 		public var extraTime:int = 0;
 
+		private var _initialTimes:String = "";  // In "GG/MM/EE" format.
 		private var _initialMoveTime:int = 0;
 
-		public function GameTimers(time:String) : void
+		/**
+		 * @param times The initial times string in "GG/MM/EE" format.
+		 */
+		public function GameTimers(times:String = "") : void
 		{
-			if (time != "") {
-				const timers:Array = time.split("/");
-				this.gameTime = parseInt(timers[0]);
-				this.moveTime = parseInt(timers[1]);
-				this.extraTime = parseInt(timers[2]);
-
-				_initialMoveTime = this.moveTime;
+			if (times != "")
+			{
+				this.initWithTimes(times);
 			}
 		}
+
+		/**
+		 * @param times The initial times string in "GG/MM/EE" format.
+		 */
+		public function initWithTimes(times:String) : void
+		{
+			const timers:Array = times.split("/");
+			this.gameTime  = parseInt(timers[0]);
+			this.moveTime  = parseInt(timers[1]);
+			this.extraTime = parseInt(timers[2]);
+
+			_initialTimes = times;
+			_initialMoveTime = this.moveTime;
+		}
+
+		public function getInitialTimes() : String { return _initialTimes; }
 
 		public function resetMoveTime() : void
 		{
 			this.moveTime = _initialMoveTime;
+		}
+
+		public function decrementTime() : void
+		{
+			if      ( gameTime > 0 )  { --gameTime;  }
+			else if ( extraTime > 0 ) { --extraTime; } // Use extra time if needed.
+
+			if ( moveTime > 0 ) { --moveTime; }
+		}
+
+		public function isTimedout() : Boolean
+		{
+			return (    moveTime == 0
+					|| (gameTime == 0 && extraTime == 0) );
 		}
 
 		public function getTimer(type:String) : String

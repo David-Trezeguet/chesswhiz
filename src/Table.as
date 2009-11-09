@@ -17,15 +17,15 @@
 		private var _blackPlayer:PlayerInfo = null;
 		private var _observers:Array = [];
 		private var _game:Game = null;
-		private var _isTopSideBlack:Boolean = true;
+		private var _isTopSideBlack:Boolean = true; // Normal view of Table.
 
 		private var _inReviewMode:Boolean = false;
 
-		private var _tableInfo:TableInfo = null;
-		private var _redTimes:GameTimers = null;
-		private var _blackTimes:GameTimers = null;
-		private var _redTimer:Timer = null;
-		private var _blackTimer:Timer = null;
+		private var _redTimes:GameTimers   = new GameTimers();
+		private var _blackTimes:GameTimers = new GameTimers();
+		private var _redClock:Timer        = new Timer(1000 /* 1s interval */);
+		private var _blackClock:Timer      = new Timer(1000 /* 1s interval */);
+
 		private var _moveList:Array = [];
 		private var _curMoveIndex:int = -1;
 		private var _settings:Object;
@@ -34,6 +34,10 @@
 		public function Table(tableId:String, pref:Object)
 		{
 			this.tableId = tableId;
+
+			_redClock.addEventListener(TimerEvent.TIMER, _timerHandler);
+			_blackClock.addEventListener(TimerEvent.TIMER, _timerHandler);
+
 			_settings = {
 					"gametime"  : 1200,
 					"movetime"  : 300,
@@ -46,8 +50,10 @@
 		public function getTopSideColor():String { return _isTopSideBlack ? "Black" : "Red"; }
 		public function getGame():Game { return _game; }
 
-		public function getTimers(color:String) : GameTimers {
-			return new GameTimers( color == "Red" ? _tableInfo.redtime : _tableInfo.blacktime );			
+		public function getTimers(color:String) : GameTimers
+		{
+			return new GameTimers( color == "Red" ? _redTimes.getInitialTimes()
+												  : _blackTimes.getInitialTimes() );
 		}
 
 		/**
@@ -69,7 +75,8 @@
 				_blackPlayer = new PlayerInfo(tableInfo.blackid, "Black", tableInfo.blackscore);
 			}
 
-			_tableInfo = tableInfo;
+			_redTimes.initWithTimes(tableInfo.redtime);
+			_blackTimes.initWithTimes(tableInfo.blacktime);
 
 			const myPID:String = Global.app.getPlayerID();
 
@@ -194,35 +201,31 @@
 			this.view.displayMessage(pid + " offering draw");
 		}
 		
-		public function updateGameTimes(pid:String, times:String) : void
+		public function updateGameTimes(times:String) : void
 		{
 			if (_moveList.length == 0)
 			{
-				_tableInfo.redtime = times;
-				_tableInfo.blacktime = times;
+				_redTimes.initWithTimes(times);
+				_blackTimes.initWithTimes(times);
+
 				var timer:GameTimers = new GameTimers(times);
 				this.view.updateTimers("Red", timer);
 				this.view.updateTimers("Black", timer);
-				var fields:Array = times.split("/");
-				_settings["gametime"] = fields[0];
-				_settings["movetime"] = fields[1];
+				const fields:Array = times.split("/");
+				_settings["gametime"]  = fields[0];
+				_settings["movetime"]  = fields[1];
 				_settings["extratime"] = fields[2];
-				this.view.displayMessage("timer changed to " + times);
+				this.view.displayMessage("Timer: " + times);
 			}
 		}
 	
 		private function _startTimer() : void
 		{
-			_redTimes = new GameTimers(_tableInfo.redtime);
-			_redTimer = new Timer(1000 /* 1 second */, _redTimes.gameTime);
-			_redTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
+			_redClock.repeatCount = _redTimes.gameTime + _redTimes.extraTime;
+			_blackClock.repeatCount = _blackTimes.gameTime + _blackTimes.extraTime;
 
-			_blackTimes = new GameTimers(_tableInfo.blacktime);
-			_blackTimer = new Timer(1000 /* 1 second */, _blackTimes.gameTime);
-			_blackTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
-
-			if (_getMoveColor() == "Red") { _redTimer.start();   }
-			else                          { _blackTimer.start(); }
+			if (_getMoveColor() == "Red") { _redClock.start();   }
+			else                          { _blackClock.start(); }
 		}
 
 		private function _getMoveColor() : String
@@ -248,12 +251,8 @@
 
 		private function _stopTimer() : void
 		{
-			if (_redTimer) {
-				_redTimer.stop();
-			}
-			if (_blackTimer) {
-				_blackTimer.stop();
-			}
+			_redClock.stop();
+			_blackClock.stop();
 		}
 
 		/**
@@ -261,50 +260,44 @@
 		 */
 		private function _resetMoveTimer(color:String) : void
 		{
-			if (color == "Red") {
+			if (color == "Red")
+			{
 				_redTimes.resetMoveTime();
-				_redTimer.stop();
-				_blackTimer.start();
+				_redClock.stop();
+				_blackClock.start();
 			}
-			else {
+			else
+			{
 				_blackTimes.resetMoveTime();
-				_blackTimer.stop();
-				_redTimer.start();
+				_blackClock.stop();
+				_redClock.start();
 			}
 		}
 
 		private function _timerHandler(event:Event) : void
 		{
+			var bTimedOut:Boolean = false;
 			const color:String = _getMoveColor();
-			if (color == "Red") {
-				if (_redTimes) {
-					_redTimes.gameTime--;
-					_redTimes.moveTime--;
-					if (_redTimes.gameTime == 0 || _redTimes.moveTime == 0) {
-						_handleTimeout(color);
-                        return;
-					}
-					this.view.updateTimers("Red", _redTimes);
-				}
-			}
-			else if (color == "Black") {
-				if (_blackTimes) {
-					_blackTimes.gameTime--;
-					_blackTimes.moveTime--;
-					if (_blackTimes.gameTime == 0 ||_blackTimes.moveTime == 0) {
-						_handleTimeout(color);
-                        return;
-					}
-					this.view.updateTimers("Black", _blackTimes);
-				}
-			}
-		}
 
-		private function _handleTimeout(color:String) : void
-		{
-			this.view.displayMessage(color + " timeout");
-			Global.app.showObserverMenu();
-            _stopTimer();
+			if (color == "Red")
+			{
+				_redTimes.decrementTime();
+				bTimedOut = _redTimes.isTimedout();
+				this.view.updateTimers("Red", _redTimes);
+			}
+			else if (color == "Black")
+			{
+				_blackTimes.decrementTime();
+				bTimedOut = _blackTimes.isTimedout();
+				this.view.updateTimers("Black", _blackTimes);
+			}
+
+			if ( bTimedOut )
+			{
+				this.view.displayMessage(color + " timedout");
+				Global.app.showObserverMenu();
+	            _stopTimer();
+			}
 		}
 
 		public function playMoveList(moves:Array) : void
