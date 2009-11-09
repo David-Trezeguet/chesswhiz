@@ -10,28 +10,31 @@
 		private var _initialMoveTime:int = 0;
 
 		/**
-		 * @param times The initial times string in "GG/MM/EE" format.
+		 * @param initialTimes The initial times string in "GG/MM/EE" format.
 		 */
-		public function GameTimers(times:String = "") : void
+		public function GameTimers(initialTimes:String = "") : void
 		{
-			if (times != "")
+			if (initialTimes != "")
 			{
-				this.initWithTimes(times);
+				this.initWithTimes(initialTimes, initialTimes);
 			}
 		}
 
 		/**
-		 * @param times The initial times string in "GG/MM/EE" format.
+		 * @param initialTimes The initial times string in "GG/MM/EE" format.
+		 * @param currentTimes The current times string in "GG/MM/EE" format.
 		 */
-		public function initWithTimes(times:String) : void
+		public function initWithTimes(initialTimes:String, currentTimes:String) : void
 		{
-			const timers:Array = times.split("/");
+			var timers:Array = initialTimes.split("/");
+			_initialMoveTime = parseInt(timers[1]);
+
+			timers = currentTimes.split("/");
 			this.gameTime  = parseInt(timers[0]);
 			this.moveTime  = parseInt(timers[1]);
 			this.extraTime = parseInt(timers[2]);
 
-			_initialTimes = times;
-			_initialMoveTime = this.moveTime;
+			_initialTimes = initialTimes;
 		}
 
 		public function getInitialTimes() : String { return _initialTimes; }
