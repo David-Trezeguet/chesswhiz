@@ -49,11 +49,14 @@
 			return new GameTimers( color == "Red" ? _tableInfo.redtime : _tableInfo.blacktime );			
 		}
 
-		private function _getJoinColor():String
+		/**
+		 * Determine which Color/Side is open.
+		 */
+		private function _getOpenColor():String
 		{
-			if ( _blackPlayer != null && _redPlayer   == null ) { return "Red";   }
-			if ( _redPlayer   != null && _blackPlayer == null ) { return "Black"; }
-			return "";
+			if ( _redPlayer   == null && _blackPlayer ) { return "Red";   }
+			if ( _blackPlayer == null && _redPlayer   ) { return "Black"; }
+			return "None";
 		}
 
 		public function newTable(tableInfo:TableInfo) : void
@@ -72,24 +75,17 @@
 			if ( tableInfo.redid == myPID || tableInfo.blackid == myPID )
 			{
 				_isTopSideBlack = (tableInfo.redid == myPID);
-				_createNewTableView();
+				_createTableView();
 				Global.app.showNewTableMenu();
 				_tableState = "NEWTABLE_STATE";
-				this.view.displayMessage(myPID + " joined");
 			}
 			else {
-				const joinColor:String = _getJoinColor();
-				_isTopSideBlack = (joinColor != "Black");
-				_createObserveTableView(joinColor);
-				_tableState = (joinColor == "" ? "OBSERVER_STATE" : "VIEWTABLE_STATE");
+				const openColor:String = _getOpenColor();
+				_isTopSideBlack = (openColor != "Black");
+				_createTableView();
+				Global.app.showOpenTableMenu(openColor, this.tableId);
+				_tableState = (openColor == "None" ? "OBSERVER_STATE" : "VIEWTABLE_STATE");
 			}
-		}
-
-		private function _createView () : void
-		{
-			this.view = new TableBoard();
-			Global.app.addBoardToWindow(this.view);  // Realize the UI first!
-			this.view.display(this);
 		}
 
 		public function reviewMove(cmd:String) : void
@@ -118,35 +114,25 @@
 				_tableState = _stateBeforeReview;
 			}
 		}
-
-		private function _createNewTableView() : void
-		{
-			if (this.view == null) {
-				_createView();
-			}
-			if (_redPlayer != null && _redPlayer.pid == Global.app.getPlayerID()) {
-				this.view.displayPlayerData(_redPlayer);
-			}
-			else if (_blackPlayer != null && _blackPlayer.pid == Global.app.getPlayerID()) {
-				this.view.displayPlayerData(_blackPlayer);
-			}
-		}
 		
-		private function _createObserveTableView(joinColor:String) : void
+		private function _createTableView() : void
 		{
-			if (this.view == null) {
-				_createView();
+			if (this.view == null)
+			{
+				this.view = new TableBoard();
+				Global.app.addBoardToWindow(this.view); // Realize the UI first!
+				this.view.display(this);
 			}
-			if (_redPlayer != null) {
+
+			if (_redPlayer) {
 				this.view.displayPlayerData(_redPlayer);
 				this.view.displayMessage(_redPlayer.pid + " joined");
 			}
-			if (_blackPlayer != null) {
+
+			if (_blackPlayer) {
 				this.view.displayPlayerData(_blackPlayer);
 				this.view.displayMessage(_blackPlayer.pid + " joined");
 			}
-			trace("joinable color: [" + joinColor + "]");
-			Global.app.showOpenTableMenu(joinColor, this.tableId);
 		}
 
 		public function displayChatMessage(pid:String, chatMsg:String) : void {
@@ -178,7 +164,7 @@
 
 		private function _startGame() : void
 		{
-			if ( _redPlayer != null && _blackPlayer != null )
+			if ( _redPlayer && _blackPlayer )
 			{
 				if (_redPlayer.pid == Global.app.getPlayerID()) {
 					_game = new Game(this);
@@ -572,79 +558,11 @@
 			_curMoveIndex = -1;
 		}
 
-		public function handleDebugCmd(cmd:String) : void
-		{
-			var prefix:String = "/debug ";
-			var arg:String = cmd.substring(prefix.length);
-			var result:String = "" + arg + ":\n";
-			var player:PlayerInfo = null;
-			if (arg == "gamestate") {
-				if (_game) {
-					result += _game.getGameState();
-				} else {
-					result += "";
-				}
-			} else if (arg == "tablestate") {
-				result += _tableState;
-			} else if (arg == "piecemap") {
-				result += this.view.board.getPieceMapInfo();
-			} else if (arg == "movelist") {
-				result += _getMoveListInfo();
-			} else if (arg == "redpieces") {
-				result += this.view.board.getRedPiecesInfo();
-			} else if (arg == "blackpieces") {
-				result += this.view.board.getBlackPiecesInfo();
-			} else if (arg == "redplayer") {
-				player = _redPlayer;
-				if (player) {
-					result += "redplayer: " + player.pid + " " + player.score;
-				}
-			}  else if (arg == "blackplayer") {
-				player = _blackPlayer;
-				if (player) {
-					result += "blackplayer: " + player.pid + " " + player.score;
-				}
-			} else if (arg == "all") {
-				result += "tablestate: " + _tableState;
-				result += "\n";
-				if (_game) {
-					result += "gamestate: " + _game.getGameState();
-					result += "\n";
-				} else {
-					result += "gamestate: \n";
-				}
-				result += this.view.board.getPieceMapInfo();
-				result += "\n";
-				result += this.view.board.getRedPiecesInfo();
-				result += "\n";
-				result += this.view.board.getRedPiecesInfo();
-				result += "\n";
-				result += this.view.board.getBlackPiecesInfo();
-				result += "\n";
-				player = _redPlayer;
-				if (player) {
-					result += "redplayer: " + player.pid + " " + player.score;
-					result += "\n";
-				} else {
-					result += "redplayer: \n";
-				}
-				player = _blackPlayer;
-				if (player) {
-					result += "blackplayer: " + player.pid + " " + player.score;
-					result += "\n";
-				} else {
-					result += "redplayer: \n";
-				}
-			}
-			trace(cmd + ":\n" + result);
-			this.view.displayMessage(result);
-		}
-
 		public function joinTable(player:PlayerInfo) : void
 		{
 			if      (player.color == "Red")   { _redPlayer   = player;   }
 			else if (player.color == "Black") { _blackPlayer = player;   }
-			else                              { _observers.push(player); }
+			else    /* "None" */              { _observers.push(player); }
 
 			if (_tableState == "NEWTABLE_STATE")
 			{

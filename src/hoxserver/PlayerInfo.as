@@ -12,10 +12,5 @@
 			this.color = color;
 			this.score = score;
 		}
-
-		public function clone() : PlayerInfo
-		{
-			return new PlayerInfo( pid, color, score );
-		}
 	}
 }
