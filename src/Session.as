@@ -50,19 +50,19 @@
 
 		private function _sendRequest(req:Message) : void
 		{
-			var reqMsg:String = req.getMessage();
-			trace("Sending request: " + reqMsg);
+			const reqMsg:String = req.getMessage();
 			if (_socket.connected) {
+				trace("Sending: " + reqMsg);
 				_socket.send(reqMsg);
 			}
 			else {
-			   Global.app.processSocketCloseEvent();
+			   trace("Session: Fail to send request. Connection lost.");
 			}
 		}
 		
-		public function sendLoginRequest(uname:String, passwd:String, version:String):void  {
+		public function sendLoginRequest(pid:String, passwd:String, version:String):void  {
 			var req:Message = new Message();
-			req.createLoginRequest(uname, passwd, version);
+			req.createLoginRequest(pid, passwd, version);
 			_sendRequest(req);
 		}
 		
@@ -84,38 +84,38 @@
 			_sendRequest(req);
 		}
 		
-		public function sendNewTableRequest(pid:String, color:String):void  {
+		public function sendNewTableRequest(pid:String, color:String):void {
 			var req:Message = new Message();
 			req.createNewTableRequest(pid, _sid, color);
 			_sendRequest(req);
 		}
 		
-		public function sendMoveRequest(pid:String, curPos:Position, newPos:Position, time:String, tid:String):void  {
+		public function sendMoveRequest(pid:String, curPos:Position, newPos:Position, time:String, tid:String):void {
 			var req:Message = new Message();
 			var move:String = "" + curPos.column + curPos.row + newPos.column + newPos.row;
 			req.createMoveRequest(pid, _sid, time, move, tid);
 			_sendRequest(req);
 		}
 		
-		public function sendLeaveRequest(pid:String, tid:String):void  {
+		public function sendLeaveRequest(pid:String, tid:String):void {
 			var req:Message = new Message();
 			req.createLeaveRequest(pid, _sid, tid);
 			_sendRequest(req);
 		}
 		
-		public function sendResignRequest(pid:String, tid:String):void  {
+		public function sendResignRequest(pid:String, tid:String):void {
 			var req:Message = new Message();
 			req.createResignRequest(pid, _sid, tid);
 			_sendRequest(req);
 		}
 		
-		public function sendDrawRequest(pid:String, tid:String):void  {
+		public function sendDrawRequest(pid:String, tid:String):void {
 			var req:Message = new Message();
 			req.createDrawRequest(pid, _sid, tid);
 			_sendRequest(req);
 		}
 
-		public function sendChatRequest(pid:String, tid:String, msg:String):void  {
+		public function sendChatRequest(pid:String, tid:String, msg:String):void {
 			var req:Message = new Message();
 			req.createChatRequest(pid, _sid, tid, msg);
 			_sendRequest(req);

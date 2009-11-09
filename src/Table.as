@@ -429,7 +429,7 @@
 				if (_game) {
 					_game.processEvent("move");
 				}
-				Global.app.sendMoveRequest(_game.getLocalPlayer(), piece, curPos, newPos, this.tableId);
+				Global.app.doSendMove(piece, curPos, newPos, this.tableId);
 			}
 		}
 

@@ -116,8 +116,8 @@
 		private function _stopApp() : void
 		{
 			_session.close();
-			_playerId  = "";
-			_table     = null;
+			_playerId = "";
+			_table    = null;
 			_mainWindow.removeAllChildren();
 		}
 
@@ -144,10 +144,10 @@
 
 		public function getPlayerID():String  { return _playerId; }
 
-		public function doLogin(uname:String, passwd:String = "") : void
+		public function doLogin(pid:String, passwd:String = "") : void
 		{
-			_playerId = uname;
-			_session.sendLoginRequest(uname, passwd, Global.LOGIN_VERSION);
+			_playerId = pid;
+			_session.sendLoginRequest(pid, passwd, Global.LOGIN_VERSION);
 		}
 
 		public function doGuestLogin() : void
@@ -203,6 +203,20 @@
 		{
 			if ( _table ) {
 				_session.sendChatRequest(_playerId, _table.tableId, msg);
+			}
+		}
+
+		public function doSendMove(piece:Piece, curPos:Position, newPos:Position, tid:String) : void
+		{
+			if ( _table && _table.tableId == tid ) {
+				_session.sendMoveRequest(_playerId, curPos, newPos, '1500', tid);
+			}
+		}
+
+		public function doUpdateTableSettings(tid:String, times:String, bRated:Boolean) : void
+		{
+			if ( _table && _table.tableId == tid ) {
+				_session.sendUpdateTableRequest(_playerId, tid, times, bRated);
 			}
 		}
 
@@ -403,26 +417,6 @@
 				_table.processWrongMove(event.getContent());
 			}
 	    }
-
-		public function sendMoveRequest(player:PlayerInfo, piece:Piece, curPos:Position, newPos:Position, tid:String) : void
-		{
-			_session.sendMoveRequest(_playerId, curPos, newPos, '1500', tid);
-		}
-		
-		public function resignGame(tableId:String) : void
-		{
-			_session.sendResignRequest(_playerId, tableId);
-		}
-	
-		public function drawGame(tableId:String) : void
-		{
-			_session.sendDrawRequest(_playerId, tableId);
-		}
-
-		public function doUpdateTableSettings(tableId:String, times:String, bRated:Boolean) : void
-		{
-			_session.sendUpdateTableRequest(_playerId, tableId, times, bRated)
-		}
 
 		private function _processEvent_I_MOVES(event:Message) : void
 		{
