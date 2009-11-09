@@ -119,11 +119,12 @@
 			};
 		}
 
-		public function createUpdateTableRequest(pid:String, tid:String, times:String, r:Boolean) : void {
+		public function createUpdateTableRequest(pid:String, sid:String, tid:String, times:String, r:Boolean) : void {
 			this.optype = "UPDATE";
 			this.params = {
-				tid: tid,
 				pid: pid,
+				sid: sid,
+				tid: tid,
 				rated: (r ? 1 : 0),
 				itimes: times
 			};
