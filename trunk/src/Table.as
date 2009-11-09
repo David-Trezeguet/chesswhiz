@@ -75,8 +75,8 @@
 				_blackPlayer = new PlayerInfo(tableInfo.blackid, "Black", tableInfo.blackscore);
 			}
 
-			_redTimes.initWithTimes(tableInfo.redtime);
-			_blackTimes.initWithTimes(tableInfo.blacktime);
+			_redTimes.initWithTimes(tableInfo.initialtime, tableInfo.redtime);
+			_blackTimes.initWithTimes(tableInfo.initialtime, tableInfo.blacktime);
 
 			const myPID:String = Global.app.getPlayerID();
 
@@ -205,8 +205,8 @@
 		{
 			if (_moveList.length == 0)
 			{
-				_redTimes.initWithTimes(times);
-				_blackTimes.initWithTimes(times);
+				_redTimes.initWithTimes(times, times);
+				_blackTimes.initWithTimes(times, times);
 
 				var timer:GameTimers = new GameTimers(times);
 				this.view.updateTimers("Red", timer);
@@ -258,18 +258,18 @@
 		/**
 		 * This function is called after each Move is made to reset the MOVE-time.
 		 */
-		private function _resetMoveTimer(color:String) : void
+		private function _resetMoveTimer(lastMoveColor:String) : void
 		{
-			if (color == "Red")
+			if (lastMoveColor == "Red")
 			{
-				_redTimes.resetMoveTime();
 				_redClock.stop();
+				_blackTimes.resetMoveTime();
 				_blackClock.start();
 			}
 			else
 			{
-				_blackTimes.resetMoveTime();
 				_blackClock.stop();
+				_redTimes.resetMoveTime();
 				_redClock.start();
 			}
 		}
