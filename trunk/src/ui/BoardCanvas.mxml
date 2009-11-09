@@ -399,13 +399,13 @@
 
 		public function updatePieceMap(newPos:Position, piece:Piece) : void
 		{
-			var curPiece:Piece = _pieceMap[newPos.row][newPos.column];
+			var capturedPiece:Piece = _pieceMap[newPos.row][newPos.column];
 			var oldPos:Position = piece.getPosition();
 			_pieceMap[newPos.row][newPos.column] = piece;
 			_pieceMap[oldPos.row][oldPos.column] = null;
-			if (curPiece) {
-				curPiece.setCapture(true);
-				curPiece.removeImage();
+			if (capturedPiece) {
+				capturedPiece.setCapture(true);
+				capturedPiece.removeImage();
 			}
 			piece.setPosition(newPos);
 		}
