@@ -17,11 +17,11 @@
 		}
 		
 		public function setLocalPlayer(player:PlayerInfo) : void {
-			_localPlayer = player.clone();
+			_localPlayer = new PlayerInfo(player.pid, player.color, player.score);
 		}
 
 		public function setOppPlayer(player:PlayerInfo) : void {
-			_oppPlayer = player.clone();
+			_oppPlayer = new PlayerInfo(player.pid, player.color, player.score);
 		}
 
 		public function getLocalPlayer() : PlayerInfo { return _localPlayer; }

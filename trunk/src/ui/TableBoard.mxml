@@ -90,15 +90,8 @@
 			const chatMsg:String = StringUtil.trim( chatInput.text );
 			chatInput.text = "";
 
-			if ( chatMsg.search("/debug") == 0 )
-			{
-				_table.handleDebugCmd(chatMsg);
-			}
-			else
-			{
-				Global.app.doTableChat(chatMsg);
-				this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
-			}
+			Global.app.doTableChat(chatMsg);
+			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
         }
 
 		public function redrawBoard(boardColor:uint, lineColor:uint) : void 

@@ -229,7 +229,7 @@
 			_menu.tableId = tid;
 			if      (color == "Red")   { _menu.currentState = "openRedState";   }
 			else if (color == "Black") { _menu.currentState = "openBlackState"; }
-			else                       { _menu.currentState = "observerState";  }
+			else    /* "None" */       { _menu.currentState = "observerState";  }
 		}
 
 		public function changeTableSettings() : void
