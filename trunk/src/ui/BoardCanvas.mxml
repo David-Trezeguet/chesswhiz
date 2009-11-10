@@ -473,20 +473,21 @@
 
 		private function _getIntervenedPiecesCount(curPos:Position, newPos:Position) : int
 		{
-			var numPieces:int = 0;
-			var newRow:int = newPos.row;
-			var newCol:int = newPos.column;
-			var curRow:int = curPos.row;
-			var curCol:int = curPos.column;
-			var rowDiff:int = Math.abs(curRow - newRow);
-			var colDiff:int = Math.abs(curCol - newCol);
-			var move:int = 0;
-			if (rowDiff > 0) {
-				if (colDiff > 0) {
+			var numPieces:int = 0;   // The number intervened pieces.
+			const newRow:int = newPos.row;
+			const newCol:int = newPos.column;
+			const curRow:int = curPos.row;
+			const curCol:int = curPos.column;
+			const rowDiff:uint = Math.abs(curRow - newRow);
+			const colDiff:uint = Math.abs(curCol - newCol);
+
+			var move:int = 0; // Move Type.
+			if (rowDiff != 0) {
+				if (colDiff != 0) {
 					if ((rowDiff == 1 && colDiff == 2) || (rowDiff == 2 && colDiff == 1)) {
 						move = 3; // L shape move
 					} else if (rowDiff == colDiff) {
-						move = 2; // Diagnol move
+						move = 2; // Diagonal move
 					} else {
 						move = 4; // Steep move
 					}
@@ -496,76 +497,86 @@
 			} else {
 				move = 0; // Horizontal move
 			}
-			var startCol:int = curCol;
-			if (curCol > newCol) {
-				startCol = newCol;
-			}
-			var startRow:int = curRow;
-			if (curRow > newRow) {
-				startRow = newRow;
-			}
+
+			const startCol:int = (curCol > newCol ? newCol : curCol);
+			const startRow:int = (curRow > newRow ? newRow : curRow);
+
 			var i:int = 0;
-			if (move == 0) {
-				for (i = 1; i < colDiff; i++) {
-					if (_pieceMap[curRow][startCol + i] != null) {
-						numPieces++;
+			switch ( move )
+			{
+				case 0:  // Horizontal move
+				{
+					for (i = 1; i < colDiff; i++) {
+						if (_pieceMap[curRow][startCol + i] != null) {
+							numPieces++;
+						}
 					}
+					break;
 				}
-			} else if (move == 1) {
-				for (i = 1; i < rowDiff; i++) {
-					if (_pieceMap[startRow + i][curCol] != null) {
-						numPieces++;
-					}
-				}
-			} else if (move == 2) {
-				if (curRow < newRow) {
+				case 1:  // Vertical move
+				{
 					for (i = 1; i < rowDiff; i++) {
-						if (curCol < newCol) {
-							if (_pieceMap[curRow + i][curCol + i] != null) {
+						if (_pieceMap[startRow + i][curCol] != null) {
+							numPieces++;
+						}
+					}
+					break;
+				}
+				case 2:  // Diagonal move
+				{
+					if (curRow < newRow) {
+						for (i = 1; i < rowDiff; i++) {
+							if (curCol < newCol) {
+								if (_pieceMap[curRow + i][curCol + i] != null) {
+									numPieces++;
+								}
+							} else {
+								if (_pieceMap[curRow + i][curCol - i] != null) {
+									numPieces++;
+								}
+							}
+						}
+					} else {
+						for (i = 1; i < rowDiff; i++) {
+							if (curCol < newCol) {
+								if (_pieceMap[curRow - i][curCol + i] != null) {
+									numPieces++;
+								}
+							} else {
+								if (_pieceMap[curRow - i][curCol - i] != null) {
+									numPieces++;
+								}
+							}
+						}
+					}
+					break;
+				}
+				case 3:  // L shape move
+				{
+					if (rowDiff == 1 && colDiff == 2) {
+						if (curCol > newCol) {
+							if (_pieceMap[curRow][curCol - 1] != null) {
 								numPieces++;
 							}
 						} else {
-							if (_pieceMap[curRow + i][curCol - i] != null) {
+							if (_pieceMap[curRow][curCol + 1] != null) {
 								numPieces++;
 							}
 						}
-					}
-				} else {
-					for (i = 1; i < rowDiff; i++) {
-						if (curCol < newCol) {
-							if (_pieceMap[curRow - i][curCol + i] != null) {
+					} else {
+						if (curRow > newRow) {
+							if (_pieceMap[curRow - 1][curCol] != null) {
 								numPieces++;
 							}
 						} else {
-							if (_pieceMap[curRow - i][curCol - i] != null) {
+							if (_pieceMap[curRow + 1][curCol] != null) {
 								numPieces++;
 							}
 						}
 					}
+					break;
 				}
-			}  else if (move == 3) {
-				if (rowDiff == 1 && colDiff == 2) {
-					if (curCol > newCol) {
-						if (_pieceMap[curRow][curCol - 1] != null) {
-							numPieces++;
-						}
-					} else {
-						if (_pieceMap[curRow][curCol + 1] != null) {
-							numPieces++;
-						}
-					}
-				} else {
-					if (curRow > newRow) {
-						if (_pieceMap[curRow - 1][curCol] != null) {
-							numPieces++;
-						}
-					} else {
-						if (_pieceMap[curRow + 1][curCol] != null) {
-							numPieces++;
-						}
-					}
-				}
-			}
+			} /* switch (...) */
 
 			return numPieces;
 		}		
@@ -743,6 +754,8 @@
 			const myKingPos:Position = myKing[0].getPosition();
 
 			const oppColor:String = (myColor == "Red" ? "Black" : "Red");
+
+			// FIXME: Missing "pawn" type!!!!
 			const types:Array = ["cannon", "horse", "chariot", "king"];
 
 			for each (var type:String in types)
