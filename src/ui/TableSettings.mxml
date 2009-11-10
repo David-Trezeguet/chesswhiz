@@ -6,29 +6,32 @@
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);">
 
+	<mx:Metadata>
+		[Event(name="newSettings", type="flash.events.Event")]
+	</mx:Metadata>
+
 	<mx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;
 
-			public function setCurrentSettings(settings:Object) : void
+			public var settings:Object = null;
+
+			public function applyCurrentSettings() : void
 			{
-				this.nsGameTime.value = settings["gametime"]/60;
-				this.nsMoveTime.value = settings["movetime"];
-				this.nsExtraTime.value = settings["extratime"];
-				if (settings["rated"]) {
-					this.cbGameType.selected = true;
-				}
+				nsGameTime.value    = settings["gametime"] / 60;
+				nsMoveTime.value    = settings["movetime"];
+				nsExtraTime.value   = settings["extratime"];
+				cbGameType.selected = settings["rated"];
 			}
 
 			private function onOK(event:Event) : void
 			{
-				var settings:Object = {}
-				settings["gametime"] = this.nsGameTime.value * 60;
-				settings["movetime"] = this.nsMoveTime.value;
-				settings["extratime"] = this.nsExtraTime.value;
-				settings["rated"] = this.cbGameType.selected;
+				settings["gametime"]  = nsGameTime.value * 60;
+				settings["movetime"]  = nsMoveTime.value;
+				settings["extratime"] = nsExtraTime.value;
+				settings["rated"]     = cbGameType.selected;
 				PopUpManager.removePopUp(this);
-				Global.app.updateTableSettings(settings);
+				dispatchEvent( new Event("newSettings", true /* bubble to parent */) );
 			}
 
 		]]>

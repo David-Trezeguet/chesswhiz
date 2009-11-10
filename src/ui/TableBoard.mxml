@@ -24,13 +24,12 @@
 			chatInput.text = resourceManager.getString('localization', 'chat_prompt');
 		}
 
-		public function display(table:Table) : void
+		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkinIndex:int) : void
 		{
 			this.title = "Table #" + table.tableId;
 			_table = table;
 			board.setTable(_table);
-			const pref:Object = _table.getPreferences();
-			board.drawBoardAndPieces(pref["boardcolor"], pref["linecolor"], pref["pieceskinindex"]);
+			board.drawBoardAndPieces(bgColor, lineColor, pieceSkinIndex);
 		}
 
 		public function displayPlayerData(player:PlayerInfo) : void

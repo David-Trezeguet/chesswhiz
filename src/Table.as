@@ -126,7 +126,7 @@
 			{
 				this.view = new TableBoard();
 				Global.app.addBoardToWindow(this.view); // Realize the UI first!
-				this.view.display(this);
+				this.view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskinindex"]);
 			}
 
 			if (_redPlayer) {
@@ -546,7 +546,6 @@
 		}
 
 		public function getSettings() : Object { return _settings; }
-		public function getPreferences() : Object { return _curPref; }
 
 		public function updateSettings(newSettings:Object) : void
 		{
