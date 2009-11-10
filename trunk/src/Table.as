@@ -331,10 +331,8 @@
 				return;
 			}
 
-			var validationResult:Array = this.view.board.validateMove(this.view.board, newPos, piece);
-			
-			if ( validationResult[0] != 1 ) {
-				trace("Piece cannot be moved: Invalid move: [" + validationResult[1] + "]");
+			if ( ! this.view.board.validateMove(piece, newPos) ) {
+				trace("Piece cannot be moved: Invalid move.");
 				piece.moveImage();
 				return;
 			}
