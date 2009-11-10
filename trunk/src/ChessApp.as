@@ -234,21 +234,30 @@
 
 		public function changeTableSettings() : void
 		{
+			if ( ! _table ) { return; }
+
 			var settingsPanel:TableSettings = new TableSettings();
 			PopUpManager.addPopUp(settingsPanel, _mainWindow, true /* modal */);
 			PopUpManager.centerPopUp(settingsPanel);
-			
-			if (_table) {
-				var settings:Object = _table.getSettings();
-				settingsPanel.setCurrentSettings(settings);
-			}
+			settingsPanel.settings = ObjectUtil.copy( _table.getSettings() );
+			settingsPanel.applyCurrentSettings();
+			settingsPanel.addEventListener("newSettings", newSettingsEventHandler);
 		}
 
-		public function updateTableSettings(settings:Object) : void
+		/**
+		 * Callback function to handle the "newSettings" event generated
+		 * by the 'TableSettings' window.
+		 */
+		private function newSettingsEventHandler(event:Event) : void
 		{
-			if (_table) {
-				_table.updateSettings(settings);
-			}
+			var settingsPanel:TableSettings = event.target as TableSettings;
+			if ( settingsPanel != null )
+			{
+				const settings:Object = settingsPanel.settings;
+				if (_table) {
+					_table.updateSettings(settings);
+				}
+			}	
 		}
 
 		public function changeAppPreferences() : void
