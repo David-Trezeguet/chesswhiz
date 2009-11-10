@@ -17,8 +17,9 @@
 		private var _blackPlayer:PlayerInfo = null;
 		private var _observers:Array = [];
 
-		private var _game:Game = null;
 		private var _isTopSideBlack:Boolean = true; // Normal view of Table.
+
+		private var _localPlayerColor:String = "None";
 
 		private var _inReviewMode:Boolean = false;
 
@@ -49,12 +50,10 @@
 		}
 
 		public function getTopSideColor():String { return _isTopSideBlack ? "Black" : "Red"; }
-		public function getGame():Game { return _game; }
 
 		public function getTimers(color:String) : GameTimers
 		{
-			return new GameTimers( color == "Red" ? _redTimes.getInitialTimes()
-												  : _blackTimes.getInitialTimes() );
+			return ( color == "Red" ? _redTimes : _blackTimes );
 		}
 
 		/**
@@ -145,35 +144,24 @@
 			this.view.displayChatMessage(pid, chatMsg);
 		}
 
-		private function _displayPlayers() : void
-		{
-			this.view.displayPlayerData(_redPlayer);
-			this.view.displayPlayerData(_blackPlayer);
-		}
-
 		private function _startGame() : void
 		{
 			if (_redPlayer.pid == Global.app.getPlayerID())
 			{
-				_game = new Game(this);
-				_game.setLocalPlayer(_redPlayer);
-				_game.setOppPlayer(_blackPlayer);
-				_game.processEvent("start");
+				_localPlayerColor = "Red";
+				this.view.board.enablePieceEvents("Red");
 			}
 			else if (_blackPlayer.pid == Global.app.getPlayerID())
 			{
-				_game = new Game(this);
-				_game.setLocalPlayer(_blackPlayer);
-				_game.setOppPlayer(_redPlayer);
-				_game.processEvent("start");
+				_localPlayerColor = "Black";
+				this.view.board.enablePieceEvents("Black");
 			}
 		}
 		
 		public function stopGame(reason:String, winner:String) : void {
-			if (_game) {
-				this.view.board.disablePieceEvents(_game.getLocalPlayer().color);
-				_game = null;
-			}
+			this.view.board.disablePieceEvents(_localPlayerColor);
+			_localPlayerColor = "None";
+			
 			this.view.board.displayStatus("Game Over (" + reason + ")");
 			_stopTimer();
 
@@ -207,29 +195,8 @@
 			_redClock.repeatCount = _redTimes.gameTime + _redTimes.extraTime;
 			_blackClock.repeatCount = _blackTimes.gameTime + _blackTimes.extraTime;
 
-			if (_getMoveColor() == "Red") { _redClock.start();   }
-			else                          { _blackClock.start(); }
-		}
-
-		private function _getMoveColor() : String
-		{
-			var color:String = "";
-
-			if (_game != null)
-			{
-				color = ( _game.waitingForMyMove() ? _game.getLocalPlayer().color
-												   : _game.getOppPlayer().color );
-			}
-			else if (_moveList.length > 0)
-			{
-				var lastMove:String = _moveList[_moveList.length - 1];
-				if (lastMove != "") {
-					var fields:Array = lastMove.split(":");
-					color = (fields[0] == "Red" ? "Black" : "Red");
-				}
-			}
-
-			return color;
+			if (this.view.board.nextColor() == "Red") { _redClock.start();   }
+			else                                      { _blackClock.start(); }
 		}
 
 		private function _stopTimer() : void
@@ -260,15 +227,15 @@
 		private function _timerHandler(event:Event) : void
 		{
 			var bTimedOut:Boolean = false;
-			const color:String = _getMoveColor();
+			const nextColor:String = this.view.board.nextColor();
 
-			if (color == "Red")
+			if (nextColor == "Red")
 			{
 				_redTimes.decrementTime();
 				bTimedOut = _redTimes.isTimedout();
 				this.view.updateTimers("Red", _redTimes);
 			}
-			else if (color == "Black")
+			else if (nextColor == "Black")
 			{
 				_blackTimes.decrementTime();
 				bTimedOut = _blackTimes.isTimedout();
@@ -277,7 +244,7 @@
 
 			if ( bTimedOut )
 			{
-				this.view.displayMessage(color + " timedout");
+				this.view.displayMessage(nextColor + " timedout");
 				Global.app.showObserverMenu();
 	            _stopTimer();
 			}
@@ -294,6 +261,7 @@
 				var piece:Piece = this.view.board.getPieceByPos(curPos);
 				if (piece) {
 					_processMoveEvent(piece, curPos, newPos);
+		            this.view.board.onNewMove();
 				}
 			}
 		}
@@ -331,9 +299,7 @@
 		{
 			_rewindLastMove();
 			this.view.displayMessage("Server rejected the move: " + error);
-			if (_game) {
-				_game.processEvent("move");
-			}
+			this.view.board.onNewMove();
 		}
 
 		public function parseMove(moveData:String) : Array
@@ -359,13 +325,14 @@
 				return;
 			}
 
-			if ( ! _game.waitingForMyMove() ) {
-				trace("Piece cannot be moved: Waiting for move from the opponent.");
+			if ( _localPlayerColor != this.view.board.nextColor() ) {
+				trace("Piece cannot be moved: It is not your turn.");
 				piece.moveImage();
 				return;
 			}
 
-			var validationResult:Array = _game.validateMove(this.view.board, newPos, piece);
+			var validationResult:Array = this.view.board.validateMove(this.view.board, newPos, piece);
+			
 			if ( validationResult[0] != 1 ) {
 				trace("Piece cannot be moved: Invalid move: [" + validationResult[1] + "]");
 				piece.moveImage();
@@ -375,7 +342,7 @@
 			// Apply the Move and then check if the 'own' King is in danger.
 			// If yes, then undo the Move.
 			_processMoveEvent(piece, curPos, newPos);
-			if ( _game.isMyKingBeingChecked() ) {
+			if ( this.view.board.isMyKingBeingChecked(piece.getColor()) ) {
 				trace("Piece cannot be moved: 'Own' King is in danger.");
 				_rewindLastMove();
 				return;
@@ -383,7 +350,7 @@
 			
 			// Upon reaching here, the Move has been determined to be valid.
 			Global.app.playMoveSound();
-			_game.processEvent("move");
+			this.view.board.onNewMove();
 			Global.app.doSendMove(piece, curPos, newPos, this.tableId);
 		}
 
@@ -397,9 +364,7 @@
 			{
 				Global.app.playMoveSound();
 				_processMoveEvent(piece, curPos, newPos);
-	            if (_game) {
-				    _game.processEvent("move");
-	            }
+	            this.view.board.onNewMove();
 			}
 		}
 
@@ -509,7 +474,7 @@
 			}
 			this.view.displayMessage(player.pid + " joined");
 
-			if (   !_game
+			if (    _localPlayerColor == "None"
 				&& ( _redPlayer && _blackPlayer )
 				&& (     _redPlayer.pid   == Global.app.getPlayerID()
 				 	  || _blackPlayer.pid == Global.app.getPlayerID() ) )
