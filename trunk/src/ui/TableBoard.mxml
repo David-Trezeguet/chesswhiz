@@ -26,6 +26,8 @@
 			infoPanel.title = resourceManager.getString('localization', 'Information');
 			chatPanel.title = resourceManager.getString('localization', 'Chat');
 			chatInput.text = resourceManager.getString('localization', 'chat_prompt');
+			resignButton.label = resourceManager.getString('localization', 'resign');
+			drawButton.label = resourceManager.getString('localization', 'draw');
 		}
 
 		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
@@ -34,25 +36,62 @@
 			_table = table;
 			board.setTable(_table);
 			board.drawBoardAndPieces(bgColor, lineColor, pieceSkin);
+			
+			const topColor:String = _table.getTopSideColor();
+			_updatePlayButtons( topColor );
 		}
 
 		public function displayPlayerData(player:PlayerInfo) : void
 		{
-			var playerLabel:Label = (player.color == _table.getTopSideColor() ? topLabel : bottomLabel);
+			const topColor:String = _table.getTopSideColor();
+			
+			var playerLabel:Label = (player.color == topColor ? topLabel : bottomLabel);
 			playerLabel.text = player.pid + "(" + player.score + ")";
 
-			var playerImage:Image = (player.color == _table.getTopSideColor() ? topImage : bottomImage);
-			playerImage.source = (player.color == "Red" ? Global.redPlayerImgClass
-													    : Global.blackPlayerImgClass);
-			
 			var timer:GameTimers = _table.getTimers(player.color);
 			updateTimers(player.color, timer);
+			
+			_updatePlayButtons( topColor );
+		}
+
+		private function _updatePlayButtons(topColor:String) : void
+		{
+			topImage.source = (topColor == "Red" ? Global.redPlayerImgClass : Global.blackPlayerImgClass);
+			bottomImage.source = (topColor == "Red" ? Global.blackPlayerImgClass : Global.redPlayerImgClass );
+
+			if (topLabel.text == "")
+			{
+				topPlayButton.visible = true;
+				topPlayButton.includeInLayout = true;
+				topPlayButton.label = (topColor == "Red" ? "Play RED" : "Play BLACK");
+			}
+			else
+			{
+				topPlayButton.visible = false;
+				topPlayButton.includeInLayout = false;
+			}
+			
+			if (bottomLabel.text == "")
+			{
+				bottomPlayButton.visible = true;
+				bottomPlayButton.includeInLayout = true;
+				bottomPlayButton.label = (topColor == "Red" ? "Play BLACK" : "Play RED");
+			}
+			else
+			{
+				bottomPlayButton.visible = false;
+				bottomPlayButton.includeInLayout = false;
+			}
 		}
 
 		public function removePlayerData(color:String) : void 
 		{
-			var playerLabel:Label = (color == _table.getTopSideColor() ? topLabel : bottomLabel);
+			const topColor:String = _table.getTopSideColor();
+
+			var playerLabel:Label = (color == topColor ? topLabel : bottomLabel);
 			playerLabel.text = "";
+
+			_updatePlayButtons(topColor);
 
 			// NOTE: There is no need to clear/reset the timer for now.
 		}
@@ -97,15 +136,41 @@
 			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
         }
 
-        public function onSettingsButtonClicked(event:Event) : void
-        {
+		public function onSettingsButton(event:Event) : void
+		{
 			var settingsPanel:TableSettings = new TableSettings();
 			PopUpManager.addPopUp(settingsPanel, this, true /* modal */);
 			PopUpManager.centerPopUp(settingsPanel);
 			settingsPanel.settings = ObjectUtil.copy( _table.getSettings() );
 			settingsPanel.applyCurrentSettings();
 			settingsPanel.addEventListener("newSettings", newSettingsEventHandler);
-        }
+		}
+
+		public function onResignButton(event:Event) : void
+		{
+			Global.app.doResignTable();
+		}
+
+		public function onDrawButton(event:Event) : void
+		{
+			Global.app.doDrawTable();
+		}
+
+		public function onPlayButton(event:Event) : void
+		{
+			const topColor:String = _table.getTopSideColor();
+			
+			var joinColor:String = "None";
+			if ( event.target == topPlayButton )
+			{
+				joinColor = (topColor == "Red" ? "Red" : "Black");
+			}
+			else
+			{
+				joinColor = (topColor == "Red" ? "Black" : "Red" );
+			}
+			Global.app.doJoinTable(_table.tableId, joinColor);
+		}
 
 		/**
 		 * Callback function to handle the "newSettings" event generated
@@ -149,8 +214,9 @@
 	<mx:VBox height="654" width="550" verticalGap="5">
 	
 		<mx:HBox width="100%">
-			<mx:HBox id="topPlayer" width="209" height="28" verticalAlign="middle">
+			<mx:HBox id="topPlayer" width="280" height="28" verticalAlign="middle">
 				<mx:Image id="topImage" scaleContent="true"/>
+				<mx:Button id="topPlayButton" label="Play" click="onPlayButton(event)" />
 				<mx:Label id="topLabel" fontSize="12" color="#A09E9E"/>
 			</mx:HBox>
 			<mx:Spacer width="100%" />
@@ -165,8 +231,9 @@
 		<cwui:BoardCanvas id="board" x="10" y="48" width="550" height="550" />
 
 		<mx:HBox width="100%">
-			<mx:HBox id="bottomPlayer" width="209" height="28" verticalAlign="middle">
+			<mx:HBox id="bottomPlayer" width="280" height="28" verticalAlign="middle">
 				<mx:Image id="bottomImage" scaleContent="true"/>
+				<mx:Button id="bottomPlayButton" label="Play" click="onPlayButton(event)" />
 				<mx:Label id="bottomLabel" fontSize="12" color="#A09E9E"/>
 			</mx:HBox>
 			<mx:Spacer width="100%" />
@@ -184,7 +251,10 @@
 			<mx:Button id="forwardButton" label="&gt;" enabled="false" click="reviewMove('forward')" />
 			<mx:Button id="endButton" label="&gt;|" enabled="false" click="reviewMove('end')" />
 			<mx:Spacer width="100%" />
-			<mx:Button id="settingsButton" label="Settings" click="onSettingsButtonClicked(event)" />
+			<mx:Button id="settingsButton" label="Settings" click="onSettingsButton(event)" />
+			<mx:Spacer width="30" />
+			<mx:Button id="resignButton" label="Resign" click="onResignButton(event)" />
+			<mx:Button id="drawButton" label="Draw" click="onDrawButton(event)" />
 		</mx:HBox>
 	</mx:VBox>
 

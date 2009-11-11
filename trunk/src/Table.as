@@ -75,7 +75,8 @@
 			if ( myPID == tableInfo.redid  || myPID == tableInfo.blackid )
 			{
 				_isTopSideBlack = (tableInfo.redid == myPID);
-				Global.app.showNewTableMenu();
+				//Global.app.showNewTableMenu();
+				Global.app.showObserverMenu();
 			}
 			else
 			{
@@ -84,7 +85,7 @@
 				if ( !_blackPlayer && _redPlayer   ) { openColor = "Black"; }
 				
 				_isTopSideBlack = (openColor != "Black");
-				Global.app.showOpenTableMenu(openColor, this.tableId);
+				Global.app.showObserverMenu();
 			}
 
 			_displayView();
@@ -443,6 +444,17 @@
 			if (player.color == "Red" || player.color == "Black") {
 				_view.displayPlayerData(player);
 			}
+			else {
+				if ( _redPlayer && _redPlayer.pid == player.pid ) {
+					_view.removePlayerData("Red");
+					_redPlayer = null;
+				}
+				else if ( _blackPlayer && _blackPlayer.pid == player.pid ) {
+					_view.removePlayerData("Black");
+					_blackPlayer = null;
+				}
+			}
+			
 			_view.displayMessage(player.pid + " joined");
 
 			// Start the Game if there are enough players.
@@ -455,7 +467,8 @@
 			{
 				_localPlayerColor = (_redPlayer.pid == myPID  ? "Red" : "Black");
 				_view.board.enablePieceEvents(_localPlayerColor);
-				Global.app.showNewTableMenu();
+				//Global.app.showNewTableMenu();
+				Global.app.showObserverMenu();
 			}
 		}
 
@@ -511,7 +524,7 @@
 					 && (    _redPlayer.pid   == Global.app.getPlayerID()
 				 	      || _blackPlayer.pid == Global.app.getPlayerID() ) )
 				{
-					Global.app.showInGameMenu();
+					//Global.app.showInGameMenu();
 				}
 			}
 

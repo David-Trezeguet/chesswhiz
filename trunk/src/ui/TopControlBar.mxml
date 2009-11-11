@@ -49,7 +49,6 @@
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="observerState" basedOn="viewTablesState">
-			<mx:RemoveChild target="{newTableButton}"/>
 			<mx:AddChild relativeTo="{logoutButton}" position="before">
 				<mx:Button id="preferencesButton"
 					label="{resourceManager.getString('localization', 'preferences')}"
@@ -62,39 +61,6 @@
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{preferencesButton}" position="before">
 				<mx:Spacer width="100%"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="newTableState" basedOn="observerState">
-			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button id="settingsButton"
-					label="{resourceManager.getString('localization', 'settings')}"
-					click="Global.app.changeTableSettings()"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="openRedState" basedOn="observerState">
-			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button id="playRedButton"
-					label="{resourceManager.getString('localization', 'play_red')}"
-					click="Global.app.doJoinTable(tableId, 'Red');"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="openBlackState" basedOn="observerState">
-			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button id="playBlackButton"
-					label="{resourceManager.getString('localization', 'play_black')}"
-					click="Global.app.doJoinTable(tableId, 'Black');"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="inGameState" basedOn="observerState">
-			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button id="resignButton"
-					label="{resourceManager.getString('localization', 'resign')}"
-					click="Global.app.doResignTable()"/>
-			</mx:AddChild>
-			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button id="drawButton"
-					label="{resourceManager.getString('localization', 'draw')}"
-					click="Global.app.doDrawTable()"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>

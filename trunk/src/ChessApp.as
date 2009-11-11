@@ -32,7 +32,7 @@
 		private var _session:Session  = new Session();
 		private var _loginFailReason:String = "";
 
-		private var _pendingTableId:String = ""; // The table-ID to be joined.
+		private var _requestingTable:Boolean = false;
 		private var _table:Table      = null;  // THE table.
 
 		public function ChessApp(menu:TopControlBar, window:Container)
@@ -171,15 +171,27 @@
 
 		public function doNewTable() : void
 		{
+			if ( _table )
+			{
+				_session.sendLeaveRequest(_playerId, _table.tableId);
+				_requestingTable = true;
+			}
 			_session.sendNewTableRequest(_playerId, "Red", "1200/240/20");
 		}
 		
 		public function doJoinTable(tableId:String, color:String = "None") : void
 		{
-			if ( _table && _table.tableId != tableId )
+			if ( _table )
 			{
-				_session.sendLeaveRequest(_playerId, _table.tableId);
-				_pendingTableId = tableId;
+				if ( _table.tableId != tableId )
+				{
+					_session.sendLeaveRequest(_playerId, _table.tableId);
+					_requestingTable = true;
+				}
+				else if (_table.isPlayerPlaying(_playerId) )
+				{
+					_session.sendJoinRequest(_playerId, tableId, "None");
+				}
 			}
 			_session.sendJoinRequest(_playerId, tableId, color);
 		}
@@ -226,17 +238,7 @@
 			}
 		}
 
-		public function showNewTableMenu() : void { _menu.currentState = "newTableState"; }
 		public function showObserverMenu() : void { _menu.currentState = "observerState"; }
-		public function showInGameMenu()   : void { _menu.currentState = "inGameState";   }
-
-		public function showOpenTableMenu(color:String, tid:String) : void
-		{
-			_menu.tableId = tid;
-			if      (color == "Red")   { _menu.currentState = "openRedState";   }
-			else if (color == "Black") { _menu.currentState = "openBlackState"; }
-			else    /* "None" */       { _menu.currentState = "observerState";  }
-		}
 
 		public function changeTableSettings() : void
 		{
@@ -408,9 +410,9 @@
 				_table = new Table(tableId, _preferences, settings);
 			}
 
-			if ( _pendingTableId == tableId )
+			if ( _requestingTable )
 			{
-				_pendingTableId = "";
+				_requestingTable = false;
 			}
 
 			_table.newTable(tableInfo);
@@ -471,7 +473,7 @@
 			{
 				_table.leaveTable(leaveInfo.pid);
 				if (    _playerId == leaveInfo.pid
-				     && _pendingTableId == "" )
+				     && _requestingTable == false )
 				{
 					_table = null;
 					_mainWindow.removeAllChildren();
