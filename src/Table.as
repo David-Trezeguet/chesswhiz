@@ -124,7 +124,7 @@
 		private function _displayView() : void
 		{
 			Global.app.addBoardToWindow(_view); // Realize the UI first!
-			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskinindex"]);
+			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
 
 			if (_redPlayer) {
 				_view.displayPlayerData(_redPlayer);
@@ -552,8 +552,8 @@
 			if (_curPref["boardcolor"] != newPref["boardcolor"]) {
 				_view.redrawBoard(newPref["boardcolor"], _curPref["linecolor"]);
 			}
-			if (_curPref["pieceskinindex"] != newPref["pieceskinindex"]) {
-				_view.changePieceSkin(newPref["pieceskinindex"]);
+			if (_curPref["pieceskin"] != newPref["pieceskin"]) {
+				_view.changePieceSkin(newPref["pieceskin"]);
 			}
 			_curPref = newPref;
 		}
