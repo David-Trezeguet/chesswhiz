@@ -68,7 +68,7 @@
 			} 
 		}
 
-		private function _saveCookie() : void
+		private function _savePreferencesToLocalSharedObject() : void
 		{
 			_sharedObject.data.persist    = 0xFFDDF1; // "Present" flag.
 			_sharedObject.data.pieceskin  = _preferences["pieceskin"];
@@ -171,7 +171,7 @@
 
 		public function doNewTable() : void
 		{
-			_session.sendNewTableRequest(_playerId, "Red");
+			_session.sendNewTableRequest(_playerId, "Red", "1200/240/20");
 		}
 		
 		public function doJoinTable(tableId:String, color:String = "None") : void
@@ -181,7 +181,7 @@
 				_session.sendLeaveRequest(_playerId, _table.tableId);
 				_pendingTableId = tableId;
 			}
-			_session.sendJoinRequest(_playerId, tableId, color, "0");
+			_session.sendJoinRequest(_playerId, tableId, color);
 		}
 
 		public function doCloseTable() : void
@@ -215,14 +215,14 @@
 		public function doSendMove(piece:Piece, curPos:Position, newPos:Position, tid:String) : void
 		{
 			if ( _table && _table.tableId == tid ) {
-				_session.sendMoveRequest(_playerId, curPos, newPos, '1500', tid);
+				_session.sendMoveRequest(_playerId, curPos, newPos, tid);
 			}
 		}
 
-		public function doUpdateTableSettings(tid:String, times:String, bRated:Boolean) : void
+		public function doUpdateTableSettings(tid:String, itimes:String, bRated:Boolean) : void
 		{
 			if ( _table && _table.tableId == tid ) {
-				_session.sendUpdateTableRequest(_playerId, tid, times, bRated);
+				_session.sendUpdateTableRequest(_playerId, tid, itimes, bRated);
 			}
 		}
 
@@ -292,7 +292,7 @@
 				for (var key:String in pref) {
 					_preferences[key] = pref[key];
 				}
-				_saveCookie();
+				_savePreferencesToLocalSharedObject();
 			}
 		}
 
@@ -326,17 +326,17 @@
 			}
 		}
 
-		private function _processResponse_LOGIN(response:Message) : void
+		private function _processResponse_LOGIN(event:Message) : void
 		{
-			if (response.getCode() != "0")
+			if (event.getCode() != 0)
 			{
-				_loginFailReason = response.getContent();
+				_loginFailReason = event.getContent();
 				_session.close();
 				_startApp();
 				return;
 			}
 			
-			const loginInfo:LoginInfo = new LoginInfo( response.getContent() );
+			const loginInfo:LoginInfo = new LoginInfo( event.getContent() );
 			if ( loginInfo.pid == _playerId ) // My own Login success?
 			{
 				trace("My LOGIN = " + loginInfo.pid + "(" + loginInfo.score + ")"
@@ -351,19 +351,19 @@
 			}
 		}
 
-		private function _processResponse_LOGOUT(response:Message) : void
+		private function _processResponse_LOGOUT(event:Message) : void
 		{
 			if (    _session.getSid() != ""
-				 && response.getCode() == "0"
-				 && response.getContent() == _playerId )
+				 && event.getCode() == 0
+				 && event.getContent() == _playerId )
 			{
 				_stopApp();
 			}
         }
 
-		private function _processResponse_LIST(response:Message) : void
+		private function _processResponse_LIST(event:Message) : void
 		{
-			const tables:Object = response.parseListResponse();
+			const tables:Object = event.parseListResponse();
 			
 			// Display the Tables view.
 			
@@ -389,9 +389,11 @@
 			}
 		}
 
-		private function _processResponse_ITABLE(response:Message) : void
+		private function _processResponse_ITABLE(event:Message) : void
 		{
-			var tableInfo:TableInfo = new TableInfo( response.getContent() );
+			if ( event.getCode() != 0 ) { return; }
+
+			var tableInfo:TableInfo = new TableInfo( event.getContent() );
 			const tableId:String = tableInfo.tid;
 
 			if ( _table == null || _table.tableId != tableId )
@@ -409,9 +411,7 @@
 
 		private function _process_E_JOIN(event:Message) : void
 		{
-			if ( event.getCode() != "0" ) {
-				return;
-			}
+			if ( event.getCode() != 0 ) { return; }
 
 			const joinInfo:JoinInfo = new JoinInfo( event.getContent() );
 			const tableId:String = joinInfo.tid;
@@ -430,7 +430,7 @@
 				return;
 			}
 
-			if ( event.getCode() == "0" )
+			if ( event.getCode() == 0 )
 			{
 				const moveInfo:MoveInfo = new MoveInfo( event.getContent() );
 				if ( _table.tableId == moveInfo.tid )
@@ -456,6 +456,8 @@
 	
 		private function _processEvent_LEAVE(event:Message) : void
 		{
+			if ( event.getCode() != 0 ) { return; }
+
 			var fields:Array = event.getContent().split(';');
 			const tid:String = fields[0];
 			const pid:String = fields[1];
@@ -476,9 +478,7 @@
 	
 		private function _processEvent_E_END(event:Message) : void
 		{
-			if ( event.getCode() != "0" ) {
-				return;
-			}
+			if ( event.getCode() != 0 ) { return; }
 
 			const endEvent:EndEvent = new EndEvent( event.getContent() );
 			if ( _table && _table.tableId == endEvent.tid )
@@ -489,9 +489,7 @@
 	
 		private function _processEvent_DRAW(event:Message) : void
 		{
-			if ( event.getCode() != "0" ) {
-				return;
-			}
+			if ( event.getCode() != 0 ) { return; }
 
 			const drawEvent:DrawEvent = new DrawEvent(event.getContent());
 			if ( _table && _table.tableId == drawEvent.tid )
@@ -502,9 +500,7 @@
 
 		private function _processEvent_MSG(event:Message) : void
 		{
-			if ( event.getCode() != "0" ) {
-				return;
-			}
+			if ( event.getCode() != 0 ) { return; }
 
 			const tableId:String = event.getTableId();
 			var fields:Array = event.getContent().split(';');
@@ -518,9 +514,7 @@
 
 		private function _processEvent_UPDATE(event:Message) : void
 		{
-			if ( event.getCode() != "0" ) {
-				return;
-			}
+			if ( event.getCode() != 0 ) { return; }
 
 			const fields:Array = event.getContent().split(';');
 			const tableId:String = fields[0];
