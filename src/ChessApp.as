@@ -311,22 +311,22 @@
 				trace("event: op" + line[0]);
 				const msg:Message = new Message( "op" + line[0] );
 
-				if      (msg.optype == "LOGIN")   { _processResponse_LOGIN(msg);  }
-                else if (msg.optype == "LIST")    { _processResponse_LIST(msg);   }
-                else if (msg.optype == "I_TABLE") { _processResponse_ITABLE(msg); }
-                else if (msg.optype == "E_JOIN")  { _process_E_JOIN(msg);         }
-                else if (msg.optype == "MOVE")    { _process_MOVE(msg);           }
-                else if (msg.optype == "E_END")   { _processEvent_E_END(msg);     }
-                else if (msg.optype == "LOGOUT")  { _processResponse_LOGOUT(msg); }
-                else if (msg.optype == "I_MOVES") { _processEvent_I_MOVES(msg);   }
-                else if (msg.optype == "LEAVE")   { _processEvent_LEAVE(msg);     }
-                else if (msg.optype == "DRAW")    { _processEvent_DRAW(msg);      }
-                else if (msg.optype == "MSG")     { _processEvent_MSG(msg);       }
-				else if (msg.optype == "UPDATE")  { _processEvent_UPDATE(msg);    }
+				if      (msg.optype == "LOGIN")   { _processEvent_LOGIN(msg);  }
+                else if (msg.optype == "LIST")    { _processEvent_LIST(msg);   }
+                else if (msg.optype == "I_TABLE") { _processEvent_I_TABLE(msg);}
+                else if (msg.optype == "E_JOIN")  { _processEvent_E_JOIN(msg); }
+                else if (msg.optype == "MOVE")    { _processEvent_MOVE(msg);   }
+                else if (msg.optype == "E_END")   { _processEvent_E_END(msg);  }
+                else if (msg.optype == "LOGOUT")  { _processEvent_LOGOUT(msg); }
+                else if (msg.optype == "I_MOVES") { _processEvent_I_MOVES(msg);}
+                else if (msg.optype == "LEAVE")   { _processEvent_LEAVE(msg);  }
+                else if (msg.optype == "DRAW")    { _processEvent_DRAW(msg);   }
+                else if (msg.optype == "MSG")     { _processEvent_MSG(msg);    }
+				else if (msg.optype == "UPDATE")  { _processEvent_UPDATE(msg); }
 			}
 		}
 
-		private function _processResponse_LOGIN(event:Message) : void
+		private function _processEvent_LOGIN(event:Message) : void
 		{
 			if (event.getCode() != 0)
 			{
@@ -336,7 +336,7 @@
 				return;
 			}
 			
-			const loginInfo:LoginInfo = new LoginInfo( event.getContent() );
+			const loginInfo:Object = event.parse_LOGIN();
 			if ( loginInfo.pid == _playerId ) // My own Login success?
 			{
 				trace("My LOGIN = " + loginInfo.pid + "(" + loginInfo.score + ")"
@@ -351,7 +351,7 @@
 			}
 		}
 
-		private function _processResponse_LOGOUT(event:Message) : void
+		private function _processEvent_LOGOUT(event:Message) : void
 		{
 			if (    _session.getSid() != ""
 				 && event.getCode() == 0
@@ -361,9 +361,9 @@
 			}
         }
 
-		private function _processResponse_LIST(event:Message) : void
+		private function _processEvent_LIST(event:Message) : void
 		{
-			const tables:Object = event.parseListResponse();
+			const tables:Object = event.parse_LIST();
 			
 			// Display the Tables view.
 			
@@ -389,11 +389,11 @@
 			}
 		}
 
-		private function _processResponse_ITABLE(event:Message) : void
+		private function _processEvent_I_TABLE(event:Message) : void
 		{
 			if ( event.getCode() != 0 ) { return; }
 
-			var tableInfo:TableInfo = new TableInfo( event.getContent() );
+			const tableInfo:Object = event.parse_I_TABLE();
 			const tableId:String = tableInfo.tid;
 
 			if ( _table == null || _table.tableId != tableId )
@@ -409,22 +409,20 @@
 			_table.newTable(tableInfo);
 		}
 
-		private function _process_E_JOIN(event:Message) : void
+		private function _processEvent_E_JOIN(event:Message) : void
 		{
 			if ( event.getCode() != 0 ) { return; }
 
-			const joinInfo:JoinInfo = new JoinInfo( event.getContent() );
+			const joinInfo:Object = event.parse_E_JOIN();
 			const tableId:String = joinInfo.tid;
 
-			if ( _table == null || _table.tableId != tableId )
+			if ( _table && _table.tableId == tableId )
 			{
-				_table = new Table(tableId, _preferences);
+				_table.joinTable( new PlayerInfo(joinInfo.pid, joinInfo.color, joinInfo.score) );
 			}
-			
-			_table.joinTable( new PlayerInfo(joinInfo.pid, joinInfo.color, joinInfo.score) );
 	    }
 		
-		private function _process_MOVE(event:Message) : void
+		private function _processEvent_MOVE(event:Message) : void
 		{
 			if ( ! _table ) {
 				return;
@@ -432,7 +430,7 @@
 
 			if ( event.getCode() == 0 )
 			{
-				const moveInfo:MoveInfo = new MoveInfo( event.getContent() );
+				const moveInfo:Object = event.parse_MOVE();
 				if ( _table.tableId == moveInfo.tid )
 				{
 					_table.handleRemoteMove( new Position(moveInfo.fromRow, moveInfo.fromCol),
@@ -441,13 +439,16 @@
 			}
 			else
 			{
+				// TODO: We must avoid handling wrong Move by fixing the way
+				//       we validate Move to get it right in the first place
+				//       before the Move is sent to the server.
 				_table.processWrongMove(event.getContent());
 			}
 	    }
 
 		private function _processEvent_I_MOVES(event:Message) : void
 		{
-			const moveList:MoveListInfo = new MoveListInfo( event.getContent() );
+			const moveList:Object = event.parse_I_MOVES();
 			if (_table && _table.tableId == moveList.tid)
 			{
 				_table.playMoveList(moveList.moves);
@@ -458,14 +459,11 @@
 		{
 			if ( event.getCode() != 0 ) { return; }
 
-			var fields:Array = event.getContent().split(';');
-			const tid:String = fields[0];
-			const pid:String = fields[1];
-
-			if ( _table && _table.tableId == tid )
+			const leaveInfo:Object = event.parse_LEAVE();
+			if ( _table && _table.tableId == leaveInfo.tid )
 			{
-				_table.leaveTable(pid);
-				if (    pid == _playerId
+				_table.leaveTable(leaveInfo.pid);
+				if (    _playerId == leaveInfo.pid
 				     && _pendingTableId == "" )
 				{
 					_table = null;
@@ -480,7 +478,7 @@
 		{
 			if ( event.getCode() != 0 ) { return; }
 
-			const endEvent:EndEvent = new EndEvent( event.getContent() );
+			const endEvent:Object = event.parse_E_END();
 			if ( _table && _table.tableId == endEvent.tid )
 			{
 				_table.stopGame(endEvent.reason, endEvent.winner);
@@ -491,7 +489,7 @@
 		{
 			if ( event.getCode() != 0 ) { return; }
 
-			const drawEvent:DrawEvent = new DrawEvent(event.getContent());
+			const drawEvent:Object = event.parse_DRAW();
 			if ( _table && _table.tableId == drawEvent.tid )
 			{
 				_table.drawGame(drawEvent.pid);
@@ -502,13 +500,21 @@
 		{
 			if ( event.getCode() != 0 ) { return; }
 
-			const tableId:String = event.getTableId();
-			var fields:Array = event.getContent().split(';');
-			const pid:String = fields[0];
-			const chatMsg:String = fields[1];
-			if ( _table && _table.tableId == tableId )
+			const msgInfo:Object = event.parse_MSG();
+
+			/* NOTE: There are 2 types of messages:
+			 *  (1) For table messages, "both tid" and "pid" are present.
+			 *  (2) For private messages, "tid" is missing.
+			 */
+			
+			if ( msgInfo.tid == null )  // a private message?
 			{
-				_table.displayChatMessage(pid, chatMsg);
+				// TODO: Need to handle private messages.
+				trace("[" + msgInfo.pid + "]: sent a private message [" + msgInfo.msg + "]");
+			}
+			else if ( _table && _table.tableId == msgInfo.tid )
+			{
+				_table.displayChatMessage(msgInfo.pid, msgInfo.msg);
 			}
 		}
 
@@ -516,13 +522,10 @@
 		{
 			if ( event.getCode() != 0 ) { return; }
 
-			const fields:Array = event.getContent().split(';');
-			const tableId:String = fields[0];
-			const pid:String = fields[1];  // Available but not used!
-			const times:String = fields[3];
-			if ( _table && _table.tableId == tableId )
+			const updateInfo:Object = event.parse_UPDATE();
+			if ( _table && _table.tableId == updateInfo.tid )
 			{
-				_table.updateGameTimes(times);
+				_table.updateTableSettings(updateInfo.itimes, updateInfo.rated);
 			}
 		}
 

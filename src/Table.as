@@ -63,7 +63,7 @@
 		 *     (1) Open a new Table.
 		 *     (2) Join an existing Table.
 		 */
-		public function newTable(tableInfo:TableInfo) : void
+		public function newTable(tableInfo:Object) : void
 		{
 			if ( tableInfo.redid != "" ) {
 				_redPlayer = new PlayerInfo(tableInfo.redid, "Red", tableInfo.redscore);
@@ -155,21 +155,24 @@
 			_view.displayMessage(pid + " offering draw");
 		}
 		
-		public function updateGameTimes(times:String) : void
+		public function updateTableSettings(itimes:String, nRated:int) : void
 		{
 			if (_moveList.length == 0)
 			{
-				_redTimes.initWithTimes(times, times);
-				_blackTimes.initWithTimes(times, times);
+				_redTimes.initWithTimes(itimes, itimes);
+				_blackTimes.initWithTimes(itimes, itimes);
 
-				var timer:GameTimers = new GameTimers(times);
+				var timer:GameTimers = new GameTimers(itimes);
 				_view.updateTimers("Red", timer);
 				_view.updateTimers("Black", timer);
-				const fields:Array = times.split("/");
+				const fields:Array = itimes.split("/");
 				_settings["gametime"]  = fields[0];
 				_settings["movetime"]  = fields[1];
 				_settings["extratime"] = fields[2];
-				_view.displayMessage("Timer: " + times);
+				_view.displayMessage("Timer: " + itimes);
+				
+				_settings["rated"] = (nRated == 1);
+				_view.displayMessage("Type: " + (nRated == 1 ? "Rated" : "Nonrated"));
 			}
 		}
 	
