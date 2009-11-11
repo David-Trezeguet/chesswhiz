@@ -3,7 +3,7 @@
 	public class Message
 	{
 		public var optype:String = "";
-		public var params:Object = {};
+		private var params:Object = {};
 
 		public function Message(content:String = "")
 		{
@@ -137,6 +137,9 @@
 			};
 		}
 
+		/**
+		 * Serialize the message into the format to be sent out to the server.
+		 */
 		public function getMessage():String {
 			var str:String = "op=" + this.optype;
 			for (var i:String in this.params) {
@@ -145,19 +148,147 @@
 			str += "\n";
 			return str;
 		}
-		
-		public function parseListResponse() : Object {
+
+		/* =================================================================*
+		 *                                                                  *
+		 *    Functions to parse events coming from the remote server.      *
+		 *                                                                  *
+		 * =================================================================*/
+
+		public function parse_LOGIN() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					pid   : fields[0],
+					score : fields[1],
+					sid   : fields[2]
+				};
+		}
+
+		public function parse_E_JOIN() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					tid   : fields[0],
+					pid   : fields[1],
+					score : fields[2],
+					color : fields[3]
+				};
+		}
+
+		public function parse_LEAVE() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					tid   : fields[0],
+					pid   : fields[1]
+				};
+		}
+
+		public function parse_MOVE() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					tid     : fields[0],
+					pid     : fields[1],
+					fromRow : parseInt( fields[2].charAt(1) ),
+					fromCol : parseInt( fields[2].charAt(0) ),
+					toRow   : parseInt( fields[2].charAt(3) ),
+					toCol   : parseInt( fields[2].charAt(2) )
+				};
+		}
+
+		public function parse_I_MOVES() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					tid    : fields[0],
+					moves  : fields[1].split('/')
+				};
+		}
+
+		public function parse_E_END() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					tid    : fields[0],
+					winner : fields[1],
+					reason : fields[2]
+				};
+		}
+
+		public function parse_DRAW() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					tid  : fields[0],
+					pid  : fields[1]
+				};
+		}
+
+		public function parse_MSG() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					pid  : fields[0],
+					msg  : fields[1],
+					tid  : this.getTableId()
+				};
+		}
+
+		public function parse_UPDATE() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					tid    : fields[0],
+					pid    : fields[1],
+					rated  : fields[2], // 1 = Rated, 0 = Nonrated.
+					itimes : fields[3]
+				};
+		}
+
+		public function parse_I_TABLE() : Object
+		{
+			return _helper_parse_I_TABLE( params.content );
+		}
+
+		public function parse_LIST() : Object
+		{
 			var tables:Object = {};
 			const entries:Array = this.params.content.split('\n');
-			for (var i:int = 0; i < entries.length; i++) {
+			for (var i:int = 0; i < entries.length; i++)
+			{
 				const entry:String = entries[i];
-				if (entry != "") {
+				if (entry != "")
+				{
 				    trace("table entry: " + entry);
-					var table:TableInfo = new TableInfo(entry);
+					var table:Object = _helper_parse_I_TABLE(entry);
 					tables[table.tid] = table;
 				}
 			}
 			return tables;
+		}
+
+		/**
+		 * The STATIC function to help parsing the following two events:
+		 *   (1) The "I_TABLE" event
+		 *   (2) The "LIST" event (consisting of the "I_TABLE" elements).
+		 */
+		static private function _helper_parse_I_TABLE(inputContent:String) : Object
+		{
+			const fields:Array = inputContent.split(';');
+			return {
+					tid         : fields[0],
+					group       : fields[1],
+					gametype    : fields[2],
+					initialtime : fields[3],
+					redtime     : fields[4],
+					blacktime   : fields[5],
+					redid       : fields[6],
+					redscore    : fields[7],
+					blackid     : fields[8],
+					blackscore  : fields[9]
+				};
 		}
 	}
 }

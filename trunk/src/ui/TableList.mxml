@@ -9,7 +9,6 @@
 <mx:Script>
 	<![CDATA[
 		import mx.managers.PopUpManager;
-		import hoxserver.TableInfo;
 		import mx.collections.ArrayCollection;
 
 		public var joinActionEnabled:Boolean = true;
@@ -34,7 +33,7 @@
 			tableListDP.removeAll(); // Remove old list.
 
 			var value:String = "";
-			for each (var table:TableInfo in tables)
+			for each (var table:Object in tables)
 			{
 				var tableRow:Object = {};
 				for each (var name:String in colNames)
