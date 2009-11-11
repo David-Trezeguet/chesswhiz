@@ -78,22 +78,22 @@
 			_sendRequest(req);
 		}
 		
-		public function sendJoinRequest(pid:String, tid:String, color:String, joined:String):void {
+		public function sendJoinRequest(pid:String, tid:String, color:String):void {
 			var req:Message = new Message();
-			req.createJoinRequest(pid, _sid, tid, color, joined);
+			req.createJoinRequest(pid, _sid, tid, color);
 			_sendRequest(req);
 		}
 		
-		public function sendNewTableRequest(pid:String, color:String):void {
+		public function sendNewTableRequest(pid:String, color:String, itimes:String):void {
 			var req:Message = new Message();
-			req.createNewTableRequest(pid, _sid, color);
+			req.createNewTableRequest(pid, _sid, color, itimes);
 			_sendRequest(req);
 		}
 		
-		public function sendMoveRequest(pid:String, curPos:Position, newPos:Position, time:String, tid:String):void {
+		public function sendMoveRequest(pid:String, curPos:Position, newPos:Position, tid:String):void {
 			var req:Message = new Message();
 			var move:String = "" + curPos.column + curPos.row + newPos.column + newPos.row;
-			req.createMoveRequest(pid, _sid, time, move, tid);
+			req.createMoveRequest(pid, _sid, move, tid);
 			_sendRequest(req);
 		}
 		
@@ -121,9 +121,9 @@
 			_sendRequest(req);
 		}
 		
-		public function sendUpdateTableRequest(pid:String, tid:String, times:String, r:Boolean) : void {
+		public function sendUpdateTableRequest(pid:String, tid:String, itimes:String, bRated:Boolean) : void {
 			var req:Message = new Message();
-			req.createUpdateTableRequest(pid, _sid, tid, times, r);
+			req.createUpdateTableRequest(pid, _sid, tid, itimes, bRated);
 			_sendRequest(req);
 		}
 	}

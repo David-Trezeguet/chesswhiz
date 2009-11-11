@@ -3,27 +3,23 @@
 	public class Message
 	{
 		public var optype:String = "";
-		public var params:Object = null;
+		public var params:Object = {};
 
 		public function Message(content:String = "")
 		{
 			if ( content != "" )
 			{
-				this.params = {};
 				var kvlist:Array = content.split('&');
-				for (var i:int = 0; i < kvlist.length; i++) {
+				for (var i:int = 0; i < kvlist.length; i++)
+				{
 					var pair:Array = kvlist[i].split('=');
-					if (pair[0] == 'op') {
-						this.optype = pair[1];
-					}
-					else {
-						this.params[pair[0]] = pair[1];
-					}
+					if (pair[0] == "op") { this.optype = pair[1]; }
+					else                 { this.params[pair[0]] = pair[1]; }
 				}
 			}
 		}
 
-		public function getCode():String    { return this.params["code"];    }
+		public function getCode():int { return parseInt(this.params["code"]); }
 		public function getTableId():String { return this.params["tid"];     }
 		public function getContent():String { return this.params["content"]; }
 
@@ -35,24 +31,22 @@
 			}
 		}
 
-		public function createJoinRequest(pid:String, sid:String, tid:String, color:String, joined:String):void {
+		public function createJoinRequest(pid:String, sid:String, tid:String, color:String):void {
 			this.optype = "JOIN";
 			this.params = {
 				pid: pid,
 				sid: sid,
-				color: color,
-				joined: joined,
-				tid: tid
+				tid: tid,
+				color: color
 			}
 		}
 
-		public function createMoveRequest(pid:String, sid:String, time:String, move:String, tableId:String):void {
+		public function createMoveRequest(pid:String, sid:String, move:String, tableId:String):void {
 			this.optype = "MOVE";
 			this.params = {
 				pid: pid,
 				sid: sid,
 				tid: tableId,
-				time: time,
 				move: move
 			};
 		}
@@ -74,12 +68,12 @@
 			};
 		}
 			
-		public function createNewTableRequest(pid:String, sid:String, color:String):void {
+		public function createNewTableRequest(pid:String, sid:String, color:String, itimes:String):void {
 			this.optype = "NEW";
 			this.params = {
 				pid: pid,
 				sid: sid,
-				itimes: "1200/240/20",
+				itimes: itimes,
 				color: color
 			};
 		}
@@ -132,23 +126,21 @@
 			};
 		}
 
-		public function createUpdateTableRequest(pid:String, sid:String, tid:String, times:String, r:Boolean) : void {
+		public function createUpdateTableRequest(pid:String, sid:String, tid:String, itimes:String, bRated:Boolean) : void {
 			this.optype = "UPDATE";
 			this.params = {
 				pid: pid,
 				sid: sid,
 				tid: tid,
-				rated: (r ? 1 : 0),
-				itimes: times
+				itimes: itimes,
+				rated: (bRated ? 1 : 0)
 			};
 		}
 
 		public function getMessage():String {
-			var str:String = 'op=' + this.optype;
+			var str:String = "op=" + this.optype;
 			for (var i:String in this.params) {
-				if (i) {
-					str += "&" + i + "=" + this.params[i];
-				}
+				str += "&" + i + "=" + this.params[i];
 			}
 			str += "\n";
 			return str;
