@@ -9,6 +9,8 @@
 
 <mx:Script>
 	<![CDATA[
+		import mx.utils.ObjectUtil;
+		import mx.managers.PopUpManager;
 		import mx.utils.StringUtil;
 		import mx.controls.Label;
 		import mx.controls.Image;
@@ -26,12 +28,12 @@
 			chatInput.text = resourceManager.getString('localization', 'chat_prompt');
 		}
 
-		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkinIndex:int) : void
+		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
 		{
 			this.title = "Table #" + table.tableId;
 			_table = table;
 			board.setTable(_table);
-			board.drawBoardAndPieces(bgColor, lineColor, pieceSkinIndex);
+			board.drawBoardAndPieces(bgColor, lineColor, pieceSkin);
 		}
 
 		public function displayPlayerData(player:PlayerInfo) : void
@@ -95,6 +97,29 @@
 			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
         }
 
+        public function onSettingsButtonClicked(event:Event) : void
+        {
+			var settingsPanel:TableSettings = new TableSettings();
+			PopUpManager.addPopUp(settingsPanel, this, true /* modal */);
+			PopUpManager.centerPopUp(settingsPanel);
+			settingsPanel.settings = ObjectUtil.copy( _table.getSettings() );
+			settingsPanel.applyCurrentSettings();
+			settingsPanel.addEventListener("newSettings", newSettingsEventHandler);
+        }
+
+		/**
+		 * Callback function to handle the "newSettings" event generated
+		 * by the 'TableSettings' window.
+		 */
+		private function newSettingsEventHandler(event:Event) : void
+		{
+			var settingsPanel:TableSettings = event.target as TableSettings;
+			if ( settingsPanel != null )
+			{
+				_table.updateSettings( settingsPanel.settings );
+			}	
+		}
+
 		public function redrawBoard(boardColor:uint, lineColor:uint) : void 
 		{
 			board.drawBoard(boardColor, lineColor);
@@ -154,11 +179,12 @@
 		</mx:HBox>
 		
 		<mx:HBox x="150" y="638" width="100%" horizontalGap="3">
-			<mx:Spacer width="170" />
 			<mx:Button id="startButton" label="|&lt;" enabled="false" click="reviewMove('start')" />
 			<mx:Button id="rewindButton" label="&lt;" enabled="false" click="reviewMove('rewind')" />
 			<mx:Button id="forwardButton" label="&gt;" enabled="false" click="reviewMove('forward')" />
 			<mx:Button id="endButton" label="&gt;|" enabled="false" click="reviewMove('end')" />
+			<mx:Spacer width="100%" />
+			<mx:Button id="settingsButton" label="Settings" click="onSettingsButtonClicked(event)" />
 		</mx:HBox>
 	</mx:VBox>
 

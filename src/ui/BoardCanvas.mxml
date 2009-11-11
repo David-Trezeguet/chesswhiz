@@ -18,7 +18,7 @@
 		private var _pieceMap:Array = new Array(10);
 		private var _table:Table = null;
 		private var _lastPieceInFocus:Piece = null;
-		private var _pieceSkinIndex:int = 1;
+		private var _pieceSkin:int = 1;
 		private var _bgColor:uint;
 		private var _lineColor:uint;
 
@@ -131,11 +131,11 @@
 		public function setTable(table:Table) : void { _table = table; }
 		public function getTable() : Table { return _table; }
 
-		public function drawBoardAndPieces(bgColor:uint, lineColor:uint, pieceSkinIndex:int) : void
+		public function drawBoardAndPieces(bgColor:uint, lineColor:uint, pieceSkin:int) : void
 		{
 			drawBoard(bgColor, lineColor);
 
-			_pieceSkinIndex = pieceSkinIndex;
+			_pieceSkin = pieceSkin;
 			_displayPieces();	
 		}
 
@@ -182,8 +182,8 @@
 		private function _displayPieces() : void
 		{
 			for (var i:int = 0; i < 16; i++) {
-				_redPieces[i].draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
-				_blackPieces[i].draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+				_redPieces[i].draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+				_blackPieces[i].draw(offset, _cellWidth, _cellHeight, _pieceSkin);
 			}
 		}
 
@@ -337,7 +337,7 @@
 			if (capturedPiece) {
 				capturedPiece.setCapture(false);
 				capturedPiece.setPosition(curPos);
-				capturedPiece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+				capturedPiece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
 				capturedPiece.setFocus();
 				_lastPieceInFocus = capturedPiece;
 			}
@@ -396,13 +396,13 @@
 				if (!captured) {
 					if (piece.isCaptured()) {
 						piece.setPosition(pos2);
-						piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+						piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
 					}
 					else {
 						if (pos1.row != pos2.row || pos1.column != pos2.column) {
 							piece.removeImage();
 							piece.setPosition(pos2);
-							piece.draw(offset, _cellWidth, _cellHeight, _pieceSkinIndex);
+							piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
 						}
 					}
 					piece.setCapture(false);
@@ -427,18 +427,18 @@
 		
 		public function changePiecesSkin(skinIndex:int) : void
 		{
-			_pieceSkinIndex = skinIndex;
+			_pieceSkin = skinIndex;
 
 			var piece:Piece = null;
 			for (var i:int = 0; i < 16; i++)
 			{
 				piece = _redPieces[i];
 				if ( ! piece.isCaptured() ) {
-					piece.changeSkinIndex(_pieceSkinIndex);
+					piece.changeSkinIndex(_pieceSkin);
 				}
 				piece = _blackPieces[i];
 				if ( ! piece.isCaptured() ) {
-					piece.changeSkinIndex(_pieceSkinIndex);
+					piece.changeSkinIndex(_pieceSkin);
 				}
 			}
 

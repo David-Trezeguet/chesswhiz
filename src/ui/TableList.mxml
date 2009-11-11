@@ -25,7 +25,7 @@
 		{
 			const colNames:Array = [ "tid",
 									 "group",
-									 "gametype",
+									 "rated",
 									 "initialtime",
 									 "redid",
 									 "blackid" ];
@@ -48,8 +48,8 @@
 					else if (name == "group") {
 						value = (value == "0" ? "Public" : "Private");
 					}
-					else if (name == "gametype") {
-						value = (value == "0" ? "Rated" : "Unrated");
+					else if (name == "rated") {
+						value = (table[name] /* Boolean */ ? "Rated" : "Unrated");
 					}
 
 					tableRow[name] = value;
@@ -92,7 +92,7 @@
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Group')}"
 				dataField="group" width="70" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Type')}"
-				dataField="gametype" width="80" />
+				dataField="rated" width="80" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Timer')}"
 				dataField="initialtime" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Red_Player')}"

@@ -34,20 +34,15 @@
 		private var _settings:Object;
 		private var _curPref:Object;
 
-		public function Table(tableId:String, pref:Object)
+		public function Table(tableId:String, pref:Object, settings:Object)
 		{
 			this.tableId = tableId;
 
 			_redClock.addEventListener(TimerEvent.TIMER, _timerHandler);
 			_blackClock.addEventListener(TimerEvent.TIMER, _timerHandler);
 
-			_settings = {
-					"gametime"  : 1200,
-					"movetime"  : 300,
-					"extratime" : 20,
-					"rated"     : false
-				};
-			_curPref = pref;
+			_settings = settings;
+			_curPref  = pref;
 		}
 
 		public function getTopSideColor():String { return _isTopSideBlack ? "Black" : "Red"; }
@@ -155,7 +150,7 @@
 			_view.displayMessage(pid + " offering draw");
 		}
 		
-		public function updateTableSettings(itimes:String, nRated:int) : void
+		public function updateTableSettings(itimes:String, bRated:Boolean) : void
 		{
 			if (_moveList.length == 0)
 			{
@@ -171,8 +166,8 @@
 				_settings["extratime"] = fields[2];
 				_view.displayMessage("Timer: " + itimes);
 				
-				_settings["rated"] = (nRated == 1);
-				_view.displayMessage("Type: " + (nRated == 1 ? "Rated" : "Nonrated"));
+				_settings["rated"] = bRated;
+				_view.displayMessage("Type: " + (bRated ? "Rated" : "Nonrated"));
 			}
 		}
 	
@@ -531,22 +526,24 @@
 
 		public function updateSettings(newSettings:Object) : void
 		{
-			var bUpdated:Boolean = false;
-			var times:String = newSettings["gametime"] + "/" + newSettings["movetime"] + "/" + newSettings["extratime"];
-			if (_settings["gametime"] != newSettings["gametime"] ||
-				_settings["movetime"] != newSettings["movetime"] ||
-				_settings["extratime"] != newSettings["extratime"]) {
-				bUpdated = true;
+			var bSettingsChanged:Boolean = false;
+
+			if (    _settings["gametime"]  != newSettings["gametime"]
+				 || _settings["movetime"]  != newSettings["movetime"]
+				 || _settings["extratime"] != newSettings["extratime"] )
+			{
+				bSettingsChanged = true;
 			}
-			if (_settings["rated"] != newSettings["rated"]) {
-				var msg:String = "Game type changed to ";
-				msg += (newSettings["rated"] == true)? "Rated" : "Nonrated";
-				_view.displayMessage(msg);
-				bUpdated = true;
+			else if ( _settings["rated"] != newSettings["rated"] )
+			{
+				bSettingsChanged = true;
 			}
-			_settings = newSettings;
-			if (bUpdated) {
-				Global.app.doUpdateTableSettings(this.tableId, times, _settings["rated"]);
+
+			if ( bSettingsChanged )
+			{
+				const itimes:String = newSettings["gametime"]
+					+ "/" + newSettings["movetime"] + "/" + newSettings["extratime"];
+				Global.app.doUpdateTableSettings(this.tableId, itimes, newSettings["rated"]);
 			}
 		}
 
