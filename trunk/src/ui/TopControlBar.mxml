@@ -55,11 +55,6 @@
 					label="{resourceManager.getString('localization', 'preferences')}"
 					click="Global.app.changeAppPreferences()"/>
 			</mx:AddChild>
-			<mx:AddChild relativeTo="{spacer1}" position="before">
-				<mx:Button id="closeButton"
-					label="{resourceManager.getString('localization', 'close')}"
-					click="Global.app.doCloseTable()"/>
-			</mx:AddChild>
 			<mx:AddChild relativeTo="{preferencesButton}" position="before">
 				<mx:Button id="ViewTablesButton"
 					label="{resourceManager.getString('localization', 'view_tables')}"
@@ -91,7 +86,6 @@
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="inGameState" basedOn="observerState">
-			<mx:RemoveChild target="{closeButton}"/>
 			<mx:AddChild relativeTo="{spacer1}" position="before">
 				<mx:Button id="resignButton"
 					label="{resourceManager.getString('localization', 'resign')}"
