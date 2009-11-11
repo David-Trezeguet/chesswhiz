@@ -34,7 +34,7 @@
 				if (_bSound)  { rbSound.selected = true; }
 				else          { rbMute.selected  = true; }
 
-				_selectedPieceSet = preferences["pieceskinindex"];
+				_selectedPieceSet = preferences["pieceskin"];
 				if      (_selectedPieceSet == 1) { rbPieseSet1.selected = true; }
 				else if (_selectedPieceSet == 2) { rbPieseSet2.selected = true; }
 				else                             { rbPieseSet3.selected = true; }
@@ -68,10 +68,10 @@
 
 			private function onOK(event:Event) : void 
 			{
-				preferences["sound"]          = _bSound;
-				preferences["pieceskinindex"] = _selectedPieceSet;
-				preferences["boardcolor"]     = colorPicker.selectedColor;
-				preferences["linecolor"]      = _lineColor;
+				preferences["sound"]      = _bSound;
+				preferences["pieceskin"]  = _selectedPieceSet;
+				preferences["boardcolor"] = colorPicker.selectedColor;
+				preferences["linecolor"]  = _lineColor;
 				PopUpManager.removePopUp(this);
 				dispatchEvent( new Event("newPreferences", true /* bubble to parent */) );
 			}

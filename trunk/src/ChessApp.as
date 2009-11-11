@@ -41,10 +41,10 @@
 			_mainWindow = window;
 
 			_preferences = {
-					"pieceskinindex" : 1,
-					"boardcolor"     : 0x5b5d5b,
-					"linecolor"      : 0xa09e9e,
-					"sound"          : true
+					"pieceskin"  : 1,
+					"boardcolor" : 0x5b5d5b,
+					"linecolor"  : 0xa09e9e,
+					"sound"      : true
 				};
 			_loadPreferencesFromLocalSharedObject();
 
@@ -55,12 +55,12 @@
 		{
 			try {
 				_sharedObject = SharedObject.getLocal("flashchess");
-				if (_sharedObject.data.persist == 0xFFDDFF)
+				if (_sharedObject.data.persist == 0xFFDDF1)
 				{
-					_preferences["pieceskinindex"] = _sharedObject.data.pieceskinindex;
-					_preferences["boardcolor"]     = _sharedObject.data.boardcolor;
-					_preferences["linecolor"]      = _sharedObject.data.linecolor;
-					_preferences["sound"]          = _sharedObject.data.sound;
+					_preferences["pieceskin"]  = _sharedObject.data.pieceskin;
+					_preferences["boardcolor"] = _sharedObject.data.boardcolor;
+					_preferences["linecolor"]  = _sharedObject.data.linecolor;
+					_preferences["sound"]      = _sharedObject.data.sound;
 				}
 			}
 			catch (error:Error) {
@@ -70,11 +70,11 @@
 
 		private function _saveCookie() : void
 		{
-			_sharedObject.data.persist        = 0xFFDDFF; // "Present" flag.
-			_sharedObject.data.pieceskinindex = _preferences["pieceskinindex"];
-			_sharedObject.data.boardcolor     = _preferences["boardcolor"];
-			_sharedObject.data.linecolor      = _preferences["linecolor"];
-			_sharedObject.data.sound          = _preferences["sound"];
+			_sharedObject.data.persist    = 0xFFDDF1; // "Present" flag.
+			_sharedObject.data.pieceskin  = _preferences["pieceskin"];
+			_sharedObject.data.boardcolor = _preferences["boardcolor"];
+			_sharedObject.data.linecolor  = _preferences["linecolor"];
+			_sharedObject.data.sound      = _preferences["sound"];
 
 			var flushStatus:String = null;
             try {
