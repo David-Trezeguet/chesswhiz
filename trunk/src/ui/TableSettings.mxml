@@ -40,7 +40,7 @@
 	<mx:Panel width="191" layout="vertical" title="Timers" paddingLeft="8" paddingTop="5" height="230">
 		<mx:Label text="Game Time:"/>
 		<mx:HBox width="100%" verticalAlign="middle">
-			<mx:NumericStepper id="nsGameTime" minimum="5" maximum="60" stepSize="5"/>
+			<mx:NumericStepper id="nsGameTime" minimum="5" maximum="60" stepSize="1"/>
 			<mx:Label text="minutes"/>
 		</mx:HBox>
 
@@ -48,7 +48,7 @@
 
 		<mx:Label text="Move Time:"/>
 		<mx:HBox width="100%" verticalAlign="middle">
-			<mx:NumericStepper id="nsMoveTime" minimum="20" maximum="600" stepSize="30" width="58"/>
+			<mx:NumericStepper id="nsMoveTime" minimum="20" maximum="600" stepSize="1" width="58"/>
 			<mx:Label text="seconds"/>
 		</mx:HBox>
 
@@ -56,7 +56,7 @@
 
 		<mx:Label text="Free Time:"/>
 		<mx:HBox width="100%" verticalAlign="middle">
-			<mx:NumericStepper id="nsExtraTime" minimum="0" maximum="60" stepSize="5"/>
+			<mx:NumericStepper id="nsExtraTime" minimum="0" maximum="60" stepSize="1"/>
 			<mx:Label text="seconds"/>
 		</mx:HBox>
 	</mx:Panel>

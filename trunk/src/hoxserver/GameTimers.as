@@ -87,5 +87,20 @@
 
 			return time;
 		}
+		
+		/**
+		 * Parse a times string into separate components. 
+		 *
+		 * @param times The times string in "GG/MM/EE" format.
+		 */
+		public static function parse_times(times:String) : Object
+		{
+			const fields:Array = times.split("/");
+			return {
+					gametime  : parseInt(fields[0]),
+					movetime  : parseInt(fields[1]),
+					extratime : parseInt(fields[2])
+				};
+		}
 	}
 }

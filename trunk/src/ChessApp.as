@@ -312,16 +312,16 @@
 				const msg:Message = new Message( "op" + line[0] );
 
 				if      (msg.optype == "LOGIN")   { _processEvent_LOGIN(msg);  }
-                else if (msg.optype == "LIST")    { _processEvent_LIST(msg);   }
-                else if (msg.optype == "I_TABLE") { _processEvent_I_TABLE(msg);}
-                else if (msg.optype == "E_JOIN")  { _processEvent_E_JOIN(msg); }
-                else if (msg.optype == "MOVE")    { _processEvent_MOVE(msg);   }
-                else if (msg.optype == "E_END")   { _processEvent_E_END(msg);  }
-                else if (msg.optype == "LOGOUT")  { _processEvent_LOGOUT(msg); }
-                else if (msg.optype == "I_MOVES") { _processEvent_I_MOVES(msg);}
-                else if (msg.optype == "LEAVE")   { _processEvent_LEAVE(msg);  }
-                else if (msg.optype == "DRAW")    { _processEvent_DRAW(msg);   }
-                else if (msg.optype == "MSG")     { _processEvent_MSG(msg);    }
+				else if (msg.optype == "LIST")    { _processEvent_LIST(msg);   }
+				else if (msg.optype == "I_TABLE") { _processEvent_I_TABLE(msg);}
+				else if (msg.optype == "E_JOIN")  { _processEvent_E_JOIN(msg); }
+				else if (msg.optype == "MOVE")    { _processEvent_MOVE(msg);   }
+				else if (msg.optype == "E_END")   { _processEvent_E_END(msg);  }
+				else if (msg.optype == "LOGOUT")  { _processEvent_LOGOUT(msg); }
+				else if (msg.optype == "I_MOVES") { _processEvent_I_MOVES(msg);}
+				else if (msg.optype == "LEAVE")   { _processEvent_LEAVE(msg);  }
+				else if (msg.optype == "DRAW")    { _processEvent_DRAW(msg);   }
+				else if (msg.optype == "MSG")     { _processEvent_MSG(msg);    }
 				else if (msg.optype == "UPDATE")  { _processEvent_UPDATE(msg); }
 			}
 		}
@@ -398,7 +398,14 @@
 
 			if ( _table == null || _table.tableId != tableId )
 			{
-				_table = new Table(tableId, _preferences);
+				const initialTimer:Object = GameTimers.parse_times(tableInfo.initialtime);
+				const settings:Object = {
+						"gametime"  : initialTimer.gametime,
+						"movetime"  : initialTimer.movetime,
+						"extratime" : initialTimer.extratime,
+						"rated"     : tableInfo.rated
+					};
+				_table = new Table(tableId, _preferences, settings);
 			}
 
 			if ( _pendingTableId == tableId )

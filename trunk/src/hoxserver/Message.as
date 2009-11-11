@@ -242,7 +242,7 @@
 			return {
 					tid    : fields[0],
 					pid    : fields[1],
-					rated  : fields[2], // 1 = Rated, 0 = Nonrated.
+					rated  : (fields[2] == "1"),
 					itimes : fields[3]
 				};
 		}
@@ -274,13 +274,13 @@
 		 *   (1) The "I_TABLE" event
 		 *   (2) The "LIST" event (consisting of the "I_TABLE" elements).
 		 */
-		static private function _helper_parse_I_TABLE(inputContent:String) : Object
+		private static function _helper_parse_I_TABLE(inputContent:String) : Object
 		{
 			const fields:Array = inputContent.split(';');
 			return {
 					tid         : fields[0],
 					group       : fields[1],
-					gametype    : fields[2],
+					rated       : (fields[2] == "0"), // NOTE: Strange but true!
 					initialtime : fields[3],
 					redtime     : fields[4],
 					blacktime   : fields[5],
