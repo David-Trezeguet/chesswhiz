@@ -60,6 +60,14 @@
 					label="{resourceManager.getString('localization', 'close')}"
 					click="Global.app.doCloseTable()"/>
 			</mx:AddChild>
+			<mx:AddChild relativeTo="{preferencesButton}" position="before">
+				<mx:Button id="ViewTablesButton"
+					label="{resourceManager.getString('localization', 'view_tables')}"
+					click="Global.app.doViewTables();"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{preferencesButton}" position="before">
+				<mx:Spacer width="100%"/>
+			</mx:AddChild>
 		</mx:State>
 		<mx:State name="newTableState" basedOn="observerState">
 			<mx:AddChild relativeTo="{spacer1}" position="before">

@@ -557,5 +557,11 @@
 			}
 			_curPref = newPref;
 		}
+		
+		public function isPlayerPlaying(playerId:String) : Boolean
+		{
+			return (    (_redPlayer && _redPlayer.pid == playerId)
+					 || (_blackPlayer && _blackPlayer.pid == playerId ) );
+		}
 	}
 }

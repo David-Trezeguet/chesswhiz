@@ -32,6 +32,7 @@
 		private var _session:Session  = new Session();
 		private var _loginFailReason:String = "";
 
+		private var _pendingTableId:String = ""; // The table-ID to be joined.
 		private var _table:Table      = null;  // THE table.
 
 		public function ChessApp(menu:TopControlBar, window:Container)
@@ -175,6 +176,11 @@
 		
 		public function doJoinTable(tableId:String, color:String = "None") : void
 		{
+			if ( _table && _table.tableId != tableId )
+			{
+				_session.sendLeaveRequest(_playerId, _table.tableId);
+				_pendingTableId = tableId;
+			}
 			_session.sendJoinRequest(_playerId, tableId, color, "0");
 		}
 
@@ -360,11 +366,27 @@
 			const tables:Object = response.parseListResponse();
 			
 			// Display the Tables view.
-			_mainWindow.removeAllChildren();
+			
 			var tableListPanel:TableList = new TableList();
 			tableListPanel.setTableList(tables);
-			_mainWindow.addChild(tableListPanel);
-			_menu.currentState = "viewTablesState";
+
+			if (   _menu.currentState == null || _menu.currentState == ""
+				|| _menu.currentState == "viewTablesState" )
+			{
+				_mainWindow.removeAllChildren();
+				tableListPanel.showCloseButton = false;
+				_mainWindow.addChild(tableListPanel);
+				_menu.currentState = "viewTablesState";
+			}
+			else
+			{
+				if ( _table && _table.isPlayerPlaying(_playerId) )
+				{
+					tableListPanel.joinActionEnabled = false;
+				}
+				PopUpManager.addPopUp(tableListPanel, _mainWindow, true /* modal */);
+				PopUpManager.centerPopUp(tableListPanel);
+			}
 		}
 
 		private function _processResponse_ITABLE(response:Message) : void
@@ -375,6 +397,11 @@
 			if ( _table == null || _table.tableId != tableId )
 			{
 				_table = new Table(tableId, _preferences);
+			}
+
+			if ( _pendingTableId == tableId )
+			{
+				_pendingTableId = "";
 			}
 
 			// NOTE: Update my table with the *new* info coming from the server.
@@ -437,7 +464,8 @@
 			if ( _table && _table.tableId == tid )
 			{
 				_table.leaveTable(pid);
-				if (pid == _playerId)
+				if (    pid == _playerId
+				     && _pendingTableId == "" )
 				{
 					_table = null;
 					_mainWindow.removeAllChildren();
