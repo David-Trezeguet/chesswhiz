@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
 	width="635" height="495"
-	title="{resourceManager.getString('localization', 'Tables')}">
+	title="{resourceManager.getString('localization', 'Tables')}"
+	showCloseButton="true"
+	close="PopUpManager.removePopUp(this);"
+	creationComplete="onCreationComplete();" >
+
 <mx:Script>
 	<![CDATA[
+		import mx.managers.PopUpManager;
 		import hoxserver.TableInfo;
 		import mx.collections.ArrayCollection;
 
+		public var joinActionEnabled:Boolean = true;
+
 		[Bindable]
 		private var tableListDP:ArrayCollection = new ArrayCollection();
+
+		private function onCreationComplete() : void
+		{
+			joinButton.enabled = joinActionEnabled;
+		}
 
 		public function setTableList(tables:Object) : void
 		{
@@ -54,12 +66,19 @@
 
         private function onRefresh(event:Event) : void
         {
+        	if ( this.showCloseButton ) {
+        		PopUpManager.removePopUp(this);
+        	}
      		Global.app.doViewTables();
         }
 
         private function onJoin(event:Event) : void
         {
- 			if (tableListDG.selectedItem) {
+ 			if (tableListDG.selectedItem)
+ 			{
+	        	if ( this.showCloseButton ) {
+	        		PopUpManager.removePopUp(this);
+	        	}
 				Global.app.doJoinTable(tableListDG.selectedItem.tid);
 			}
         }
@@ -88,5 +107,6 @@
 		x="384" y="423" width="95" click="onRefresh(event)"/>
 	<mx:Button id="joinButton"
 		label="{resourceManager.getString('localization', 'join_table')}"
-		x="508" y="423" width="94" click="onJoin(event)"/>
-</mx:Panel>
+		x="508" y="423" width="95" click="onJoin(event)"/>
+
+</mx:TitleWindow>
