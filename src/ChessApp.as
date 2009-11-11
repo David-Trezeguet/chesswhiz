@@ -404,7 +404,6 @@
 				_pendingTableId = "";
 			}
 
-			// NOTE: Update my table with the *new* info coming from the server.
 			_table.newTable(tableInfo);
 		}
 

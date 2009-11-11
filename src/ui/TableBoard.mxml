@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
 	layout="horizontal" width="886" height="718"
 	paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8"
-	initialize="init()">
+	showCloseButton="true"
+	initialize="init()"
+	close="Global.app.doCloseTable();">
 
 <mx:Script>
 	<![CDATA[
@@ -50,7 +52,7 @@
 			var playerLabel:Label = (color == _table.getTopSideColor() ? topLabel : bottomLabel);
 			playerLabel.text = "";
 
-			// NOTE: There is not need to clear/reset the timer for now.
+			// NOTE: There is no need to clear/reset the timer for now.
 		}
 		
 		public function updateTimers(color:String, timer:GameTimers) : void
@@ -176,4 +178,4 @@
 		</mx:Panel>
 	</mx:VBox>
 
-</mx:Panel>
+</mx:TitleWindow>
