@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
-	layout="horizontal" width="886" height="718"
-	paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8"
+	layout="horizontal" width="880" height="710"
+	paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="4"
 	showCloseButton="true"
 	initialize="init()"
 	close="Global.app.doCloseTable();">
@@ -268,15 +268,15 @@
 		<mx:HBox width="100%">
 			<mx:HBox id="topPlayer" width="280" height="28" verticalAlign="middle">
 				<mx:Image id="topImage" scaleContent="true"/>
-				<mx:Button id="topPlayButton" label="Play" click="onPlayButton(event)" />
-				<mx:Label id="topLabel" fontSize="12" color="#A09E9E"/>
+				<mx:Button id="topPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
+				<mx:Label id="topLabel" fontSize="13"/>
 			</mx:HBox>
 			<mx:Spacer width="100%" />
 			<mx:HBox id="topTimers" width="197" height="28" verticalAlign="middle">
 				<mx:Image id="topTimerImage"/>
-				<mx:Label id="topTimerGame" fontSize="12" color="#A09E9E" text="00:00"/>
-				<mx:Label id="topTimerMove" fontSize="12" color="#A09E9E" text="00:00"/>
-				<mx:Label id="topTimerExtra" fontSize="12" color="#A09E9E" text="00:00"/>
+				<mx:Label id="topTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
+				<mx:Label id="topTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
+				<mx:Label id="topTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
 			</mx:HBox>
 		</mx:HBox>
 		
@@ -285,15 +285,15 @@
 		<mx:HBox width="100%">
 			<mx:HBox id="bottomPlayer" width="280" height="28" verticalAlign="middle">
 				<mx:Image id="bottomImage" scaleContent="true"/>
-				<mx:Button id="bottomPlayButton" label="Play" click="onPlayButton(event)" />
-				<mx:Label id="bottomLabel" fontSize="12" color="#A09E9E"/>
+				<mx:Button id="bottomPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
+				<mx:Label id="bottomLabel" fontSize="13"/>
 			</mx:HBox>
 			<mx:Spacer width="100%" />
 			<mx:HBox id="bottomTimers" width="197" height="28" verticalAlign="middle">
 				<mx:Image id="bottomTimerImage"/>
-				<mx:Label id="bottomTimerGame" fontSize="12" color="#A09E9E" text="00:00"/>
-				<mx:Label id="bottomTimerMove" fontSize="12" color="#A09E9E" text="00:00"/>
-				<mx:Label id="bottomTimerExtra" fontSize="12" color="#A09E9E" text="00:00"/>
+				<mx:Label id="bottomTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
+				<mx:Label id="bottomTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
+				<mx:Label id="bottomTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
 			</mx:HBox>
 		</mx:HBox>
 		
@@ -311,7 +311,7 @@
 				icon="{Global.reverseImageClass}" toolTip="Reverse View"/>
 			<mx:Button id="settingsButton" click="onSettingsButton(event)" 
 				icon="{Global.settingsImageClass}" toolTip="Table Settings"/>
-			<mx:Spacer width="30" />
+			<mx:Spacer width="100%" />
 			<mx:Button id="resignButton" label="Resign" click="onResignButton(event)"
 				icon="{Global.whiteFlagImageClass}"/>
 			<mx:Button id="drawButton" label="Draw" click="onDrawButton(event)"
