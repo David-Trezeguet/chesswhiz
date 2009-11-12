@@ -16,11 +16,10 @@
 
 		private var _redPlayer:PlayerInfo   = null;
 		private var _blackPlayer:PlayerInfo = null;
-		private var _observers:Array        = [];
 
 		private var _isTopSideBlack:Boolean = true; // Normal view of Table.
 
-		private var _localPlayerColor:String = "None";
+		private var _localPlayerColor:String = "None"; // My own color.
 
 		private var _inReviewMode:Boolean = false;
 
@@ -34,7 +33,7 @@
 		private var _settings:Object;
 		private var _curPref:Object;
 
-		public function Table(tableId:String, pref:Object, settings:Object)
+		public function Table(tableId:String, preferences:Object, settings:Object)
 		{
 			this.tableId = tableId;
 
@@ -42,10 +41,8 @@
 			_blackClock.addEventListener(TimerEvent.TIMER, _timerHandler);
 
 			_settings = settings;
-			_curPref  = pref;
+			_curPref  = preferences;
 		}
-
-		public function getTopSideColor():String { return _isTopSideBlack ? "Black" : "Red"; }
 
 		public function getTimers(color:String) : GameTimers
 		{
@@ -60,35 +57,27 @@
 		 */
 		public function newTable(tableInfo:Object) : void
 		{
-			if ( tableInfo.redid != "" ) {
-				_redPlayer = new PlayerInfo(tableInfo.redid, "Red", tableInfo.redscore);
-			}
-			if ( tableInfo.blackid != "" ) {
-				_blackPlayer = new PlayerInfo(tableInfo.blackid, "Black", tableInfo.blackscore);
-			}
-
 			_redTimes.initWithTimes(tableInfo.initialtime, tableInfo.redtime);
 			_blackTimes.initWithTimes(tableInfo.initialtime, tableInfo.blacktime);
 
-			const myPID:String = Global.app.getPlayerID();
-
-			if ( myPID == tableInfo.redid  || myPID == tableInfo.blackid )
-			{
-				_isTopSideBlack = (tableInfo.redid == myPID);
-				//Global.app.showNewTableMenu();
-				Global.app.showObserverMenu();
-			}
-			else
-			{
-				var openColor:String = "None";
-				if ( !_redPlayer   && _blackPlayer ) { openColor = "Red";   }
-				if ( !_blackPlayer && _redPlayer   ) { openColor = "Black"; }
-				
-				_isTopSideBlack = (openColor != "Black");
-				Global.app.showObserverMenu();
+			Global.app.addBoardToWindow(_view); // Realize the UI first!
+			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
+			
+			if ( tableInfo.redid != "" ) {
+				_redPlayer = new PlayerInfo(tableInfo.redid, "Red", tableInfo.redscore);
+				_view.onPlayerJoined(_redPlayer);
 			}
 
-			_displayView();
+			if ( tableInfo.blackid != "" ) {
+				_blackPlayer = new PlayerInfo(tableInfo.blackid, "Black", tableInfo.blackscore);
+				_view.onPlayerJoined(_blackPlayer);
+			}
+
+			// Reverse view if I play BLACK.
+			if ( Global.app.getPlayerID() == tableInfo.blackid )
+			{
+				_view.reverseView();
+			}
 		}
 
 		public function reviewMove(cmd:String) : void
@@ -116,38 +105,24 @@
 				_inReviewMode = false;
 			}
 		}
-		
-		private function _displayView() : void
-		{
-			Global.app.addBoardToWindow(_view); // Realize the UI first!
-			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
-
-			if (_redPlayer) {
-				_view.displayPlayerData(_redPlayer);
-				_view.displayMessage(_redPlayer.pid + " joined");
-			}
-
-			if (_blackPlayer) {
-				_view.displayPlayerData(_blackPlayer);
-				_view.displayMessage(_blackPlayer.pid + " joined");
-			}
-		}
 
 		public function displayChatMessage(pid:String, chatMsg:String) : void {
 			_view.displayChatMessage(pid, chatMsg);
 		}
 		
-		public function stopGame(reason:String, winner:String) : void {
+		public function stopGame(reason:String, winner:String) : void
+		{
 			_view.board.disablePieceEvents(_localPlayerColor);
 			_localPlayerColor = "None";
 			
 			_view.board.displayStatus("Game Over (" + reason + ")");
-			_stopTimer();
+			_stopTimers();
 
 			Global.app.showObserverMenu();
 		}
 		
-		public function drawGame(pid:String) : void {
+		public function drawGame(pid:String) : void
+		{
 			_view.displayMessage(pid + " offering draw");
 		}
 		
@@ -181,7 +156,7 @@
 			else                                  { _blackClock.start(); }
 		}
 
-		private function _stopTimer() : void
+		private function _stopTimers() : void
 		{
 			_redClock.stop();
 			_blackClock.stop();
@@ -274,18 +249,6 @@
 			_rewindLastMove();
 			_view.displayMessage("Server rejected the move: " + error);
 			_view.board.onNewMove();
-		}
-
-		public function parseMove(moveData:String) : Array
-		{
-			var fields:Array = moveData.split(":");
-			var piece:Piece = _view.board.getPieceByIndex(fields[0], fields[1]);
-			var move:String = fields[2];
-			var capturePiece:Piece = null;
-			if (fields[3] != "") {
-				capturePiece = _view.board.getPieceByIndex((fields[0] == "Red" ? "Black" : "Red"), fields[3]);
-			}
-			return [piece, move, capturePiece];
 		}
 
 		/**
@@ -435,29 +398,27 @@
 			_curMoveIndex = -1;
 		}
 
+		/**
+		 * Handler for a remote event in which a Player just joined the Table
+		 * or changed his/her color (e.g., the playing role).
+		 */
 		public function joinTable(player:PlayerInfo) : void
 		{
 			if      (player.color == "Red")   { _redPlayer   = player;   }
 			else if (player.color == "Black") { _blackPlayer = player;   }
-			else    /* "None" */              { _observers.push(player); }
-
-			if (player.color == "Red" || player.color == "Black") {
-				_view.displayPlayerData(player);
-			}
-			else {
+			else    /* "None" */              
+			{
 				if ( _redPlayer && _redPlayer.pid == player.pid ) {
-					_view.removePlayerData("Red");
 					_redPlayer = null;
 				}
 				else if ( _blackPlayer && _blackPlayer.pid == player.pid ) {
-					_view.removePlayerData("Black");
 					_blackPlayer = null;
 				}
 			}
-			
-			_view.displayMessage(player.pid + " joined");
 
-			// Start the Game if there are enough players.
+			_view.onPlayerJoined(player);
+
+			/* Start the Game if there are enough players. */
 
 			const myPID:String = Global.app.getPlayerID();
 
@@ -467,28 +428,31 @@
 			{
 				_localPlayerColor = (_redPlayer.pid == myPID  ? "Red" : "Black");
 				_view.board.enablePieceEvents(_localPlayerColor);
-				//Global.app.showNewTableMenu();
 				Global.app.showObserverMenu();
+
+				// Reverse view if I play BLACK.
+				if ( Global.app.getPlayerID() == _blackPlayer.pid )
+				{
+					_view.reverseView();
+				}
 			}
 		}
 
 		public function leaveTable(pid:String) : void
 		{
+			_view.onPlayerLeft(pid);
+
 			if (pid == Global.app.getPlayerID()) {
-				_stopTimer();
+				_stopTimers();
 			}
-			else if (_view != null)
+			else
 			{
 				if (_redPlayer && _redPlayer.pid == pid) {
-					_view.removePlayerData("Red");
-					_stopTimer();
+					_stopTimers();
 				} else if (_blackPlayer && _blackPlayer.pid == pid) {
-					_view.removePlayerData("Black");
-					_stopTimer();
+					_stopTimers();
 				} 
 			}
-
-			_view.displayMessage(pid + " left");
 		}
 
 		/**
@@ -520,12 +484,6 @@
 			else if (nMoves == 2)
 			{
 				_startTimer();
-				if (    ( _redPlayer && _blackPlayer )
-					 && (    _redPlayer.pid   == Global.app.getPlayerID()
-				 	      || _blackPlayer.pid == Global.app.getPlayerID() ) )
-				{
-					//Global.app.showInGameMenu();
-				}
 			}
 
 			// Reset Move-time.

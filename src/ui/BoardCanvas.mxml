@@ -16,7 +16,10 @@
 		private var _redPieceHash:Object = {};
 		private var _blackPieceHash:Object = {};		
 		private var _pieceMap:Array = new Array(10);
+
 		private var _table:Table = null;
+		private var _topColor:String = "Black"; // Normal view: Black at the top.
+
 		private var _lastPieceInFocus:Piece = null;
 		private var _pieceSkin:int = 1;
 		private var _bgColor:uint;
@@ -139,6 +142,34 @@
 			_displayPieces();	
 		}
 
+		public function reverseView() : void
+		{
+			_topColor = (_topColor == "Red" ? "Black" : "Red");
+
+			// Clear the old board.
+			this.graphics.clear();
+			this.removeAllChildren();
+
+			drawBoard(_bgColor, _lineColor);
+
+			var piece:Piece = null;
+			for (var i:int = 0; i < 16; i++)
+			{
+				piece = _redPieces[i];
+				if ( ! piece.isCaptured() ) {
+					piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+				}
+				piece = _blackPieces[i];
+				if ( ! piece.isCaptured() ) {
+					piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+				}
+			}
+
+			if (_lastPieceInFocus) {
+				_lastPieceInFocus.setFocus();
+			}
+		}
+
 		public function drawBoard(bgColor:uint, lineColor:uint) : void
 		{
 			_bgColor        = bgColor;
@@ -172,7 +203,7 @@
 
 			const offsetLeft:int = offset;
 	        const offsetTop:int = offset;
-			const bDescending:Boolean = (_table.getTopSideColor() == "Red");
+			const bDescending:Boolean = (_topColor == "Red");
 			_drawHeaderRow(offsetLeft, offsetTop, bDescending);
 			_drawHeaderRow(offset + _cellWidth*9 + 15, offset, bDescending);
 			_drawHeaderColumn(offsetLeft, offsetTop, bDescending);
@@ -349,7 +380,7 @@
 
 		public function getViewPosition(pos:Position) : Position
 		{
-			return ( _table.getTopSideColor() == "Black" // normal view?
+			return ( _topColor == "Black" // normal view?
 					? new Position( pos.row, pos.column )
 					: new Position( Math.abs(pos.row - 9), Math.abs(pos.column - 8) ) );
 		}

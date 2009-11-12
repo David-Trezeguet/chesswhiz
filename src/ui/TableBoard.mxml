@@ -18,16 +18,20 @@
 
 		private var _table:Table;
 
+		private var _redId:String    = "";
+		private var _blackId:String  = "";
+		private var _topColor:String = "Black"; // Normal view: Black at the top.
+
 		private function init() : void
 		{
 			topTimerImage.source = Global.timerImgClass;
 			bottomTimerImage.source = topTimerImage.source;
-			
-			infoPanel.title = resourceManager.getString('localization', 'Information');
-			chatPanel.title = resourceManager.getString('localization', 'Chat');
-			chatInput.text = resourceManager.getString('localization', 'chat_prompt');
+
+			infoPanel.title    = resourceManager.getString('localization', 'Information');
+			chatPanel.title    = resourceManager.getString('localization', 'Chat');
+			chatInput.text     = resourceManager.getString('localization', 'chat_prompt');
 			resignButton.label = resourceManager.getString('localization', 'resign');
-			drawButton.label = resourceManager.getString('localization', 'draw');
+			drawButton.label   = resourceManager.getString('localization', 'draw');
 		}
 
 		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
@@ -36,34 +40,91 @@
 			_table = table;
 			board.setTable(_table);
 			board.drawBoardAndPieces(bgColor, lineColor, pieceSkin);
-			
-			const topColor:String = _table.getTopSideColor();
-			_updatePlayButtons( topColor );
 		}
 
-		public function displayPlayerData(player:PlayerInfo) : void
+		public function reverseView() : void
 		{
-			const topColor:String = _table.getTopSideColor();
-			
-			var playerLabel:Label = (player.color == topColor ? topLabel : bottomLabel);
-			playerLabel.text = player.pid + "(" + player.score + ")";
+			_topColor = (_topColor == "Red" ? "Black" : "Red");
 
-			var timer:GameTimers = _table.getTimers(player.color);
-			updateTimers(player.color, timer);
-			
-			_updatePlayButtons( topColor );
+			var savedString:String = topLabel.text;
+			topLabel.text = bottomLabel.text;
+			bottomLabel.text = savedString;
+
+			_updatePlayButtons();
+
+			updateTimers( "Red", _table.getTimers("Red") );
+			updateTimers( "Black", _table.getTimers("Black") );
+
+			board.reverseView();
 		}
 
-		private function _updatePlayButtons(topColor:String) : void
+		/**
+		 * @note The player can join the Table as an observer (color = "None").
+		 */
+		public function onPlayerJoined(player:PlayerInfo) : void
 		{
-			topImage.source = (topColor == "Red" ? Global.redPlayerImgClass : Global.blackPlayerImgClass);
-			bottomImage.source = (topColor == "Red" ? Global.blackPlayerImgClass : Global.redPlayerImgClass );
+			this.displayMessage(player.pid + " joined");
+
+			if ( player.color == "None" )
+			{
+				if ( player.pid == _redId )
+				{
+					_redId = "";
+					if    ( _topColor == "Red" ) { topLabel.text = "";    }
+					else                         { bottomLabel.text = ""; }
+				}
+				else if ( player.pid == _blackId )
+				{
+					_blackId = "";
+					if    ( _topColor == "Red" ) { bottomLabel.text = ""; }
+					else                         { topLabel.text = "";    }
+				}
+			}
+			else
+			{
+				var playerLabel:Label = (player.color == _topColor ? topLabel : bottomLabel);
+				playerLabel.text = player.pid + " (" + player.score + ")";
+	
+				const timer:GameTimers = _table.getTimers(player.color);
+				updateTimers(player.color, timer);
+
+				if ( player.color == "Red" ) { _redId = player.pid;   }
+				else   /* "Black" */         { _blackId = player.pid; }
+			}
+
+			_updatePlayButtons();
+		}
+
+		/**
+		 * Handle the event in which a player left the Table.
+		 */
+		public function onPlayerLeft(playerId:String) : void
+		{
+			var playerColor:String = "None";
+			if      ( playerId == _redId )   { playerColor = "Red";   }
+			else if ( playerId == _blackId ) { playerColor = "Black"; }
+
+			if ( playerColor != "None" )
+			{
+				var playerLabel:Label = (playerColor == _topColor ? topLabel : bottomLabel);
+				playerLabel.text = "";
+			}
+
+			this.displayMessage(playerId + " left");
+
+			_updatePlayButtons();
+		}
+
+		private function _updatePlayButtons() : void
+		{
+			topImage.source = (_topColor == "Red" ? Global.redPlayerImgClass : Global.blackPlayerImgClass);
+			bottomImage.source = (_topColor == "Red" ? Global.blackPlayerImgClass : Global.redPlayerImgClass );
 
 			if (topLabel.text == "")
 			{
 				topPlayButton.visible = true;
 				topPlayButton.includeInLayout = true;
-				topPlayButton.label = (topColor == "Red" ? "Play RED" : "Play BLACK");
+				topPlayButton.label = (_topColor == "Red" ? "Play RED" : "Play BLACK");
 			}
 			else
 			{
@@ -75,7 +136,7 @@
 			{
 				bottomPlayButton.visible = true;
 				bottomPlayButton.includeInLayout = true;
-				bottomPlayButton.label = (topColor == "Red" ? "Play BLACK" : "Play RED");
+				bottomPlayButton.label = (_topColor == "Red" ? "Play BLACK" : "Play RED");
 			}
 			else
 			{
@@ -83,22 +144,10 @@
 				bottomPlayButton.includeInLayout = false;
 			}
 		}
-
-		public function removePlayerData(color:String) : void 
-		{
-			const topColor:String = _table.getTopSideColor();
-
-			var playerLabel:Label = (color == topColor ? topLabel : bottomLabel);
-			playerLabel.text = "";
-
-			_updatePlayButtons(topColor);
-
-			// NOTE: There is no need to clear/reset the timer for now.
-		}
 		
 		public function updateTimers(color:String, timer:GameTimers) : void
 		{
-			if (color == _table.getTopSideColor())
+			if (color == _topColor)
 			{
 				topTimerGame.text = timer.getTimer("game");
 				topTimerMove.text = timer.getTimer("move");
@@ -136,6 +185,11 @@
 			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
         }
 
+		public function onReverseViewButton(event:Event) : void
+		{
+			this.reverseView();
+		}
+
 		public function onSettingsButton(event:Event) : void
 		{
 			var settingsPanel:TableSettings = new TableSettings();
@@ -158,16 +212,14 @@
 
 		public function onPlayButton(event:Event) : void
 		{
-			const topColor:String = _table.getTopSideColor();
-			
 			var joinColor:String = "None";
 			if ( event.target == topPlayButton )
 			{
-				joinColor = (topColor == "Red" ? "Red" : "Black");
+				joinColor = (_topColor == "Red" ? "Red" : "Black");
 			}
 			else
 			{
-				joinColor = (topColor == "Red" ? "Black" : "Red" );
+				joinColor = (_topColor == "Red" ? "Black" : "Red" );
 			}
 			Global.app.doJoinTable(_table.tableId, joinColor);
 		}
@@ -251,6 +303,7 @@
 			<mx:Button id="forwardButton" label="&gt;" enabled="false" click="reviewMove('forward')" />
 			<mx:Button id="endButton" label="&gt;|" enabled="false" click="reviewMove('end')" />
 			<mx:Spacer width="100%" />
+			<mx:Button id="reverseViewButton" label="Reverse" click="onReverseViewButton(event)" />
 			<mx:Button id="settingsButton" label="Settings" click="onSettingsButton(event)" />
 			<mx:Spacer width="30" />
 			<mx:Button id="resignButton" label="Resign" click="onResignButton(event)" />
