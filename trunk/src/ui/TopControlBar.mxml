@@ -25,6 +25,7 @@
 			<mx:AddChild position="lastChild">
 				<mx:Button id="newTableButton"
 					label="{resourceManager.getString('localization', 'new_table')}"
+					icon="{Global.newImageClass}"
 					click="Global.app.doNewTable()"/>
 			</mx:AddChild>
 			<mx:AddChild position="lastChild">
@@ -33,6 +34,7 @@
 			<mx:AddChild position="lastChild">
 				<mx:Button id="logoutButton"
 					label="{resourceManager.getString('localization', 'logout')}"
+					icon="{Global.logoutImageClass}"
 					click="Global.app.doLogout()"/>
 			</mx:AddChild>
 			<mx:AddChild position="lastChild">
@@ -52,11 +54,13 @@
 			<mx:AddChild relativeTo="{logoutButton}" position="before">
 				<mx:Button id="preferencesButton"
 					label="{resourceManager.getString('localization', 'preferences')}"
+					icon="{Global.preferencesImageClass}"
 					click="Global.app.changeAppPreferences()"/>
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{preferencesButton}" position="before">
 				<mx:Button id="ViewTablesButton"
 					label="{resourceManager.getString('localization', 'view_tables')}"
+					icon="{Global.listImageClass}"
 					click="Global.app.doViewTables();"/>
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{preferencesButton}" position="before">
