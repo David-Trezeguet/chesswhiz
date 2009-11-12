@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
-	width="414" height="216"
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="horizontal"
+	width="690" height="250"
 	initialize="init()"
-	creationComplete="creationCompleteHandler()">
+	creationComplete="creationCompleteHandler()" horizontalGap="0" paddingRight="20" paddingLeft="20" paddingBottom="20" paddingTop="20" verticalAlign="middle">
 
 	<mx:Script>
 		<![CDATA[
@@ -120,7 +120,7 @@
 	<!-- 
 		User interface 
 	-->
-	<mx:Form verticalGap="10">
+	<mx:Form verticalGap="10" height="90%" borderStyle="solid" cornerRadius="4">
 		<mx:FormHeading id="formHeading" label="login_prompt" width="347"/>
 
 		<mx:FormItem id="usernameItem" label="username" width="100%">
@@ -141,4 +141,16 @@
 				click="onGuestLogin(event)" />
 		</mx:FormItem>
 	</mx:Form>
+	<mx:VBox height="90%" width="100%">
+		<mx:Text height="100%" width="100%" paddingLeft="20" paddingRight="0" paddingTop="20">
+            <mx:htmlText>
+                <![CDATA[<br/>
+To continue, you must be a registered user, or you can login as <font color="#008800"><b>Guest</b></font>.
+
+<b>Need to register? <a href="http://www.playxiangqi.com/index.php?page=register"><font color="#3366FF">Join now</font></a>
+                ]]>
+            </mx:htmlText>
+			
+		</mx:Text>
+	</mx:VBox>
 </mx:Panel>
