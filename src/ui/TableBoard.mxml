@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
-	layout="horizontal" width="880" height="710"
+	layout="horizontal" width="880" height="720"
 	paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="4"
 	showCloseButton="true"
 	initialize="init()"
@@ -263,7 +263,7 @@
 	]]>
 </mx:Script>
 
-	<mx:VBox height="654" width="550" verticalGap="5">
+	<mx:VBox height="670" width="550" verticalGap="5" horizontalAlign="center">
 	
 		<mx:HBox width="100%">
 			<mx:HBox id="topPlayer" width="280" height="28" verticalAlign="middle">
@@ -297,15 +297,15 @@
 			</mx:HBox>
 		</mx:HBox>
 		
-		<mx:HBox x="150" y="638" width="100%" horizontalGap="3" verticalAlign="middle">
+		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#860B09, #C03D33]">
 			<mx:Image id="startButton" enabled="false" click="reviewMove('start')"
-				source="{Global.goFirstImageClass}" alpha="0.75"/>
+				source="{Global.goFirstImageClass}" alpha="1.0"/>
 			<mx:Image id="rewindButton" enabled="false" click="reviewMove('rewind')"
-				source="{Global.goPreviousImageClass}" alpha="0.75"/>
+				source="{Global.goPreviousImageClass}" alpha="1.0"/>
 			<mx:Image id="forwardButton" enabled="false" click="reviewMove('forward')"
-				source="{Global.goNextImageClass}" alpha="0.75"/>
+				source="{Global.goNextImageClass}" alpha="1.0"/>
 			<mx:Image id="endButton" enabled="false" click="reviewMove('end')"
-				source="{Global.goLastImageClass}" alpha="0.75"/>
+				source="{Global.goLastImageClass}" alpha="1.0"/>
 			<mx:Spacer width="100%" />
 			<mx:Button id="reverseViewButton" click="onReverseViewButton(event)"
 				icon="{Global.reverseImageClass}" toolTip="Reverse View"/>
@@ -316,7 +316,7 @@
 				icon="{Global.whiteFlagImageClass}"/>
 			<mx:Button id="drawButton" label="Draw" click="onDrawButton(event)"
 				icon="{Global.blueFlagImageClass}"/>
-		</mx:HBox>
+		</mx:ApplicationControlBar>
 	</mx:VBox>
 
 	<mx:Spacer width="0" />
