@@ -126,6 +126,7 @@
 		{
 			_mainWindow.removeAllChildren();
 			_mainWindow.addChild(board);
+			_menu.currentState = "observerState";
 		}
 
 		public function processSocketConnectEvent() : void
@@ -240,34 +241,6 @@
 
 		public function showObserverMenu() : void { _menu.currentState = "observerState"; }
 
-		public function changeTableSettings() : void
-		{
-			if ( ! _table ) { return; }
-
-			var settingsPanel:TableSettings = new TableSettings();
-			PopUpManager.addPopUp(settingsPanel, _mainWindow, true /* modal */);
-			PopUpManager.centerPopUp(settingsPanel);
-			settingsPanel.settings = ObjectUtil.copy( _table.getSettings() );
-			settingsPanel.applyCurrentSettings();
-			settingsPanel.addEventListener("newSettings", newSettingsEventHandler);
-		}
-
-		/**
-		 * Callback function to handle the "newSettings" event generated
-		 * by the 'TableSettings' window.
-		 */
-		private function newSettingsEventHandler(event:Event) : void
-		{
-			var settingsPanel:TableSettings = event.target as TableSettings;
-			if ( settingsPanel != null )
-			{
-				const settings:Object = settingsPanel.settings;
-				if (_table) {
-					_table.updateSettings(settings);
-				}
-			}	
-		}
-
 		public function changeAppPreferences() : void
 		{
 			var preferencesPanel:TablePreferences = new TablePreferences();
@@ -366,9 +339,9 @@
 		private function _processEvent_LIST(event:Message) : void
 		{
 			const tables:Object = event.parse_LIST();
-			
+
 			// Display the Tables view.
-			
+
 			var tableListPanel:TableList = new TableList();
 			tableListPanel.setTableList(tables);
 
@@ -396,9 +369,8 @@
 			if ( event.getCode() != 0 ) { return; }
 
 			const tableInfo:Object = event.parse_I_TABLE();
-			const tableId:String = tableInfo.tid;
 
-			if ( _table == null || _table.tableId != tableId )
+			if ( _table == null || _table.tableId != tableInfo.tid )
 			{
 				const initialTimer:Object = GameTimers.parse_times(tableInfo.initialtime);
 				const settings:Object = {
@@ -407,7 +379,7 @@
 						"extratime" : initialTimer.extratime,
 						"rated"     : tableInfo.rated
 					};
-				_table = new Table(tableId, _preferences, settings);
+				_table = new Table(tableInfo.tid, _preferences, settings);
 			}
 
 			if ( _requestingTable )
@@ -423,9 +395,8 @@
 			if ( event.getCode() != 0 ) { return; }
 
 			const joinInfo:Object = event.parse_E_JOIN();
-			const tableId:String = joinInfo.tid;
 
-			if ( _table && _table.tableId == tableId )
+			if ( _table && _table.tableId == joinInfo.tid )
 			{
 				_table.joinTable( new PlayerInfo(joinInfo.pid, joinInfo.color, joinInfo.score) );
 			}
