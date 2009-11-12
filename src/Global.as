@@ -8,7 +8,7 @@
 	{
 		public static var app:ChessApp = null;
 
-		public static const VERSION:String    = "0.9.4.6";
+		public static const VERSION:String    = "0.9.4.7";
 
 		/**
 		 * The internal name known only to the PlayXiangqi server.
@@ -46,5 +46,56 @@
 		[Embed(source="assets/move.mp3")]
 		[Bindable]
 		static public var moveSoundClass:Class;
+
+		/* Application-wide icons. */
+
+		[Embed(source="assets/logout.png")]
+		[Bindable]
+		static public var logoutImageClass:Class;
+
+		[Embed(source="assets/preferences.png")]
+		[Bindable]
+		static public var preferencesImageClass:Class;
+
+		[Embed(source="assets/new.png")]
+		[Bindable]
+		static public var newImageClass:Class;
+
+		[Embed(source="assets/list.png")]
+		[Bindable]
+		static public var listImageClass:Class;
+
+		/* Table specific icons. */
+
+		[Embed(source="assets/reverse.png")]
+		[Bindable]
+		static public var reverseImageClass:Class;
+
+		[Embed(source="assets/settings.png")]
+		[Bindable]
+		static public var settingsImageClass:Class;
+
+		[Embed(source="assets/white_flag.png")]
+		[Bindable]
+		static public var whiteFlagImageClass:Class;
+
+		[Embed(source="assets/blue_flag.png")]
+		[Bindable]
+		static public var blueFlagImageClass:Class;
+		
+		[Embed(source="assets/go_first.png")]
+		[Bindable]
+		static public var goFirstImageClass:Class;
+		
+		[Embed(source="assets/go_previous.png")]
+		[Bindable] static public var goPreviousImageClass:Class;
+		
+		[Embed(source="assets/go_next.png")]
+		[Bindable]
+		static public var goNextImageClass:Class;
+		
+		[Embed(source="assets/go_last.png")]
+		[Bindable]
+		static public var goLastImageClass:Class;
 	}
 }
