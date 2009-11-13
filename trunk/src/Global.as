@@ -8,7 +8,7 @@
 	{
 		public static var app:ChessApp = null;
 
-		public static const VERSION:String    = "0.9.5.0";
+		public static const VERSION:String    = "0.9.5.1";
 
 		/**
 		 * The internal name known only to the PlayXiangqi server.

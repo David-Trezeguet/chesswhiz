@@ -20,18 +20,18 @@
 
 		private var _redId:String    = "";
 		private var _blackId:String  = "";
-		private var _topColor:String = "Black"; // Normal view: Black at the top.
 
 		private function init() : void
 		{
-			topTimerImage.source = Global.timerImgClass;
-			bottomTimerImage.source = topTimerImage.source;
-
 			infoPanel.title    = resourceManager.getString('localization', 'Information');
 			chatPanel.title    = resourceManager.getString('localization', 'Chat');
 			chatInput.text     = resourceManager.getString('localization', 'chat_prompt');
 			resignButton.label = resourceManager.getString('localization', 'resign');
 			drawButton.label   = resourceManager.getString('localization', 'draw');
+			redPlayButton.label = resourceManager.getString('localization', 'Play_RED');
+			blackPlayButton.label = resourceManager.getString('localization', 'Play_BLACK');
+			reverseViewButton.toolTip = resourceManager.getString('localization', 'Reverse_View');
+			settingsButton.toolTip = resourceManager.getString('localization', 'Table_Settings');
 		}
 
 		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
@@ -44,15 +44,13 @@
 
 		public function reverseView() : void
 		{
-			_topColor = (_topColor == "Red" ? "Black" : "Red");
+			/* NOTE: Assuming that the two Player-Boxes are with
+			 *       the index 0 and 2 of the main parent container.
+			 */
+			boardBox.setChildIndex( boardBox.getChildAt(2), 0 );
+			boardBox.setChildIndex( boardBox.getChildAt(1), 2 );
 
-			var savedString:String = topLabel.text;
-			topLabel.text = bottomLabel.text;
-			bottomLabel.text = savedString;
-
-			_updatePlayButtons();
-
-			updateTimers( "Red", _table.getTimers("Red") );
+			updateTimers( "Red",   _table.getTimers("Red")   );
 			updateTimers( "Black", _table.getTimers("Black") );
 
 			board.reverseView();
@@ -70,26 +68,29 @@
 				if ( player.pid == _redId )
 				{
 					_redId = "";
-					if    ( _topColor == "Red" ) { topLabel.text = "";    }
-					else                         { bottomLabel.text = ""; }
+					redLabel.text = "";
 				}
 				else if ( player.pid == _blackId )
 				{
 					_blackId = "";
-					if    ( _topColor == "Red" ) { bottomLabel.text = ""; }
-					else                         { topLabel.text = "";    }
+					blackLabel.text = "";
 				}
 			}
 			else
 			{
-				var playerLabel:Label = (player.color == _topColor ? topLabel : bottomLabel);
-				playerLabel.text = player.pid + " (" + player.score + ")";
-	
+				if ( player.color == "Red" )
+				{
+					_redId = player.pid;
+					redLabel.text = player.pid + " (" + player.score + ")";
+				}
+				else   /* "Black" */
+				{
+					_blackId = player.pid;
+					blackLabel.text = player.pid + " (" + player.score + ")"
+				}
+
 				const timer:GameTimers = _table.getTimers(player.color);
 				updateTimers(player.color, timer);
-
-				if ( player.color == "Red" ) { _redId = player.pid;   }
-				else   /* "Black" */         { _blackId = player.pid; }
 			}
 
 			_updatePlayButtons();
@@ -100,64 +101,44 @@
 		 */
 		public function onPlayerLeft(playerId:String) : void
 		{
-			var playerColor:String = "None";
-			if      ( playerId == _redId )   { playerColor = "Red";   }
-			else if ( playerId == _blackId ) { playerColor = "Black"; }
-
-			if ( playerColor != "None" )
-			{
-				var playerLabel:Label = (playerColor == _topColor ? topLabel : bottomLabel);
-				playerLabel.text = "";
-			}
-
 			this.displayMessage(playerId + " left");
+
+			if ( playerId == _redId )
+			{
+				_redId = "";
+				redLabel.text = "";
+			}
+			else if ( playerId == _blackId )
+			{
+				_blackId = "";
+				blackLabel.text = "";
+			}
 
 			_updatePlayButtons();
 		}
 
 		private function _updatePlayButtons() : void
 		{
-			topImage.source = (_topColor == "Red" ? Global.redPlayerImgClass : Global.blackPlayerImgClass);
-			bottomImage.source = (_topColor == "Red" ? Global.blackPlayerImgClass : Global.redPlayerImgClass );
+			redPlayButton.visible         = (redLabel.text == "");
+			redPlayButton.includeInLayout = (redLabel.text == "");
 
-			if (topLabel.text == "")
-			{
-				topPlayButton.visible = true;
-				topPlayButton.includeInLayout = true;
-				topPlayButton.label = (_topColor == "Red" ? "Play RED" : "Play BLACK");
-			}
-			else
-			{
-				topPlayButton.visible = false;
-				topPlayButton.includeInLayout = false;
-			}
-			
-			if (bottomLabel.text == "")
-			{
-				bottomPlayButton.visible = true;
-				bottomPlayButton.includeInLayout = true;
-				bottomPlayButton.label = (_topColor == "Red" ? "Play BLACK" : "Play RED");
-			}
-			else
-			{
-				bottomPlayButton.visible = false;
-				bottomPlayButton.includeInLayout = false;
-			}
+			blackPlayButton.visible         = (blackLabel.text == "");
+			blackPlayButton.includeInLayout = (blackLabel.text == "");
 		}
 		
 		public function updateTimers(color:String, timer:GameTimers) : void
 		{
-			if (color == _topColor)
+			if (color == "Red")
 			{
-				topTimerGame.text = timer.getTimer("game");
-				topTimerMove.text = timer.getTimer("move");
-				topTimerExtra.text = timer.getTimer("extra");
+				redTimerGame.text = timer.getTimer("game");
+				redTimerMove.text = timer.getTimer("move");
+				redTimerExtra.text = timer.getTimer("extra");
 			}
 			else
 			{
-				bottomTimerGame.text = timer.getTimer("game");
-				bottomTimerMove.text = timer.getTimer("move");
-				bottomTimerExtra.text = timer.getTimer("extra");
+				blackTimerGame.text = timer.getTimer("game");
+				blackTimerMove.text = timer.getTimer("move");
+				blackTimerExtra.text = timer.getTimer("extra");
 			}
 		}
 
@@ -166,11 +147,11 @@
 			this.taMessages.text += msg + "\n";		
 		}
 
-		private function reviewMove(cmd:String) : void
+		private function onReviewButton(cmd:String) : void
 		{
 			_table.reviewMove(cmd);
 		}
-		
+
 		public function displayChatMessage(pid:String, chatMsg:String) : void 
 		{
 			chatArea.text  += "[" + pid + "] " + chatMsg + "\n";
@@ -184,11 +165,6 @@
 			Global.app.doTableChat(chatMsg);
 			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
         }
-
-		public function onReverseViewButton(event:Event) : void
-		{
-			this.reverseView();
-		}
 
 		public function onSettingsButton(event:Event) : void
 		{
@@ -212,16 +188,8 @@
 
 		public function onPlayButton(event:Event) : void
 		{
-			var joinColor:String = "None";
-			if ( event.target == topPlayButton )
-			{
-				joinColor = (_topColor == "Red" ? "Red" : "Black");
-			}
-			else
-			{
-				joinColor = (_topColor == "Red" ? "Black" : "Red" );
-			}
-			Global.app.doJoinTable(_table.tableId, joinColor);
+			Global.app.doJoinTable( _table.tableId,
+									( event.target == redPlayButton ? "Red" : "Black") );
 		}
 
 		/**
@@ -263,54 +231,54 @@
 	]]>
 </mx:Script>
 
-	<mx:VBox height="670" width="550" verticalGap="5" horizontalAlign="center">
+	<mx:VBox id="boardBox" height="670" width="550" verticalGap="5" horizontalAlign="center">
 	
-		<mx:HBox width="100%">
-			<mx:HBox id="topPlayer" width="280" height="28" verticalAlign="middle">
-				<mx:Image id="topImage" scaleContent="true"/>
-				<mx:Button id="topPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
-				<mx:Label id="topLabel" fontSize="13"/>
+		<mx:HBox id="blackBox" width="100%">
+			<mx:HBox id="blackPlayer" width="280" height="28" verticalAlign="middle">
+				<mx:Image id="blackImage" scaleContent="true"/>
+				<mx:Button id="blackPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
+				<mx:Label id="blackLabel" fontSize="13"/>
 			</mx:HBox>
 			<mx:Spacer width="100%" />
-			<mx:HBox id="topTimers" width="197" height="28" verticalAlign="middle">
-				<mx:Image id="topTimerImage"/>
-				<mx:Label id="topTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
-				<mx:Label id="topTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
-				<mx:Label id="topTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
+			<mx:HBox id="blackTimers" width="197" height="28" verticalAlign="middle">
+				<mx:Image id="blackTimerImage" source="{Global.timerImgClass}"/>
+				<mx:Label id="blackTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
+				<mx:Label id="blackTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
+				<mx:Label id="blackTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
 			</mx:HBox>
 		</mx:HBox>
 		
 		<cwui:BoardCanvas id="board" x="10" y="48" width="550" height="550" />
 
-		<mx:HBox width="100%">
-			<mx:HBox id="bottomPlayer" width="280" height="28" verticalAlign="middle">
-				<mx:Image id="bottomImage" scaleContent="true"/>
-				<mx:Button id="bottomPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
-				<mx:Label id="bottomLabel" fontSize="13"/>
+		<mx:HBox id="redBox" width="100%">
+			<mx:HBox id="redPlayer" width="280" height="28" verticalAlign="middle">
+				<mx:Image id="redImage" scaleContent="true"/>
+				<mx:Button id="redPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
+				<mx:Label id="redLabel" fontSize="13"/>
 			</mx:HBox>
 			<mx:Spacer width="100%" />
-			<mx:HBox id="bottomTimers" width="197" height="28" verticalAlign="middle">
-				<mx:Image id="bottomTimerImage"/>
-				<mx:Label id="bottomTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
-				<mx:Label id="bottomTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
-				<mx:Label id="bottomTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
+			<mx:HBox id="redTimers" width="197" height="28" verticalAlign="middle">
+				<mx:Image id="redTimerImage" source="{Global.timerImgClass}"/>
+				<mx:Label id="redTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
+				<mx:Label id="redTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
+				<mx:Label id="redTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
 			</mx:HBox>
 		</mx:HBox>
 		
 		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#383232, #FFFFFF]">
-			<mx:Image id="startButton" enabled="false" click="reviewMove('start')"
+			<mx:Image id="startButton" enabled="false" click="onReviewButton('start')"
 				source="{Global.goFirstImageClass}" alpha="1.0"/>
-			<mx:Image id="rewindButton" enabled="false" click="reviewMove('rewind')"
+			<mx:Image id="rewindButton" enabled="false" click="onReviewButton('rewind')"
 				source="{Global.goPreviousImageClass}" alpha="1.0"/>
-			<mx:Image id="forwardButton" enabled="false" click="reviewMove('forward')"
+			<mx:Image id="forwardButton" enabled="false" click="onReviewButton('forward')"
 				source="{Global.goNextImageClass}" alpha="1.0"/>
-			<mx:Image id="endButton" enabled="false" click="reviewMove('end')"
+			<mx:Image id="endButton" enabled="false" click="onReviewButton('end')"
 				source="{Global.goLastImageClass}" alpha="1.0"/>
 			<mx:Spacer width="100%" />
-			<mx:Button id="reverseViewButton" click="onReverseViewButton(event)"
-				icon="{Global.reverseImageClass}" toolTip="Reverse View"/>
+			<mx:Button id="reverseViewButton" click="reverseView();"
+				icon="{Global.reverseImageClass}"/>
 			<mx:Button id="settingsButton" click="onSettingsButton(event)" 
-				icon="{Global.settingsImageClass}" toolTip="Table Settings"/>
+				icon="{Global.settingsImageClass}"/>
 			<mx:Spacer width="100%" />
 			<mx:Button id="resignButton" label="Resign" click="onResignButton(event)"
 				icon="{Global.whiteFlagImageClass}"/>
