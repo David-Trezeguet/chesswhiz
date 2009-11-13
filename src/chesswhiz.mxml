@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
-	layout="vertical" backgroundGradientColors="[#000000, #ffffff]"
+	layout="absolute" backgroundGradientColors="[#000000, #ffffff]"
 	initialize="init()"
 	applicationComplete="initComplete()"
 	viewSourceURL="srcview/index.html">
@@ -35,7 +35,7 @@
 		[ResourceBundle ("localization")]
 	</mx:Metadata>
 
-    <cwui:TopControlBar id="topControlBar" dock="true" />
-	<mx:Canvas id="mainWindow" />
+    <cwui:TopControlBar id="topControlBar" dock="true"/>
+	<mx:VBox id="mainWindow" horizontalCenter="0" top="5"/>
 
 </mx:Application>

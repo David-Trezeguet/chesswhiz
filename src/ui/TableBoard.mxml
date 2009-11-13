@@ -297,7 +297,7 @@
 			</mx:HBox>
 		</mx:HBox>
 		
-		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#860B09, #C03D33]">
+		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#383232, #FFFFFF]">
 			<mx:Image id="startButton" enabled="false" click="reviewMove('start')"
 				source="{Global.goFirstImageClass}" alpha="1.0"/>
 			<mx:Image id="rewindButton" enabled="false" click="reviewMove('rewind')"
