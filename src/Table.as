@@ -17,8 +17,6 @@
 		private var _redPlayer:PlayerInfo   = null;
 		private var _blackPlayer:PlayerInfo = null;
 
-		private var _localPlayerColor:String = "None"; // My own color.
-
 		private var _inReviewMode:Boolean = false;
 
 		private var _redTimes:GameTimers   = new GameTimers();
@@ -61,20 +59,27 @@
 			Global.app.addBoardToWindow(_view); // Realize the UI first!
 			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
 			
-			if ( tableInfo.redid != "" ) {
+			if ( tableInfo.redid != "" )
+			{
 				_redPlayer = new PlayerInfo(tableInfo.redid, "Red", tableInfo.redscore);
 				_view.onPlayerJoined(_redPlayer);
+				if ( Global.player.pid == tableInfo.redid ) {
+					Global.player.color = "Red";
+				}
 			}
 
-			if ( tableInfo.blackid != "" ) {
+			if ( tableInfo.blackid != "" )
+			{
 				_blackPlayer = new PlayerInfo(tableInfo.blackid, "Black", tableInfo.blackscore);
 				_view.onPlayerJoined(_blackPlayer);
+				if ( Global.player.pid == tableInfo.blackid ) {
+					Global.player.color = "Black";
+				}
 			}
 
-			// Reverse view if I play BLACK.
-			if ( Global.app.getPlayerID() == tableInfo.blackid )
+			if ( Global.player.color == "None" )
 			{
-				_view.reverseView();
+				_view.onPlayerJoined( Global.player );
 			}
 		}
 
@@ -110,8 +115,11 @@
 		
 		public function stopGame(reason:String, winner:String) : void
 		{
-			_view.board.disablePieceEvents(_localPlayerColor);
-			_localPlayerColor = "None";
+			if ( Global.player.color != "None" )
+			{
+				_view.board.disablePieceEvents(Global.player.color);
+				Global.player.color = "None";
+			}
 			
 			_view.board.displayStatus("Game Over (" + reason + ")");
 			_stopTimers();
@@ -260,7 +268,7 @@
 				return;
 			}
 
-			if ( _localPlayerColor != _view.board.nextColor() ) {
+			if ( Global.player.color != _view.board.nextColor() ) {
 				trace("Piece cannot be moved: It is not your turn.");
 				piece.moveImage();
 				return;
@@ -402,9 +410,9 @@
 		 */
 		public function joinTable(player:PlayerInfo) : void
 		{
-			if      (player.color == "Red")   { _redPlayer   = player;   }
-			else if (player.color == "Black") { _blackPlayer = player;   }
-			else    /* "None" */              
+			if      (player.color == "Red")   { _redPlayer   = player; }
+			else if (player.color == "Black") { _blackPlayer = player; }
+			else    /* "None" */
 			{
 				if ( _redPlayer && _redPlayer.pid == player.pid ) {
 					_redPlayer = null;
@@ -414,25 +422,22 @@
 				}
 			}
 
+			var bMyColorChanged:Boolean = false;
+			if ( player.pid == Global.player.pid  )
+			{
+				Global.player.color = player.color;
+				bMyColorChanged = true;
+			}
+
 			_view.onPlayerJoined(player);
 
 			/* Start the Game if there are enough players. */
 
-			const myPID:String = Global.app.getPlayerID();
-
-			if (    _localPlayerColor == "None"
-				&& ( _redPlayer && _blackPlayer )
-				&& ( _redPlayer.pid == myPID || _blackPlayer.pid == myPID ) )
+			if (    bMyColorChanged && Global.player.color != "None"
+				&& ( _redPlayer && _blackPlayer ) )
 			{
-				_localPlayerColor = (_redPlayer.pid == myPID  ? "Red" : "Black");
-				_view.board.enablePieceEvents(_localPlayerColor);
+				_view.board.enablePieceEvents(Global.player.color);
 				Global.app.showObserverMenu();
-
-				// Reverse view if I play BLACK.
-				if ( Global.app.getPlayerID() == _blackPlayer.pid )
-				{
-					_view.reverseView();
-				}
 			}
 		}
 
@@ -440,16 +445,15 @@
 		{
 			_view.onPlayerLeft(pid);
 
-			if (pid == Global.app.getPlayerID()) {
-				_stopTimers();
-			}
-			else
+			if (pid == Global.player.pid)
 			{
-				if (_redPlayer && _redPlayer.pid == pid) {
-					_stopTimers();
-				} else if (_blackPlayer && _blackPlayer.pid == pid) {
-					_stopTimers();
-				} 
+				Global.player.color = "None";
+			}
+
+			if (   _redPlayer && _redPlayer.pid == pid
+				|| _blackPlayer && _blackPlayer.pid == pid )
+			{
+				_stopTimers();
 			}
 		}
 

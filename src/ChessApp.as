@@ -48,6 +48,8 @@
 				};
 			_loadPreferencesFromLocalSharedObject();
 
+			Global.player = new PlayerInfo("", "None", "0");
+
 			_startApp();
 		}
 
@@ -118,7 +120,10 @@
 		{
 			_session.close();
 			_playerId = "";
-			_table    = null;
+			Global.player.pid = "";
+			Global.player.score = "0";
+			Global.player.color = "None";
+			_table = null;
 			_mainWindow.removeAllChildren();
 		}
 
@@ -143,8 +148,6 @@
 		{
 			trace("Connection to server lost.");
 		}
-
-		public function getPlayerID():String  { return _playerId; }
 
 		public function doLogin(pid:String, passwd:String = "") : void
 		{
@@ -316,6 +319,8 @@
 			{
 				trace("My LOGIN = " + loginInfo.pid + "(" + loginInfo.score + ")"
 									+ ", sessionid: " + loginInfo.sid);
+				Global.player.pid = loginInfo.pid;
+				Global.player.score = loginInfo.score;
 				_session.setSid( loginInfo.sid );
 				_loginFailReason = "";
 				this.doViewTables(); // By default, get the List of Tables.

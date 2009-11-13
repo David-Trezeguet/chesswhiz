@@ -9,6 +9,7 @@
 
 <mx:Script>
 	<![CDATA[
+		import mx.collections.ArrayCollection;
 		import mx.utils.ObjectUtil;
 		import mx.managers.PopUpManager;
 		import mx.utils.StringUtil;
@@ -16,22 +17,27 @@
 		import mx.controls.Image;
 		import hoxserver.*;
 
+		public static const INVALID_INDEX:int = -1;
+
 		private var _table:Table;
 
 		private var _redId:String    = "";
 		private var _blackId:String  = "";
 
+		[Bindable]
+		private var _playerList:ArrayCollection = new ArrayCollection();
+
 		private function init() : void
 		{
-			infoPanel.title    = resourceManager.getString('localization', 'Information');
-			chatPanel.title    = resourceManager.getString('localization', 'Chat');
-			chatInput.text     = resourceManager.getString('localization', 'chat_prompt');
-			resignButton.label = resourceManager.getString('localization', 'resign');
-			drawButton.label   = resourceManager.getString('localization', 'draw');
-			redPlayButton.label = resourceManager.getString('localization', 'Play_RED');
-			blackPlayButton.label = resourceManager.getString('localization', 'Play_BLACK');
+			infoPanel.title           = resourceManager.getString('localization', 'Information');
+			chatPanel.title           = resourceManager.getString('localization', 'Chat');
+			chatInput.text            = resourceManager.getString('localization', 'chat_prompt');
+			resignButton.label        = resourceManager.getString('localization', 'resign');
+			drawButton.label          = resourceManager.getString('localization', 'draw');
+			redPlayButton.label       = resourceManager.getString('localization', 'Play_RED');
+			blackPlayButton.label     = resourceManager.getString('localization', 'Play_BLACK');
 			reverseViewButton.toolTip = resourceManager.getString('localization', 'Reverse_View');
-			settingsButton.toolTip = resourceManager.getString('localization', 'Table_Settings');
+			settingsButton.toolTip    = resourceManager.getString('localization', 'Table_Settings');
 		}
 
 		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
@@ -42,7 +48,7 @@
 			board.drawBoardAndPieces(bgColor, lineColor, pieceSkin);
 		}
 
-		public function reverseView() : void
+		private function _reverseView() : void
 		{
 			/* NOTE: Assuming that the two Player-Boxes are with
 			 *       the index 0 and 2 of the main parent container.
@@ -61,7 +67,18 @@
 		 */
 		public function onPlayerJoined(player:PlayerInfo) : void
 		{
-			this.displayMessage(player.pid + " joined");
+			/* TODO: Need to handle the case in which the player's Rating is changed. */
+
+			const playerIndex:int = _findPlayerIndexInList(player.pid);
+			if ( playerIndex == INVALID_INDEX )  // Not yet in the list?
+			{
+				var playerRow:Object = {
+						"pid"    : player.pid,
+						"rating" : player.score
+					};
+				_playerList.addItem(playerRow);
+				this.displayMessage(player.pid + " joined");
+			}
 
 			if ( player.color == "None" )
 			{
@@ -94,6 +111,12 @@
 			}
 
 			_updatePlayButtons();
+
+			// By default, reverse the view if I play BLACK.
+			if ( Global.player.pid == _blackId )
+			{
+				_reverseView();
+			}
 		}
 
 		/**
@@ -101,7 +124,12 @@
 		 */
 		public function onPlayerLeft(playerId:String) : void
 		{
-			this.displayMessage(playerId + " left");
+			const playerIndex:int = _findPlayerIndexInList(playerId);
+			if ( playerIndex != INVALID_INDEX )  // Found?
+			{
+				_playerList.removeItemAt(playerIndex);
+				this.displayMessage(playerId + " left");
+			}
 
 			if ( playerId == _redId )
 			{
@@ -115,6 +143,23 @@
 			}
 
 			_updatePlayButtons();
+		}
+
+		/**
+		 * Find a given Player in the Player-List DataGrid.
+		 * @return INVALID_INDEX if the Player is not in the list.
+		 */
+		private function _findPlayerIndexInList(playerId:String) : int
+		{
+			for (var i:int = 0; i < _playerList.length; ++i)
+			{
+				if ( _playerList[i]["pid"] == playerId )
+				{
+					return i;
+				}
+			}
+
+			return INVALID_INDEX; // "Not found".
 		}
 
 		private function _updatePlayButtons() : void
@@ -163,7 +208,7 @@
 			chatInput.text = "";
 
 			Global.app.doTableChat(chatMsg);
-			this.displayChatMessage(Global.app.getPlayerID(), chatMsg);
+			this.displayChatMessage(Global.player.pid, chatMsg);
         }
 
 		public function onSettingsButton(event:Event) : void
@@ -275,7 +320,7 @@
 			<mx:Image id="endButton" enabled="false" click="onReviewButton('end')"
 				source="{Global.goLastImageClass}" alpha="1.0"/>
 			<mx:Spacer width="100%" />
-			<mx:Button id="reverseViewButton" click="reverseView();"
+			<mx:Button id="reverseViewButton" click="_reverseView();"
 				icon="{Global.reverseImageClass}"/>
 			<mx:Button id="settingsButton" click="onSettingsButton(event)" 
 				icon="{Global.settingsImageClass}"/>
@@ -289,18 +334,27 @@
 
 	<mx:Spacer width="0" />
 
-	<mx:VBox height="654" width="270">
-		<mx:Spacer height="26" />
-		<mx:Panel id="infoPanel" title="Information" width="100%" height="242" layout="absolute">
-			<mx:TextArea id="taMessages" width="100%" height="100%" editable="false" />
-		</mx:Panel>
+	<mx:VBox height="100%" width="100%">
+		<mx:DataGrid id="playerDataGrid" dataProvider="{_playerList}" width="100%" height="120">
+			<mx:columns>
+				<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Id')}"
+					dataField="pid" width="60"/>
+				<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Rating')}"
+					dataField="rating" width="30"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:VDividedBox width="100%" height="100%">
+			<mx:Panel id="infoPanel" title="Information" width="100%" height="230" layout="vertical">
+				<mx:TextArea id="taMessages" width="100%" height="100%" editable="false" />
+			</mx:Panel>
 
-		<mx:Panel id="chatPanel" title="Chat" width="100%" height="300" layout="vertical" verticalGap="0">
-			<mx:TextArea id="chatArea" width="100%" height="230" editable="false" backgroundColor="#F8F6F1"/>
-			<mx:TextInput id="chatInput" width="100%" height="100%"
-				enter="onEnterInput(event)"
-				focusIn="onChatInputFocusIn(event)"/>
-		</mx:Panel>
+			<mx:Panel id="chatPanel" title="Chat" width="100%" height="100%" layout="vertical" verticalGap="0">
+				<mx:TextArea id="chatArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"/>
+				<mx:TextInput id="chatInput" width="100%" height="30"
+					enter="onEnterInput(event)"
+					focusIn="onChatInputFocusIn(event)"/>
+			</mx:Panel>
+		</mx:VDividedBox>
 	</mx:VBox>
 
 </mx:TitleWindow>

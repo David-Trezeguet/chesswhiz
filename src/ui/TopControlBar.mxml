@@ -13,7 +13,7 @@
 			private function onStateChange(event:StateChangeEvent):void
 			{
 				if (event.newState != "") {
-					playerIdLabel.text = Global.app.getPlayerID();
+					playerIdLabel.text = Global.player.pid + " (" + Global.player.score + ")";
 				}
 			}
 			

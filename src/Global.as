@@ -1,14 +1,24 @@
 ﻿package
 {
+	import hoxserver.PlayerInfo;
+	
 	/**
 	 * The class contains the variables and constants
 	 * to be globally shared throught the entire application.
 	 */
 	public final class Global
 	{
+		public static const VERSION:String    = "0.9.6.0";
+
+		/**
+		 * The reference to the global Application.
+		 */
 		public static var app:ChessApp = null;
 
-		public static const VERSION:String    = "0.9.5.1";
+		/**
+		 * The reference to THE player (i.e., the local player).
+		 */
+		public static var player:PlayerInfo = null;
 
 		/**
 		 * The internal name known only to the PlayXiangqi server.
