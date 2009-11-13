@@ -17,8 +17,6 @@
 		private var _redPlayer:PlayerInfo   = null;
 		private var _blackPlayer:PlayerInfo = null;
 
-		private var _isTopSideBlack:Boolean = true; // Normal view of Table.
-
 		private var _localPlayerColor:String = "None"; // My own color.
 
 		private var _inReviewMode:Boolean = false;

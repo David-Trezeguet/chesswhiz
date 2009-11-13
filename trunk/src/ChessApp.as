@@ -42,7 +42,7 @@
 
 			_preferences = {
 					"pieceskin"  : 1,
-					"boardcolor" : 0x5b5d5b,
+					"boardcolor" : 0x333333,
 					"linecolor"  : 0xa09e9e,
 					"sound"      : true
 				};
