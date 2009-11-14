@@ -13,9 +13,8 @@
 		private var _cellHeight:int;
 		private var _redPieces:Array = new Array(16);
 		private var _blackPieces:Array = new Array(16);
-		private var _redPieceHash:Object = {};
-		private var _blackPieceHash:Object = {};		
-		private var _pieceMap:Array = new Array(10);
+
+		private var _pieceMap:Array = null;
 
 		private var _table:Table = null;
 		private var _topColor:String = "Black"; // Normal view: Black at the top.
@@ -29,15 +28,6 @@
 		{
 			_cellWidth = (width - 2 * margin)/8;
 			_cellHeight = (height - 2 * margin)/9;
-            
-			for (var k:int = 0; k < 10; k++)
-			{
-				_pieceMap[k] = new Array(9);
-				for (var m:int = 0; m < 9; m++)
-				{
-					_pieceMap[k][m] = null;
-				}
-			}
 
 			// --- Create piece objects.
 
@@ -77,58 +67,8 @@
 	        	_blackPieces[11 + pawn] = new Piece(index++, "pawn", color, 3, 2*pawn, this);
 			}
 
- 			// --- Initialize piece map.
-
-			_pieceMap[0][0] = _blackPieces[0];
-			_pieceMap[0][1] = _blackPieces[1];
-			_pieceMap[0][2] = _blackPieces[2];
-			_pieceMap[0][3] = _blackPieces[3];
-			_pieceMap[0][4] = _blackPieces[4];
-			_pieceMap[0][5] = _blackPieces[5];
-			_pieceMap[0][6] = _blackPieces[6];
-			_pieceMap[0][7] = _blackPieces[7];
-			_pieceMap[0][8] = _blackPieces[8];
-			_pieceMap[2][1] = _blackPieces[9];
-			_pieceMap[2][7] = _blackPieces[10];
-			for (pawn = 0; pawn < 5; pawn++) {
-	        	_pieceMap[3][2*pawn] = _blackPieces[11 + pawn];
-			}
-
-			_pieceMap[9][0] = _redPieces[0];
-			_pieceMap[9][1] = _redPieces[1];
-			_pieceMap[9][2] = _redPieces[2];
-			_pieceMap[9][3] = _redPieces[3];
-			_pieceMap[9][4] = _redPieces[4];
-			_pieceMap[9][5] = _redPieces[5];
-			_pieceMap[9][6] = _redPieces[6];
-			_pieceMap[9][7] = _redPieces[7];
-			_pieceMap[9][8] = _redPieces[8];
-			_pieceMap[7][1] = _redPieces[9];
-			_pieceMap[7][7] = _redPieces[10];
-			for (pawn = 0; pawn < 5; pawn++) {
-	        	_pieceMap[6][2*pawn] = _redPieces[11 + pawn];
-			}
-
-			// --- Initialize piece hash.
-
-			_redPieceHash["king"]     = [ _redPieces[4] ];
-			_redPieceHash["chariot"]  = [ _redPieces[0], _redPieces[8] ];
-			_redPieceHash["horse"]    = [ _redPieces[1], _redPieces[7] ];
-			_redPieceHash["elephant"] = [ _redPieces[2], _redPieces[6] ];
-			_redPieceHash["advisor"]  = [ _redPieces[3], _redPieces[5] ];
-			_redPieceHash["cannon"]   = [ _redPieces[9], _redPieces[10] ];
-			_redPieceHash["pawn"]     = [ _redPieces[11], _redPieces[12],
-			                              _redPieces[13], _redPieces[14],
-			                              _redPieces[15] ];
-			_blackPieceHash["king"]     = [ _blackPieces[4] ];
-			_blackPieceHash["chariot"]  = [ _blackPieces[0], _blackPieces[8] ];
-			_blackPieceHash["horse"]    = [ _blackPieces[1], _blackPieces[7] ];
-			_blackPieceHash["elephant"] = [ _blackPieces[2], _blackPieces[6] ];
-			_blackPieceHash["advisor"]  = [ _blackPieces[3], _blackPieces[5] ];
-			_blackPieceHash["cannon"]   = [ _blackPieces[9], _blackPieces[10] ];
-			_blackPieceHash["pawn"]     = [ _blackPieces[11], _blackPieces[12],
-			                                _blackPieces[13], _blackPieces[14],
-			                                _blackPieces[15] ];
+ 			// --- Initialize the internal state.
+			_resetInternalState();
 		}
 
 		public function setTable(table:Table) : void { _table = table; }
@@ -168,6 +108,38 @@
 			if (_lastPieceInFocus) {
 				_lastPieceInFocus.setFocus();
 			}
+		}
+
+		public function reset() : void
+		{
+			// Clear the old board.
+			this.graphics.clear();
+			this.removeAllChildren();
+
+			drawBoard(_bgColor, _lineColor);
+
+			var piece:Piece = null;
+			for (var i:int = 0; i < 16; i++)
+			{
+				piece = _redPieces[i];
+				piece.setCapture(false);
+				piece.setPosition( piece.getInitialPosition() );
+				piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+
+				piece = _blackPieces[i];
+				piece.setCapture(false);
+				piece.setPosition( piece.getInitialPosition() );
+				piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+			}
+
+			if (_lastPieceInFocus)
+			{
+				_lastPieceInFocus.clearFocus();
+				_lastPieceInFocus = null;
+			}
+
+			_nextColor = "Red";
+			_resetInternalState();
 		}
 
 		public function drawBoard(bgColor:uint, lineColor:uint) : void
@@ -319,7 +291,7 @@
 			_pieceMap[oldPos.row][oldPos.column] = null;
 		}
 
-		public function updatePieceMap(newPos:Position, piece:Piece) : void
+		private function _updatePieceMap(newPos:Position, piece:Piece) : void
 		{
 			var capturedPiece:Piece = _pieceMap[newPos.row][newPos.column];
 			var oldPos:Position = piece.getPosition();
@@ -346,7 +318,7 @@
 
 		public function movePieceByPos(piece:Piece, newPos:Position) : void
 		{
-			updatePieceMap(newPos, piece);
+			_updatePieceMap(newPos, piece);
 			piece.moveImage();
 
 			if (_lastPieceInFocus) {
@@ -488,7 +460,78 @@
 
 		private var _nextColor:String = "Red"; // Keep track who moves NEXT?
 
+		private var _redPieceHash:Object = null;
+		private var _blackPieceHash:Object = null;
+
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		private function _resetInternalState() : void
+		{
+			// --- Initialize piece map.
+            _pieceMap = new Array(10);
+			for (var k:int = 0; k < 10; k++)
+			{
+				_pieceMap[k] = new Array(9);
+				for (var m:int = 0; m < 9; m++)
+				{
+					_pieceMap[k][m] = null;
+				}
+			}
+
+			_pieceMap[0][0] = _blackPieces[0];
+			_pieceMap[0][1] = _blackPieces[1];
+			_pieceMap[0][2] = _blackPieces[2];
+			_pieceMap[0][3] = _blackPieces[3];
+			_pieceMap[0][4] = _blackPieces[4];
+			_pieceMap[0][5] = _blackPieces[5];
+			_pieceMap[0][6] = _blackPieces[6];
+			_pieceMap[0][7] = _blackPieces[7];
+			_pieceMap[0][8] = _blackPieces[8];
+			_pieceMap[2][1] = _blackPieces[9];
+			_pieceMap[2][7] = _blackPieces[10];
+			for (var pawn:int = 0; pawn < 5; pawn++) {
+	        	_pieceMap[3][2*pawn] = _blackPieces[11 + pawn];
+			}
+
+			_pieceMap[9][0] = _redPieces[0];
+			_pieceMap[9][1] = _redPieces[1];
+			_pieceMap[9][2] = _redPieces[2];
+			_pieceMap[9][3] = _redPieces[3];
+			_pieceMap[9][4] = _redPieces[4];
+			_pieceMap[9][5] = _redPieces[5];
+			_pieceMap[9][6] = _redPieces[6];
+			_pieceMap[9][7] = _redPieces[7];
+			_pieceMap[9][8] = _redPieces[8];
+			_pieceMap[7][1] = _redPieces[9];
+			_pieceMap[7][7] = _redPieces[10];
+			for (pawn = 0; pawn < 5; pawn++) {
+	        	_pieceMap[6][2*pawn] = _redPieces[11 + pawn];
+			}
+
+			// --- Initialize piece hash.
+
+			_redPieceHash = {};
+			_blackPieceHash = {};
+
+			_redPieceHash["king"]     = [ _redPieces[4] ];
+			_redPieceHash["chariot"]  = [ _redPieces[0], _redPieces[8] ];
+			_redPieceHash["horse"]    = [ _redPieces[1], _redPieces[7] ];
+			_redPieceHash["elephant"] = [ _redPieces[2], _redPieces[6] ];
+			_redPieceHash["advisor"]  = [ _redPieces[3], _redPieces[5] ];
+			_redPieceHash["cannon"]   = [ _redPieces[9], _redPieces[10] ];
+			_redPieceHash["pawn"]     = [ _redPieces[11], _redPieces[12],
+			                              _redPieces[13], _redPieces[14],
+			                              _redPieces[15] ];
+			_blackPieceHash["king"]     = [ _blackPieces[4] ];
+			_blackPieceHash["chariot"]  = [ _blackPieces[0], _blackPieces[8] ];
+			_blackPieceHash["horse"]    = [ _blackPieces[1], _blackPieces[7] ];
+			_blackPieceHash["elephant"] = [ _blackPieces[2], _blackPieces[6] ];
+			_blackPieceHash["advisor"]  = [ _blackPieces[3], _blackPieces[5] ];
+			_blackPieceHash["cannon"]   = [ _blackPieces[9], _blackPieces[10] ];
+			_blackPieceHash["pawn"]     = [ _blackPieces[11], _blackPieces[12],
+			                                _blackPieces[13], _blackPieces[14],
+			                                _blackPieces[15] ];
+		}
 
 		public function nextColor() : String { return _nextColor; }
 

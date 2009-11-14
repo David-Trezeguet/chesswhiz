@@ -7,7 +7,9 @@
 		public var extraTime:int = 0;
 
 		private var _initialTimes:String = "";  // In "GG/MM/EE" format.
+		private var _initialGameTime:int = 0;
 		private var _initialMoveTime:int = 0;
+		private var _initialExtraTime:int = 0;
 
 		/**
 		 * @param initialTimes The initial times string in "GG/MM/EE" format.
@@ -27,7 +29,9 @@
 		public function initWithTimes(initialTimes:String, currentTimes:String) : void
 		{
 			var timers:Array = initialTimes.split("/");
+			_initialGameTime = parseInt(timers[0]);
 			_initialMoveTime = parseInt(timers[1]);
+			_initialExtraTime = parseInt(timers[2]);
 
 			timers = currentTimes.split("/");
 			this.gameTime  = parseInt(timers[0]);
@@ -42,6 +46,13 @@
 		public function resetMoveTime() : void
 		{
 			this.moveTime = _initialMoveTime;
+		}
+
+		public function resetAll() : void
+		{
+			this.gameTime = _initialGameTime;
+			this.moveTime = _initialMoveTime;
+			this.extraTime = _initialExtraTime;
 		}
 
 		public function decrementTime() : void

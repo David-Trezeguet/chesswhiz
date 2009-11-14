@@ -301,6 +301,7 @@
 				else if (msg.optype == "DRAW")    { _processEvent_DRAW(msg);   }
 				else if (msg.optype == "MSG")     { _processEvent_MSG(msg);    }
 				else if (msg.optype == "UPDATE")  { _processEvent_UPDATE(msg); }
+				else if (msg.optype == "RESET")   { _processEvent_RESET(msg);  }
 			}
 		}
 
@@ -511,6 +512,17 @@
 			if ( _table && _table.tableId == updateInfo.tid )
 			{
 				_table.updateTableSettings(updateInfo.itimes, updateInfo.rated);
+			}
+		}
+
+		private function _processEvent_RESET(event:Message) : void
+		{
+			if ( event.getCode() != 0 ) { return; }
+
+			const tableId:String = event.getContent();
+			if ( _table && _table.tableId == tableId )
+			{
+				_table.resetTable();
 			}
 		}
 
