@@ -112,8 +112,9 @@
 
 			_updatePlayButtons();
 
-			// By default, reverse the view if I play BLACK.
-			if ( Global.player.pid == _blackId )
+			// By default, make sure that if I play BLACK, the BLACK side is
+			// at the bottom of the board.
+			if ( Global.player.pid == _blackId && _isBlackAtTopSide() )
 			{
 				_reverseView();
 			}
@@ -146,6 +147,17 @@
 		}
 
 		/**
+		 * Handle the event in which this Table is reset..
+		 */
+		public function onReset() : void
+		{
+			updateTimers( "Red",   _table.getTimers("Red")   );
+			updateTimers( "Black", _table.getTimers("Black") );
+
+			board.reset();
+		}
+
+		/**
 		 * Find a given Player in the Player-List DataGrid.
 		 * @return INVALID_INDEX if the Player is not in the list.
 		 */
@@ -160,6 +172,15 @@
 			}
 
 			return INVALID_INDEX; // "Not found".
+		}
+
+		/**
+		 * This helper function determines whether the Black side is displayed
+		 * at the top of the board.
+		 */
+		private function _isBlackAtTopSide() : Boolean
+		{
+			return ( boardBox.getChildIndex(blackBox) == 0 );
 		}
 
 		private function _updatePlayButtons() : void

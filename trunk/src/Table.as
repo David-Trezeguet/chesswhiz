@@ -17,15 +17,15 @@
 		private var _redPlayer:PlayerInfo   = null;
 		private var _blackPlayer:PlayerInfo = null;
 
-		private var _inReviewMode:Boolean = false;
-
 		private var _redTimes:GameTimers   = new GameTimers();
 		private var _blackTimes:GameTimers = new GameTimers();
 		private var _redClock:Timer        = new Timer(1000 /* 1s interval */);
 		private var _blackClock:Timer      = new Timer(1000 /* 1s interval */);
 
+		private var _inReviewMode:Boolean = false;
 		private var _moveList:Array = [];
 		private var _curMoveIndex:int = -1;
+
 		private var _settings:Object;
 		private var _curPref:Object;
 
@@ -152,12 +152,38 @@
 				_view.displayMessage("Type: " + (bRated ? "Rated" : "Nonrated"));
 			}
 		}
-	
+
+		public function resetTable() : void
+		{
+			_stopTimers();
+			_redTimes.resetAll();
+			_blackTimes.resetAll();
+
+			_inReviewMode = false;
+			_moveList = [];
+			_curMoveIndex = -1;
+
+			_view.onReset();
+
+			/* Get the Table in the "ready" state if there are enough players. */
+
+			if ( _redPlayer && _redPlayer.pid == Global.player.pid ) {
+				Global.player.color = "Red";
+			} else if ( _blackPlayer && _blackPlayer.pid == Global.player.pid ) {
+				Global.player.color = "Black";
+			} else {
+				Global.player.color = "None";
+			}
+
+			if (   Global.player.color != "None" 
+				&& ( _redPlayer && _blackPlayer ) )
+			{
+				_view.board.enablePieceEvents(Global.player.color);
+			}
+		}
+
 		private function _startTimer() : void
 		{
-			_redClock.repeatCount = _redTimes.gameTime + _redTimes.extraTime;
-			_blackClock.repeatCount = _blackTimes.gameTime + _blackTimes.extraTime;
-
 			if (_view.board.nextColor() == "Red") { _redClock.start();   }
 			else                                  { _blackClock.start(); }
 		}
