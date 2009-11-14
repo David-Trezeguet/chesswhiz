@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:ApplicationControlBar xmlns:mx="http://www.adobe.com/2006/mxml"
-	fillAlphas="[1.0, 1.0]" fillColors="[#860B09, #C03D33]"
-	currentStateChange="onStateChange(event)">
-
-	<mx:Script>
-		<![CDATA[
-
-			import mx.events.StateChangeEvent;
-
-			public var tableId:String;
-			
-			private function onStateChange(event:StateChangeEvent):void
-			{
-				if (event.newState != "") {
-					playerIdLabel.text = Global.player.pid + " (" + Global.player.score + ")";
-				}
-			}
-			
-		]]>
-	</mx:Script>
+	fillAlphas="[1.0, 1.0]" fillColors="[#860B09, #C03D33]">
 
 	<mx:states>
 		<mx:State name="viewTablesState">

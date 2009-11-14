@@ -173,8 +173,6 @@
 			
 			_view.board.displayStatus("Game Over (" + reason + ")");
 			_stopTimers();
-
-			Global.app.showObserverMenu();
 		}
 		
 		public function drawGame(pid:String) : void
@@ -512,7 +510,6 @@
 				&& ( _redPlayer && _blackPlayer ) )
 			{
 				_view.board.enablePieceEvents(Global.player.color);
-				Global.app.showObserverMenu();
 			}
 		}
 
@@ -556,7 +553,6 @@
 			if (nMoves == 1)
 			{
 				_view.enableReviewButtons(true);
-				Global.app.showObserverMenu();
 			}
 			else if (nMoves == 2)
 			{
