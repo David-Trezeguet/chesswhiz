@@ -88,6 +88,15 @@
 			};
 		}
 
+		public function createResetRequest(pid:String, sid:String, tableId:String):void {
+			this.optype = "RESET";
+			this.params = {
+				pid: pid,
+				sid: sid,
+				tid: tableId
+			};
+		}
+
 		public function createChatRequest(pid:String, sid:String, tableId:String, msg:String):void {
 			this.optype = "MSG";
 			this.params = {

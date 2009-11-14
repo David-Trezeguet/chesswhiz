@@ -8,7 +8,7 @@
 	 */
 	public final class Global
 	{
-		public static const VERSION:String    = "0.9.6.1";
+		public static const VERSION:String    = "0.9.6.2";
 
 		/**
 		 * The reference to the global Application.
@@ -84,6 +84,10 @@
 		[Embed(source="assets/settings.png")]
 		[Bindable]
 		static public var settingsImageClass:Class;
+
+		[Embed(source="assets/reset.png")]
+		[Bindable]
+		static public var resetImageClass:Class;
 
 		[Embed(source="assets/white_flag.png")]
 		[Bindable]
