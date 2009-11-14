@@ -10,9 +10,9 @@
 	
 	public class Table
 	{
-		public var tableId:String;
+		public var tableId:String = "";
 
-		private var _view:TableBoard  = new TableBoard();
+		private var _view:TableBoard  = null;
 
 		private var _redPlayer:PlayerInfo   = null;
 		private var _blackPlayer:PlayerInfo = null;
@@ -29,20 +29,56 @@
 		private var _settings:Object;
 		private var _curPref:Object;
 
-		public function Table(tableId:String, preferences:Object, settings:Object)
+		public function Table(tableId:String, preferences:Object, view:TableBoard)
 		{
 			this.tableId = tableId;
 
 			_redClock.addEventListener(TimerEvent.TIMER, _timerHandler);
 			_blackClock.addEventListener(TimerEvent.TIMER, _timerHandler);
 
-			_settings = settings;
+			_settings =
+				{
+					"gametime"  : 0,
+					"movetime"  : 0,
+					"extratime" : 0,
+					"rated"     : false
+				};
+
 			_curPref  = preferences;
+			
+			_view = view;
 		}
+
+		public function valid() : Boolean { return tableId != ""; }
+		public function setTableId(id:String) : void { tableId = id; }
+
+		public function setSettings(settings:Object) : void { _settings = settings; }
 
 		public function getTimers(color:String) : GameTimers
 		{
 			return ( color == "Red" ? _redTimes : _blackTimes );
+		}
+
+		public function displayEmptyTable() : void
+		{
+			_redPlayer = null;
+			_blackPlayer = null;
+			_stopTimers();
+			_redTimes.clearAll();
+			_blackTimes.clearAll();
+
+			_inReviewMode = false;
+			_moveList = [];
+			_curMoveIndex = -1;
+
+			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
+			_view.onReset();
+
+			_view.board.disablePieceEvents("Red");
+			_view.board.disablePieceEvents("Black");
+			
+			_view.board.displayEmptyStatus();
+			_view.showCloseButton = false;
 		}
 
 		/**
@@ -53,11 +89,25 @@
 		 */
 		public function newTable(tableInfo:Object) : void
 		{
+			/////////////////////////////////////
+			_stopTimers();
 			_redTimes.initWithTimes(tableInfo.initialtime, tableInfo.redtime);
 			_blackTimes.initWithTimes(tableInfo.initialtime, tableInfo.blacktime);
 
-			Global.app.addBoardToWindow(_view); // Realize the UI first!
+			_redPlayer = null;
+			_blackPlayer = null;
+
+			_inReviewMode = false;
+			_moveList = [];
+			_curMoveIndex = -1;
+
 			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
+			_view.onReset();
+			_view.showCloseButton = true;
+
+			_view.board.disablePieceEvents("Red");
+			_view.board.disablePieceEvents("Black");
+			////////////////////////////////////////
 			
 			if ( tableInfo.redid != "" )
 			{
@@ -318,7 +368,7 @@
 			// Upon reaching here, the Move has been determined to be valid.
 			Global.app.playMoveSound();
 			_view.board.onNewMove();
-			Global.app.doSendMove(piece, curPos, newPos, this.tableId);
+			Global.app.doSendMove(piece, curPos, newPos);
 		}
 
 		/**
@@ -448,18 +498,17 @@
 				}
 			}
 
-			var bMyColorChanged:Boolean = false;
 			if ( player.pid == Global.player.pid  )
 			{
 				Global.player.color = player.color;
-				bMyColorChanged = true;
 			}
 
 			_view.onPlayerJoined(player);
 
 			/* Start the Game if there are enough players. */
 
-			if (    bMyColorChanged && Global.player.color != "None"
+			if (   player.color != "None"
+				&& Global.player.color != "None"
 				&& ( _redPlayer && _blackPlayer ) )
 			{
 				_view.board.enablePieceEvents(Global.player.color);
@@ -542,7 +591,7 @@
 			{
 				const itimes:String = newSettings["gametime"]
 					+ "/" + newSettings["movetime"] + "/" + newSettings["extratime"];
-				Global.app.doUpdateTableSettings(this.tableId, itimes, newSettings["rated"]);
+				Global.app.doUpdateTableSettings(itimes, newSettings["rated"]);
 			}
 		}
 
