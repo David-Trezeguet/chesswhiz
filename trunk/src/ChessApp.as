@@ -13,16 +13,17 @@
 	import mx.utils.ObjectUtil;
 	
 	import ui.LoginPanel;
+	import ui.PlayerListPanel;
 	import ui.TableBoard;
 	import ui.TableList;
 	import ui.TablePreferences;
-	import ui.TableSettings;
 	import ui.TopControlBar;
 
 	public class ChessApp
 	{
 		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
+		private var _playerWindow:PlayerListPanel;
 		private var _moveSound:Sound = new Global.moveSoundClass() as Sound;
 
 		private var _preferences:Object;
@@ -35,10 +36,11 @@
 		private var _requestingTable:Boolean = false;
 		private var _table:Table      = null;  // THE table.
 
-		public function ChessApp(menu:TopControlBar, window:Container)
+		public function ChessApp(menu:TopControlBar, window:Container, playersPanel:PlayerListPanel)
 		{
 			_menu       = menu;
 			_mainWindow = window;
+			_playerWindow = playersPanel;
 
 			_preferences = {
 					"pieceskin"  : 1,
@@ -125,6 +127,8 @@
 			Global.player.color = "None";
 			_table = null;
 			_mainWindow.removeAllChildren();
+			_playerWindow.visible = false;
+			_playerWindow.includeInLayout = false;
 		}
 
 		public function addBoardToWindow(board:TableBoard) : void
@@ -297,6 +301,7 @@
 				const msg:Message = new Message( "op" + line[0] );
 
 				if      (msg.optype == "LOGIN")   { _processEvent_LOGIN(msg);  }
+				else if (msg.optype == "I_PLAYERS") { _processEvent_I_PLAYERS(msg); }
 				else if (msg.optype == "LIST")    { _processEvent_LIST(msg);   }
 				else if (msg.optype == "I_TABLE") { _processEvent_I_TABLE(msg);}
 				else if (msg.optype == "E_JOIN")  { _processEvent_E_JOIN(msg); }
@@ -331,23 +336,42 @@
 				Global.player.score = loginInfo.score;
 				_session.setSid( loginInfo.sid );
 				_loginFailReason = "";
+				_playerWindow.visible = true;
+				_playerWindow.includeInLayout = true;
 				this.doViewTables(); // By default, get the List of Tables.
 			}
 			else
 			{
 				trace("Other LOGIN = " + loginInfo.pid + "(" + loginInfo.score + ")");
 			}
+
+			_playerWindow.addPlayer( loginInfo.pid, loginInfo.score );
 		}
 
 		private function _processEvent_LOGOUT(event:Message) : void
 		{
+			if ( event.getCode() != 0 ) { return; }
+
+			const playerId:String = event.getContent(); 
 			if (    _session.getSid() != ""
-				 && event.getCode() == 0
-				 && event.getContent() == _playerId )
+				 && playerId == _playerId )
 			{
 				_stopApp();
 			}
+			else
+			{
+				_playerWindow.removePlayer( playerId );
+			}
         }
+
+		private function _processEvent_I_PLAYERS(event:Message) : void
+		{
+			const players:Object = event.parse_I_PLAYERS();
+			for each (var player:Object in players)
+			{
+				_playerWindow.addPlayer( player.pid, player.score );
+			}
+		}
 
 		private function _processEvent_LIST(event:Message) : void
 		{

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical">
+
+	<mx:Script>
+		<![CDATA[
+			import hoxserver.PlayerInfo;
+			import mx.collections.ArrayCollection;
+
+			public static const INVALID_INDEX:int = -1;
+
+			[Bindable]
+			private var _playerList:ArrayCollection = new ArrayCollection();
+
+			/**
+			 * Add a player to the list.
+			 * @return true if the player just joined the list.
+			 */
+			public function addPlayer(pid:String, score:String) : Boolean
+			{
+				const playerIndex:int = _findPlayerIndexInList(pid);
+				if ( playerIndex == INVALID_INDEX )  // Not yet in the list?
+				{
+					var playerRow:Object = { "pid"    : pid,
+											 "rating" : score
+										   };
+					_playerList.addItem(playerRow);
+				}
+				else // Already in the list, update the Rating then.
+				{
+					var foundPlayer:Object = _playerList.getItemAt(playerIndex);
+					foundPlayer["Rating"] = score;
+				}
+				return (playerIndex == INVALID_INDEX);
+			}
+
+			/**
+			 * Remove a player from the list.
+			 * @return true if the player was removed in the list.
+			 */
+			public function removePlayer(playerId:String) : Boolean
+			{
+				const playerIndex:int = _findPlayerIndexInList(playerId);
+				if ( playerIndex != INVALID_INDEX )  // Found?
+				{
+					_playerList.removeItemAt(playerIndex);
+					return true;
+				}
+				return false;
+			}
+
+			/**
+			 * Find a given Player in the Player-List DataGrid.
+			 * @return INVALID_INDEX if the Player is not in the list.
+			 */
+			private function _findPlayerIndexInList(playerId:String) : int
+			{
+				for (var i:int = 0; i < _playerList.length; ++i)
+				{
+					if ( _playerList[i]["pid"] == playerId )
+					{
+						return i;
+					}
+				}
+
+				return INVALID_INDEX; // "Not found".
+			}
+
+		]]>
+	</mx:Script>
+
+	<mx:DataGrid id="playerDataGrid" dataProvider="{_playerList}" width="100%" height="100%">
+		<mx:columns>
+			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Id')}"
+				dataField="pid" width="60"/>
+			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Rating')}"
+				dataField="rating" width="30"/>
+		</mx:columns>
+	</mx:DataGrid>
+
+</mx:Panel>

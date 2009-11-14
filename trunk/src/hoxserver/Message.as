@@ -256,6 +256,20 @@
 				};
 		}
 
+		public function parse_I_PLAYERS() : Object
+		{
+			var players:Array = [];
+			const entries:Array = this.params.content.split('\n');
+			for each (var entry:String in entries)
+			{
+				if ( entry == "" ) { continue; }
+				const fields:Array = entry.split(';');
+				players.push( { pid  : fields[0],
+								score : fields[1] } );
+			}
+			return players;
+		}
+
 		public function parse_I_TABLE() : Object
 		{
 			return _helper_parse_I_TABLE( params.content );

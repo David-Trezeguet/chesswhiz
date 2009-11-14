@@ -24,9 +24,6 @@
 		private var _redId:String    = "";
 		private var _blackId:String  = "";
 
-		[Bindable]
-		private var _playerList:ArrayCollection = new ArrayCollection();
-
 		private function init() : void
 		{
 			infoPanel.title           = resourceManager.getString('localization', 'Information');
@@ -68,16 +65,8 @@
 		 */
 		public function onPlayerJoined(player:PlayerInfo) : void
 		{
-			/* TODO: Need to handle the case in which the player's Rating is changed. */
-
-			const playerIndex:int = _findPlayerIndexInList(player.pid);
-			if ( playerIndex == INVALID_INDEX )  // Not yet in the list?
+			if ( playersPanel.addPlayer(player.pid, player.score) ) // newly joined?
 			{
-				var playerRow:Object = {
-						"pid"    : player.pid,
-						"rating" : player.score
-					};
-				_playerList.addItem(playerRow);
 				this.displayMessage(player.pid + " joined");
 			}
 
@@ -126,10 +115,8 @@
 		 */
 		public function onPlayerLeft(playerId:String) : void
 		{
-			const playerIndex:int = _findPlayerIndexInList(playerId);
-			if ( playerIndex != INVALID_INDEX )  // Found?
+			if ( playersPanel.removePlayer(playerId) ) // removed from list?
 			{
-				_playerList.removeItemAt(playerIndex);
 				this.displayMessage(playerId + " left");
 			}
 
@@ -156,23 +143,6 @@
 			updateTimers( "Black", _table.getTimers("Black") );
 
 			board.reset();
-		}
-
-		/**
-		 * Find a given Player in the Player-List DataGrid.
-		 * @return INVALID_INDEX if the Player is not in the list.
-		 */
-		private function _findPlayerIndexInList(playerId:String) : int
-		{
-			for (var i:int = 0; i < _playerList.length; ++i)
-			{
-				if ( _playerList[i]["pid"] == playerId )
-				{
-					return i;
-				}
-			}
-
-			return INVALID_INDEX; // "Not found".
 		}
 
 		/**
@@ -364,14 +334,7 @@
 	<mx:Spacer width="0" />
 
 	<mx:VBox height="100%" width="100%">
-		<mx:DataGrid id="playerDataGrid" dataProvider="{_playerList}" width="100%" height="120">
-			<mx:columns>
-				<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Id')}"
-					dataField="pid" width="60"/>
-				<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Rating')}"
-					dataField="rating" width="30"/>
-			</mx:columns>
-		</mx:DataGrid>
+		<cwui:PlayerListPanel id="playersPanel" title="Players" width="100%" height="160"/>
 		<mx:VDividedBox width="100%" height="100%">
 			<mx:Panel id="infoPanel" title="Information" width="100%" height="230" layout="vertical">
 				<mx:TextArea id="taMessages" width="100%" height="100%" editable="false" />
