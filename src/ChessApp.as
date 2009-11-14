@@ -18,11 +18,9 @@
 	import ui.TableBoard;
 	import ui.TableList;
 	import ui.TablePreferences;
-	import ui.TopControlBar;
 
 	public class ChessApp
 	{
-		private var _menu:TopControlBar;
 		private var _mainWindow:Container;
 		private var _playerWindow:PlayerListPanel;
 		private var _moveSound:Sound = new Global.moveSoundClass() as Sound;
@@ -34,16 +32,15 @@
 		private var _session:Session  = new Session();
 		private var _loginFailReason:String = "";
 
-		private var _requestingTable:Boolean = false;
 		private var _table:Table      = null;  // THE table.
 
-		public function ChessApp(menu:TopControlBar, window:Container, playersPanel:PlayerListPanel)
+		public function ChessApp(window:Container, playersPanel:PlayerListPanel)
 		{
-			_menu       = menu;
 			_mainWindow = window;
 			_playerWindow = playersPanel;
 
-			_preferences = {
+			_preferences =
+				{
 					"pieceskin"  : 1,
 					"boardcolor" : 0x333333,
 					"linecolor"  : 0xa09e9e,
@@ -136,7 +133,6 @@
 		public function processSocketConnectEvent() : void
 		{
 			trace("Connection to server established.");
-			_menu.currentState = "";
 
 			Application.application.currentState = "loginState";
 			var loginPanel:LoginPanel = Application.application.mainWindow.getChildAt(0);
@@ -177,7 +173,6 @@
 			if ( _table.valid() )
 			{
 				_session.sendLeaveRequest(_playerId, _table.tableId);
-				_requestingTable = true;
 			}
 			_session.sendNewTableRequest(_playerId, "Red", "1200/240/20");
 		}
@@ -189,7 +184,6 @@
 				if ( _table.tableId != tableId )
 				{
 					_session.sendLeaveRequest(_playerId, _table.tableId);
-					_requestingTable = true;
 				}
 				else if (_table.isPlayerPlaying(_playerId) )
 				{
@@ -247,8 +241,6 @@
 				_session.sendUpdateTableRequest(_playerId, _table.tableId, itimes, bRated);
 			}
 		}
-
-		public function showObserverMenu() : void { _menu.currentState = "observerState"; }
 
 		public function changeAppPreferences() : void
 		{
@@ -320,7 +312,7 @@
 				_startApp();
 				return;
 			}
-			
+
 			const loginInfo:Object = event.parse_LOGIN();
 			if ( loginInfo.pid == _playerId ) // My own Login success?
 			{
@@ -331,8 +323,8 @@
 				_session.setSid( loginInfo.sid );
 				_loginFailReason = "";
 				
-				_menu.currentState = "observerState";
 				Application.application.currentState = "";
+				Application.application.setPlayerLabel( loginInfo.pid + " (" + loginInfo.score + ")" );
 				
 				_table.displayEmptyTable();
 				doViewTables(); // By default, get the List of Tables.
@@ -405,11 +397,6 @@
 				_table.setSettings( settings );
 			}
 
-			if ( _requestingTable )
-			{
-				_requestingTable = false;
-			}
-
 			_table.newTable(tableInfo);
 		}
 
@@ -466,8 +453,7 @@
 			if ( _table.tableId == leaveInfo.tid )
 			{
 				_table.leaveTable(leaveInfo.pid);
-				if (    _playerId == leaveInfo.pid
-				     && _requestingTable == false )
+				if (    _playerId == leaveInfo.pid )
 				{
 					_table.setTableId("");
 					_table.displayEmptyTable();
