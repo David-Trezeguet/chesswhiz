@@ -38,6 +38,7 @@
 			blackPlayButton.label     = resourceManager.getString('localization', 'Play_BLACK');
 			reverseViewButton.toolTip = resourceManager.getString('localization', 'Reverse_View');
 			settingsButton.toolTip    = resourceManager.getString('localization', 'Table_Settings');
+			resetButton.toolTip       = resourceManager.getString('localization', 'Reset_table');
 		}
 
 		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
@@ -252,6 +253,11 @@
 			Global.app.doDrawTable();
 		}
 
+		public function onResetButton(event:Event) : void
+		{
+			Global.app.doResetTable();
+		}
+
 		public function onPlayButton(event:Event) : void
 		{
 			Global.app.doJoinTable( _table.tableId,
@@ -345,6 +351,8 @@
 				icon="{Global.reverseImageClass}"/>
 			<mx:Button id="settingsButton" click="onSettingsButton(event)" 
 				icon="{Global.settingsImageClass}"/>
+			<mx:Button id="resetButton" click="onResetButton(event)" 
+				icon="{Global.resetImageClass}"/>
 			<mx:Spacer width="100%" />
 			<mx:Button id="resignButton" label="Resign" click="onResignButton(event)"
 				icon="{Global.whiteFlagImageClass}"/>

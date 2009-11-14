@@ -115,6 +115,12 @@
 			_sendRequest(req);
 		}
 
+		public function sendResetRequest(pid:String, tid:String):void {
+			var req:Message = new Message();
+			req.createResetRequest(pid, _sid, tid);
+			_sendRequest(req);
+		}
+
 		public function sendChatRequest(pid:String, tid:String, msg:String):void {
 			var req:Message = new Message();
 			req.createChatRequest(pid, _sid, tid, msg);

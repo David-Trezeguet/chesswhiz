@@ -221,6 +221,13 @@
 			}
 		}
 
+		public function doResetTable() : void
+		{
+			if ( _table ) {
+				_session.sendResetRequest(_playerId, _table.tableId);
+			}
+		}
+
 		public function doTableChat(msg:String) : void
 		{
 			if ( _table ) {
