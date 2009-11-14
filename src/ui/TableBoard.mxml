@@ -44,6 +44,15 @@
 			_table = table;
 			board.setTable(_table);
 			board.drawBoardAndPieces(bgColor, lineColor, pieceSkin);
+			
+			// Clear old state.
+			_redId = "";
+			redLabel.text = "";
+			_blackId = "";
+			blackLabel.text = "";
+			playersPanel.removeAllPlayers();
+			taMessages.text = "";
+			chatArea.text = "";
 		}
 
 		private function _reverseView() : void
@@ -141,6 +150,8 @@
 		{
 			updateTimers( "Red",   _table.getTimers("Red")   );
 			updateTimers( "Black", _table.getTimers("Black") );
+			
+			_updatePlayButtons();
 
 			board.reset();
 		}

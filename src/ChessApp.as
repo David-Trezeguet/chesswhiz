@@ -8,6 +8,7 @@
 	
 	import hoxserver.*;
 	
+	import mx.core.Application;
 	import mx.core.Container;
 	import mx.managers.PopUpManager;
 	import mx.utils.ObjectUtil;
@@ -51,6 +52,8 @@
 			_loadPreferencesFromLocalSharedObject();
 
 			Global.player = new PlayerInfo("", "None", "0");
+
+			_table = new Table("", _preferences, Application.application.mainBoard);
 
 			_startApp();
 		}
@@ -125,17 +128,9 @@
 			Global.player.pid = "";
 			Global.player.score = "0";
 			Global.player.color = "None";
-			_table = null;
-			_mainWindow.removeAllChildren();
-			_playerWindow.visible = false;
-			_playerWindow.includeInLayout = false;
-		}
+			_table.setTableId("");
 
-		public function addBoardToWindow(board:TableBoard) : void
-		{
-			_mainWindow.removeAllChildren();
-			_mainWindow.addChild(board);
-			_menu.currentState = "observerState";
+			Application.application.currentState = "loginState";
 		}
 
 		public function processSocketConnectEvent() : void
@@ -143,9 +138,9 @@
 			trace("Connection to server established.");
 			_menu.currentState = "";
 
-			var loginPanel:LoginPanel = new LoginPanel();
+			Application.application.currentState = "loginState";
+			var loginPanel:LoginPanel = Application.application.mainWindow.getChildAt(0);
 			loginPanel.errorString = _loginFailReason;
-			_mainWindow.addChild(loginPanel);
 		}
 
 		public function processSocketCloseEvent() : void
@@ -179,7 +174,7 @@
 
 		public function doNewTable() : void
 		{
-			if ( _table )
+			if ( _table.valid() )
 			{
 				_session.sendLeaveRequest(_playerId, _table.tableId);
 				_requestingTable = true;
@@ -189,7 +184,7 @@
 		
 		public function doJoinTable(tableId:String, color:String = "None") : void
 		{
-			if ( _table )
+			if ( _table.valid() )
 			{
 				if ( _table.tableId != tableId )
 				{
@@ -201,55 +196,55 @@
 					_session.sendJoinRequest(_playerId, tableId, "None");
 				}
 			}
-			_session.sendJoinRequest(_playerId, tableId, color);
+			_session.sendJoinRequest(_playerId, tableId, color); // TODO: May send twice!
 		}
 
 		public function doCloseTable() : void
 		{
-			if ( _table ) {
+			if ( _table.valid() ) {
 				_session.sendLeaveRequest(_playerId, _table.tableId);
 			}
 		}
 
 		public function doResignTable() : void
 		{
-			if ( _table ) {
+			if ( _table.valid() ) {
 				_session.sendResignRequest(_playerId, _table.tableId);
 			}
 		}
 
 		public function doDrawTable() : void
 		{
-			if ( _table ) {
+			if ( _table.valid() ) {
 				_session.sendDrawRequest(_playerId, _table.tableId);
 			}
 		}
 
 		public function doResetTable() : void
 		{
-			if ( _table ) {
+			if ( _table.valid() ) {
 				_session.sendResetRequest(_playerId, _table.tableId);
 			}
 		}
 
 		public function doTableChat(msg:String) : void
 		{
-			if ( _table ) {
+			if ( _table.valid() ) {
 				_session.sendChatRequest(_playerId, _table.tableId, msg);
 			}
 		}
 
-		public function doSendMove(piece:Piece, curPos:Position, newPos:Position, tid:String) : void
+		public function doSendMove(piece:Piece, curPos:Position, newPos:Position) : void
 		{
-			if ( _table && _table.tableId == tid ) {
-				_session.sendMoveRequest(_playerId, curPos, newPos, tid);
+			if ( _table.valid() ) {
+				_session.sendMoveRequest(_playerId, curPos, newPos, _table.tableId);
 			}
 		}
 
-		public function doUpdateTableSettings(tid:String, itimes:String, bRated:Boolean) : void
+		public function doUpdateTableSettings(itimes:String, bRated:Boolean) : void
 		{
-			if ( _table && _table.tableId == tid ) {
-				_session.sendUpdateTableRequest(_playerId, tid, itimes, bRated);
+			if ( _table.valid() ) {
+				_session.sendUpdateTableRequest(_playerId, _table.tableId, itimes, bRated);
 			}
 		}
 
@@ -275,9 +270,8 @@
 			if ( preferencesPanel != null )
 			{
 				const pref:Object = preferencesPanel.preferences;
-				if (_table) {
-					_table.updatePreferences(pref);
-				}
+				_table.updatePreferences(pref);
+
 				for (var key:String in pref) {
 					_preferences[key] = pref[key];
 				}
@@ -336,9 +330,12 @@
 				Global.player.score = loginInfo.score;
 				_session.setSid( loginInfo.sid );
 				_loginFailReason = "";
-				_playerWindow.visible = true;
-				_playerWindow.includeInLayout = true;
-				this.doViewTables(); // By default, get the List of Tables.
+				
+				_menu.currentState = "observerState";
+				Application.application.currentState = "";
+				
+				_table.displayEmptyTable();
+				doViewTables(); // By default, get the List of Tables.
 			}
 			else
 			{
@@ -381,24 +378,12 @@
 
 			var tableListPanel:TableList = new TableList();
 			tableListPanel.setTableList(tables);
-
-			if (   _menu.currentState == null || _menu.currentState == ""
-				|| _menu.currentState == "viewTablesState" )
+			if ( _table.valid() && _table.isPlayerPlaying(_playerId) )
 			{
-				_mainWindow.removeAllChildren();
-				tableListPanel.showCloseButton = false;
-				_mainWindow.addChild(tableListPanel);
-				_menu.currentState = "viewTablesState";
+				tableListPanel.joinActionEnabled = false;
 			}
-			else
-			{
-				if ( _table && _table.isPlayerPlaying(_playerId) )
-				{
-					tableListPanel.joinActionEnabled = false;
-				}
-				PopUpManager.addPopUp(tableListPanel, _mainWindow, true /* modal */);
-				PopUpManager.centerPopUp(tableListPanel);
-			}
+			PopUpManager.addPopUp(tableListPanel, _mainWindow, true /* modal */);
+			PopUpManager.centerPopUp(tableListPanel);
 		}
 
 		private function _processEvent_I_TABLE(event:Message) : void
@@ -407,7 +392,7 @@
 
 			const tableInfo:Object = event.parse_I_TABLE();
 
-			if ( _table == null || _table.tableId != tableInfo.tid )
+			if ( _table.tableId != tableInfo.tid )
 			{
 				const initialTimer:Object = GameTimers.parse_times(tableInfo.initialtime);
 				const settings:Object = {
@@ -416,7 +401,8 @@
 						"extratime" : initialTimer.extratime,
 						"rated"     : tableInfo.rated
 					};
-				_table = new Table(tableInfo.tid, _preferences, settings);
+				_table.setTableId( tableInfo.tid );
+				_table.setSettings( settings );
 			}
 
 			if ( _requestingTable )
@@ -433,7 +419,7 @@
 
 			const joinInfo:Object = event.parse_E_JOIN();
 
-			if ( _table && _table.tableId == joinInfo.tid )
+			if ( _table.tableId == joinInfo.tid )
 			{
 				_table.joinTable( new PlayerInfo(joinInfo.pid, joinInfo.color, joinInfo.score) );
 			}
@@ -441,7 +427,7 @@
 		
 		private function _processEvent_MOVE(event:Message) : void
 		{
-			if ( ! _table ) {
+			if ( ! _table.valid() ) {
 				return;
 			}
 
@@ -466,7 +452,7 @@
 		private function _processEvent_I_MOVES(event:Message) : void
 		{
 			const moveList:Object = event.parse_I_MOVES();
-			if (_table && _table.tableId == moveList.tid)
+			if (_table.tableId == moveList.tid)
 			{
 				_table.playMoveList(moveList.moves);
 			}
@@ -477,16 +463,14 @@
 			if ( event.getCode() != 0 ) { return; }
 
 			const leaveInfo:Object = event.parse_LEAVE();
-			if ( _table && _table.tableId == leaveInfo.tid )
+			if ( _table.tableId == leaveInfo.tid )
 			{
 				_table.leaveTable(leaveInfo.pid);
 				if (    _playerId == leaveInfo.pid
 				     && _requestingTable == false )
 				{
-					_table = null;
-					_mainWindow.removeAllChildren();
-					_menu.currentState = "viewTablesState";
-					doViewTables();
+					_table.setTableId("");
+					_table.displayEmptyTable();
 				}
 			}
 		}
@@ -496,7 +480,7 @@
 			if ( event.getCode() != 0 ) { return; }
 
 			const endEvent:Object = event.parse_E_END();
-			if ( _table && _table.tableId == endEvent.tid )
+			if ( _table.tableId == endEvent.tid )
 			{
 				_table.stopGame(endEvent.reason, endEvent.winner);
 			}
@@ -507,7 +491,7 @@
 			if ( event.getCode() != 0 ) { return; }
 
 			const drawEvent:Object = event.parse_DRAW();
-			if ( _table && _table.tableId == drawEvent.tid )
+			if ( _table.tableId == drawEvent.tid )
 			{
 				_table.drawGame(drawEvent.pid);
 			}
@@ -529,7 +513,7 @@
 				// TODO: Need to handle private messages.
 				trace("[" + msgInfo.pid + "]: sent a private message [" + msgInfo.msg + "]");
 			}
-			else if ( _table && _table.tableId == msgInfo.tid )
+			else if ( _table.tableId == msgInfo.tid )
 			{
 				_table.displayChatMessage(msgInfo.pid, msgInfo.msg);
 			}
@@ -540,7 +524,7 @@
 			if ( event.getCode() != 0 ) { return; }
 
 			const updateInfo:Object = event.parse_UPDATE();
-			if ( _table && _table.tableId == updateInfo.tid )
+			if ( _table.tableId == updateInfo.tid )
 			{
 				_table.updateTableSettings(updateInfo.itimes, updateInfo.rated);
 			}
@@ -551,7 +535,7 @@
 			if ( event.getCode() != 0 ) { return; }
 
 			const tableId:String = event.getContent();
-			if ( _table && _table.tableId == tableId )
+			if ( _table.tableId == tableId )
 			{
 				_table.resetTable();
 			}

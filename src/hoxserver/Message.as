@@ -284,7 +284,7 @@
 				const entry:String = entries[i];
 				if (entry != "")
 				{
-				    trace("table entry: " + entry);
+				    //trace("table entry: " + entry);
 					var table:Object = _helper_parse_I_TABLE(entry);
 					tables[table.tid] = table;
 				}

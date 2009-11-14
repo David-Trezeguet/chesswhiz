@@ -4,7 +4,18 @@
 	layout="absolute" backgroundGradientColors="[#000000, #ffffff]"
 	initialize="init()"
 	applicationComplete="initComplete()"
-	viewSourceURL="srcview/index.html">
+	viewSourceURL="srcview/index.html"
+	currentState="loginState">
+
+	<mx:states>
+		<mx:State name="loginState">
+			<mx:AddChild relativeTo="{mainWindow}" position="lastChild">
+				<cwui:LoginPanel/>
+			</mx:AddChild>
+			<mx:RemoveChild target="{allPlayersPanel}"/>
+			<mx:RemoveChild target="{mainBoard}"/>
+		</mx:State>
+	</mx:states>
 
 	<mx:Script>	
 		<![CDATA[
@@ -37,10 +48,10 @@
 
     <cwui:TopControlBar id="topControlBar" dock="true"/>
     <mx:HBox horizontalCenter="0" top="5" verticalAlign="middle">
-    	<cwui:PlayerListPanel id="allPlayersPanel" title="All players"
-    		visible="false" includeInLayout="false" width="220" height="720"
-    	/>
-    	<mx:VBox id="mainWindow" verticalAlign="middle"/>
+    	<cwui:PlayerListPanel id="allPlayersPanel" title="All players" width="220" height="720"/>
+    	<mx:VBox id="mainWindow" verticalAlign="middle" width="880" height="720">
+    		<cwui:TableBoard id="mainBoard"/>
+    	</mx:VBox>
     </mx:HBox>
 
 </mx:Application>

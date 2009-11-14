@@ -49,6 +49,14 @@
 			}
 
 			/**
+			 * Remove all players..
+			 */
+			public function removeAllPlayers() : void
+			{
+				_playerList.removeAll();
+			}
+
+			/**
 			 * Find a given Player in the Player-List DataGrid.
 			 * @return INVALID_INDEX if the Player is not in the list.
 			 */

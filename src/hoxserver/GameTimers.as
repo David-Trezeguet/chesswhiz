@@ -55,6 +55,20 @@
 			this.extraTime = _initialExtraTime;
 		}
 
+		/**
+		 * Set the times to all zeros.
+		 */
+		public function clearAll() : void
+		{
+			_initialGameTime = 0;
+			_initialMoveTime = 0;
+			_initialExtraTime = 0;
+
+			this.gameTime = _initialGameTime;
+			this.moveTime = _initialMoveTime;
+			this.extraTime = _initialExtraTime;
+		}
+
 		public function decrementTime() : void
 		{
 			if      ( gameTime > 0 )  { --gameTime;  }
