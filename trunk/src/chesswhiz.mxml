@@ -14,7 +14,7 @@
 			</mx:AddChild>
 			<mx:RemoveChild target="{allPlayersPanel}"/>
 			<mx:RemoveChild target="{mainBoard}"/>
-			<mx:SetProperty target="{topControlBar}" name="currentState"/>
+			<mx:SetProperty target="{topControlBar}" name="currentState" value="loginState"/>
 		</mx:State>
 	</mx:states>
 
@@ -52,7 +52,7 @@
 		[ResourceBundle ("localization")]
 	</mx:Metadata>
 
-    <cwui:TopControlBar id="topControlBar" dock="true" currentState="observerState"/>
+    <cwui:TopControlBar id="topControlBar" dock="true"/>
     <mx:HBox id="appBox" horizontalCenter="0" top="5" verticalAlign="middle">
     	<cwui:PlayerListPanel id="allPlayersPanel" title="All players" width="220" height="720"/>
     	<mx:VBox id="mainWindow" width="880" height="720"

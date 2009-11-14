@@ -1,57 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:ApplicationControlBar xmlns:mx="http://www.adobe.com/2006/mxml"
 	fillAlphas="[1.0, 1.0]" fillColors="[#860B09, #C03D33]">
-
 	<mx:states>
-		<mx:State name="viewTablesState">
-			<mx:AddChild position="lastChild">
-				<mx:Button id="newTableButton"
-					label="{resourceManager.getString('localization', 'new_table')}"
-					icon="{Global.newImageClass}"
-					click="Global.app.doNewTable()"/>
-			</mx:AddChild>
-			<mx:AddChild position="lastChild">
-				<mx:Spacer width="100%" id="spacer1"/>
-			</mx:AddChild>
-			<mx:AddChild position="lastChild">
-				<mx:Button id="logoutButton"
-					label="{resourceManager.getString('localization', 'logout')}"
-					icon="{Global.logoutImageClass}"
-					click="Global.app.doLogout()"/>
-			</mx:AddChild>
-			<mx:AddChild position="lastChild">
-				<mx:Spacer id="spacer2"/>
-			</mx:AddChild>
-			<mx:AddChild relativeTo="{spacer2}" position="before">
-				<mx:Label id="playerIdLabel" text="[PLAYERID]"
-					fontFamily="Verdana" fontSize="12" color="0xa09e9e"/>
-			</mx:AddChild>
-			<mx:SetProperty target="{logoLabel}" name="x"/>
-			<mx:SetProperty target="{logoLabel}" name="y"/>
-			<mx:AddChild relativeTo="{newTableButton}" position="before">
-				<mx:Spacer width="20"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="observerState" basedOn="viewTablesState">
-			<mx:AddChild relativeTo="{logoutButton}" position="before">
-				<mx:Button id="preferencesButton"
-					label="{resourceManager.getString('localization', 'preferences')}"
-					icon="{Global.preferencesImageClass}"
-					click="Global.app.changeAppPreferences()"/>
-			</mx:AddChild>
-			<mx:AddChild relativeTo="{preferencesButton}" position="before">
-				<mx:Button id="ViewTablesButton"
-					label="{resourceManager.getString('localization', 'view_tables')}"
-					icon="{Global.listImageClass}"
-					click="Global.app.doViewTables();"/>
-			</mx:AddChild>
-			<mx:AddChild relativeTo="{preferencesButton}" position="before">
-				<mx:Spacer width="100%"/>
-			</mx:AddChild>
+		<mx:State name="loginState">
+			<mx:RemoveChild target="{spacer1}"/>
+			<mx:RemoveChild target="{preferencesButton}"/>
+			<mx:RemoveChild target="{spacer2}"/>
+			<mx:RemoveChild target="{newTableButton}"/>
+			<mx:RemoveChild target="{ViewTablesButton}"/>
+			<mx:RemoveChild target="{spacer3}"/>
+			<mx:RemoveChild target="{playerIdLabel}"/>
+			<mx:RemoveChild target="{logoutButton}"/>
 		</mx:State>
 	</mx:states>
 
 	<mx:Label id="logoLabel" text="PlayXiangqi"
 		fontFamily="Verdana" fontSize="18" color="#FFFFFF"/>
+	<mx:Spacer width="30" id="spacer1"/>
+	<mx:Button id="preferencesButton"
+				label="{resourceManager.getString('localization', 'preferences')}"
+				icon="{Global.preferencesImageClass}"
+				click="Global.app.changeAppPreferences()"/>
+	<mx:Spacer width="100%" id="spacer2"/>
+	<mx:Button id="newTableButton"
+		label="{resourceManager.getString('localization', 'new_table')}"
+		icon="{Global.newImageClass}"
+		click="Global.app.doNewTable()"/>
+	<mx:Button id="ViewTablesButton"
+		label="{resourceManager.getString('localization', 'view_tables')}"
+		icon="{Global.listImageClass}"
+		click="Global.app.doViewTables();"/>
+	<mx:Spacer width="100%" id="spacer3"/>
+	<mx:Label id="playerIdLabel" text="[PLAYERID]"
+		fontFamily="Verdana" fontSize="12" color="0xa09e9e"/>
+	<mx:Button id="logoutButton"
+		label="{resourceManager.getString('localization', 'logout')}"
+		icon="{Global.logoutImageClass}"
+		click="Global.app.doLogout()"/>
 	
 </mx:ApplicationControlBar>
