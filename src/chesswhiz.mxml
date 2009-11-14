@@ -25,7 +25,7 @@
 	
 	    private function initComplete() : void
 	    {
-			Global.app = new ChessApp(topControlBar, mainWindow);
+			Global.app = new ChessApp(topControlBar, mainWindow, allPlayersPanel);
 		}
 	
 	]]>
@@ -36,6 +36,11 @@
 	</mx:Metadata>
 
     <cwui:TopControlBar id="topControlBar" dock="true"/>
-	<mx:VBox id="mainWindow" horizontalCenter="0" top="5"/>
+    <mx:HBox horizontalCenter="0" top="5" verticalAlign="middle">
+    	<cwui:PlayerListPanel id="allPlayersPanel" title="All players"
+    		visible="false" includeInLayout="false" width="220" height="720"
+    	/>
+    	<mx:VBox id="mainWindow" verticalAlign="middle"/>
+    </mx:HBox>
 
 </mx:Application>
