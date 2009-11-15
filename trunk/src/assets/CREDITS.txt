@@ -1,4 +1,13 @@
-These images were downloaded from 
-http://www.everaldo.com/crystal/
 
+Most images were downloaded from the following:
+=============================================== 
+- http://www.everaldo.com/crystal/
+- http://tango.freedesktop.org
+
+Special notes:
+===============
 - move.mp3 - Its sampling rate is converted from 16K to 44.1K using Audacity. 
+- refresh.png - Extracted from the open source project svnX http://svnx.googlecode.com
+
+
+/////////////// END OF FILE //////////////////

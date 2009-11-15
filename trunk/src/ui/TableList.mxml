@@ -114,7 +114,7 @@
 	<mx:HBox horizontalAlign="right" width="100%" paddingTop="4" paddingBottom="4">
 		<mx:Button id="refreshButton"
 			label="{resourceManager.getString('localization', 'refresh')}"
-			icon="@Embed(source='../assets/reload.png')"
+			icon="@Embed(source='../assets/refresh.png')"
 			click="onRefresh(event)"/>
 		<mx:Spacer width="60"/>
 		<mx:Button id="joinButton"
