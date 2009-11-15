@@ -74,12 +74,11 @@
 		public function setTable(table:Table) : void { _table = table; }
 		public function getTable() : Table { return _table; }
 
-		public function drawBoardAndPieces(bgColor:uint, lineColor:uint, pieceSkin:int) : void
+		public function setPreferences(bgColor:uint, lineColor:uint, pieceSkin:int) : void
 		{
-			drawBoard(bgColor, lineColor);
-
+			_bgColor   = bgColor;
+			_lineColor = lineColor;
 			_pieceSkin = pieceSkin;
-			_displayPieces();	
 		}
 
 		public function reverseView() : void

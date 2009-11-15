@@ -190,7 +190,7 @@
 					_session.sendJoinRequest(_playerId, tableId, "None");
 				}
 			}
-			_session.sendJoinRequest(_playerId, tableId, color); // TODO: May send twice!
+			_session.sendJoinRequest(_playerId, tableId, color);
 		}
 
 		public function doCloseTable() : void

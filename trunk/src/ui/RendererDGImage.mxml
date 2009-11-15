@@ -4,6 +4,6 @@
 
     <mx:Image id="tableImage" height="22" buttonMode="true" width="22"
     	toolTip="{resourceManager.getString('localization', 'join_table')}"
-    	source="{data.imageClass}"/>
+    	source="{Global.goNextImageClass}"/>
 
 </mx:HBox>

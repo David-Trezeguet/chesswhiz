@@ -45,8 +45,9 @@
 				};
 
 			_curPref  = preferences;
-			
+
 			_view = view;
+			_view.setPreferences(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
 		}
 
 		public function valid() : Boolean { return tableId != ""; }
@@ -63,22 +64,18 @@
 		{
 			_redPlayer = null;
 			_blackPlayer = null;
-			_stopTimers();
 			_redTimes.clearAll();
 			_blackTimes.clearAll();
+			_stopTimers();
 
 			_inReviewMode = false;
 			_moveList = [];
 			_curMoveIndex = -1;
 
-			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
-			_view.onReset();
+			_view.clearDisplay();
 
 			_view.board.disablePieceEvents("Red");
 			_view.board.disablePieceEvents("Black");
-			
-			_view.board.displayEmptyStatus();
-			_view.showCloseButton = false;
 		}
 
 		/**
@@ -89,26 +86,13 @@
 		 */
 		public function newTable(tableInfo:Object) : void
 		{
-			/////////////////////////////////////
-			_stopTimers();
+			this.displayEmptyTable(); // Reset the previous table, if any.
+			
+			// Setup the Table with new table-info.
+
 			_redTimes.initWithTimes(tableInfo.initialtime, tableInfo.redtime);
 			_blackTimes.initWithTimes(tableInfo.initialtime, tableInfo.blacktime);
 
-			_redPlayer = null;
-			_blackPlayer = null;
-
-			_inReviewMode = false;
-			_moveList = [];
-			_curMoveIndex = -1;
-
-			_view.display(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
-			_view.onReset();
-			_view.showCloseButton = true;
-
-			_view.board.disablePieceEvents("Red");
-			_view.board.disablePieceEvents("Black");
-			////////////////////////////////////////
-			
 			if ( tableInfo.redid != "" )
 			{
 				_redPlayer = new PlayerInfo(tableInfo.redid, "Red", tableInfo.redscore);
