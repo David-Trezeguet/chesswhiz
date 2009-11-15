@@ -134,10 +134,13 @@
 			</mx:Canvas>
 		</mx:Panel>
 		<mx:Spacer height="100%"/>
-		<mx:HBox width="100%">
-			<mx:Spacer width="100%"/>
-			<mx:Button id="okButton" label="OK"  minWidth="70" click="onOK(event)"/>
-			<mx:Button id="cancelButton" label="Canel"  minWidth="70" click="PopUpManager.removePopUp(this);"/>
+		<mx:HBox width="100%" horizontalAlign="right">
+			<mx:Button id="cancelButton" label="Canel" minWidth="70"
+				icon="@Embed(source='../assets/button_cancel.png')"
+				click="PopUpManager.removePopUp(this);"/>
+			<mx:Button id="okButton" label="OK"  minWidth="70"
+				icon="@Embed(source='../assets/button_ok.png')"
+				click="onOK(event)"/>
 		</mx:HBox>
 	</mx:VBox>
 
