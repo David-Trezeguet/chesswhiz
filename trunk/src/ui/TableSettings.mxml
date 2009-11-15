@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
-	layout="horizontal"
-	width="412" height="292"
+	layout="vertical" verticalGap="10"
 	title="Table Settings"
 	showCloseButton="true"
-	close="PopUpManager.removePopUp(this);">
+	close="PopUpManager.removePopUp(this);" 
+	creationComplete="onCreationComplete()">
 
 	<mx:Metadata>
 		[Event(name="newSettings", type="flash.events.Event")]
@@ -16,12 +16,27 @@
 
 			public var settings:Object = null;
 
+			private function onCreationComplete() : void
+			{
+				this.title         = resourceManager.getString('localization', 'Table_Settings');
+				typeCheckBox.label = resourceManager.getString('localization', 'Rated_Game');
+				timersPanel.title  = resourceManager.getString('localization', 'Timers');
+				gameLabel.text     = resourceManager.getString('localization', 'Game_Time');
+				moveLabel.text     = resourceManager.getString('localization', 'Move_Time');
+				freeLabel.text     = resourceManager.getString('localization', 'Free_Time');
+				gameMinLabel.text  = resourceManager.getString('localization', 'min');
+				moveSecLabel.text  = resourceManager.getString('localization', 'sec');
+				freeSecLabel.text  = resourceManager.getString('localization', 'sec');
+				okButton.label     = resourceManager.getString('localization', 'OK');
+				cancelButton.label = resourceManager.getString('localization', 'Cancel');
+			}
+
 			public function applyCurrentSettings() : void
 			{
-				nsGameTime.value    = settings["gametime"] / 60;
-				nsMoveTime.value    = settings["movetime"];
-				nsExtraTime.value   = settings["extratime"];
-				cbGameType.selected = settings["rated"];
+				nsGameTime.value      = settings["gametime"] / 60;
+				nsMoveTime.value      = settings["movetime"];
+				nsExtraTime.value     = settings["extratime"];
+				typeCheckBox.selected = settings["rated"];
 			}
 
 			private function onOK(event:Event) : void
@@ -29,7 +44,7 @@
 				settings["gametime"]  = nsGameTime.value * 60;
 				settings["movetime"]  = nsMoveTime.value;
 				settings["extratime"] = nsExtraTime.value;
-				settings["rated"]     = cbGameType.selected;
+				settings["rated"]     = typeCheckBox.selected;
 				PopUpManager.removePopUp(this);
 				dispatchEvent( new Event("newSettings", true /* bubble to parent */) );
 			}
@@ -37,43 +52,39 @@
 		]]>
 	</mx:Script>
 
-	<mx:Panel width="191" layout="vertical" title="Timers" paddingLeft="8" paddingTop="5" height="230">
-		<mx:Label text="Game Time:"/>
-		<mx:HBox width="100%" verticalAlign="middle">
+	<mx:CheckBox id="typeCheckBox" label="Rated Game"/>
+
+	<mx:Panel id="timersPanel" title="Timers" width="100%" layout="horizontal"
+			paddingLeft="8" paddingTop="8" height="100%" paddingRight="8" paddingBottom="8" horizontalGap="6">
+		<mx:HBox id="gameBox" width="100%" verticalAlign="middle" horizontalGap="4">
+			<mx:Label id="gameLabel" text="Game:"/>
 			<mx:NumericStepper id="nsGameTime" minimum="5" maximum="60" stepSize="1"/>
-			<mx:Label text="minutes"/>
+			<mx:Label id="gameMinLabel" text="min"/>
 		</mx:HBox>
 
 		<mx:Spacer height="5"/>
-
-		<mx:Label text="Move Time:"/>
-		<mx:HBox width="100%" verticalAlign="middle">
+		<mx:HBox id="moveBox" width="100%" verticalAlign="middle" horizontalGap="4">
+			<mx:Label id="moveLabel" text="Move:"/>
 			<mx:NumericStepper id="nsMoveTime" minimum="20" maximum="600" stepSize="1" width="58"/>
-			<mx:Label text="seconds"/>
+			<mx:Label id="moveSecLabel" text="sec"/>
 		</mx:HBox>
 
 		<mx:Spacer height="5"/>
-
-		<mx:Label text="Free Time:"/>
-		<mx:HBox width="100%" verticalAlign="middle">
+		<mx:HBox id="freeBox" width="100%" verticalAlign="middle" horizontalGap="4">
+			<mx:Label id="freeLabel" text="Free:"/>
 			<mx:NumericStepper id="nsExtraTime" minimum="0" maximum="60" stepSize="1"/>
-			<mx:Label text="seconds"/>
+			<mx:Label id="freeSecLabel" text="sec"/>
 		</mx:HBox>
 	</mx:Panel>
 
-	<mx:VBox paddingBottom="0" width="173" height="230">
-		<mx:Panel layout="vertical" title="Game Type"
-				  paddingLeft="8" width="172" height="85" verticalAlign="middle">
-			<mx:CheckBox id="cbGameType" label="Rated" height="28" width="139"/>
-		</mx:Panel>
-
-		<mx:Spacer height="100%"/>
-
-		<mx:HBox width="100%">
-			<mx:Spacer width="100%"/>
-			<mx:Button label="OK" minWidth="70" click="onOK(event)" />
-			<mx:Button label="Cancel" minWidth="70" click="PopUpManager.removePopUp(this);" />
-		</mx:HBox>
-	</mx:VBox>
+	<mx:HBox id="commandBox" width="100%" paddingTop="8" paddingBottom="4">
+		<mx:Spacer width="100%"/>
+		<mx:Button id="cancelButton" label="Cancel" minWidth="70"
+			icon="@Embed(source='../assets/button_cancel.png')"
+			click="PopUpManager.removePopUp(this);"/>
+		<mx:Button id="okButton" label="OK" minWidth="70"
+			icon="@Embed(source='../assets/button_ok.png')"
+			click="onOK(event);"/>
+	</mx:HBox>
 
 </mx:TitleWindow>
