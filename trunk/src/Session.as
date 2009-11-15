@@ -126,10 +126,16 @@
 			req.createChatRequest(pid, _sid, tid, msg);
 			_sendRequest(req);
 		}
-		
+
 		public function sendUpdateTableRequest(pid:String, tid:String, itimes:String, bRated:Boolean) : void {
 			var req:Message = new Message();
 			req.createUpdateTableRequest(pid, _sid, tid, itimes, bRated);
+			_sendRequest(req);
+		}
+
+		public function sendQueryPlayerInfoRequest(pid:String, oid:String) : void {
+			var req:Message = new Message();
+			req.createQueryPlayerInfoRequest(pid, _sid, oid);
 			_sendRequest(req);
 		}
 	}
