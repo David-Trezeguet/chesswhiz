@@ -306,6 +306,7 @@
 				else if (msg.optype == "UPDATE")      { _processEvent_UPDATE(msg);      }
 				else if (msg.optype == "RESET")       { _processEvent_RESET(msg);       }
 				else if (msg.optype == "PLAYER_INFO") { _processEvent_PLAYER_INFO(msg); }
+				else if (msg.optype == "INVITE")      { _processEvent_INVITE(msg);      }
 			}
 		}
 
@@ -539,6 +540,14 @@
 
 			const playerInfo:Object = event.parse_PLAYER_INFO();
 			_table.displayPlayerInfo(playerInfo);
+		}
+
+		private function _processEvent_INVITE(event:Message) : void
+		{
+			if ( event.getCode() != 0 ) { return; }
+
+			const inviteInfo:Object = event.parse_INVITE();
+			_table.displayInvitation(inviteInfo);
 		}
 
 		public function playMoveSound() : void

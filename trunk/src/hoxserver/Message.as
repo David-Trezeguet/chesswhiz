@@ -291,6 +291,17 @@
 				};
 		}
 
+		public function parse_INVITE() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					pid    : fields[0],  // The inviting player's ID.
+					score  : fields[1],  // The inviting player's Score.
+					oid    : fields[2],  // The invited player
+					tid    : this.getTableId()
+				};
+		}
+
 		public function parse_I_TABLE() : Object
 		{
 			return _helper_parse_I_TABLE( params.content );
