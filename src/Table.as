@@ -599,5 +599,13 @@
 				+ "D" + playerInfo.draws + "L" + playerInfo.losses;
 			_view.onBoardMessage("*INFO: " + infoString);
 		}
+
+		public function displayInvitation(inviteInfo:Object) : void
+		{
+			const tableId:String = (inviteInfo.tid ? inviteInfo.tid : "?");
+			const inviteString:String = "From [" + inviteInfo.pid + " (" + inviteInfo.score + ")]"
+				+ " @ [" + tableId + "]";
+			_view.onBoardMessage("*INVITE: " + inviteString);
+		}
 	}
 }

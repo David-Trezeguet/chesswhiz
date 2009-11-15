@@ -73,6 +73,10 @@
 				this.title = "";
 				board.displayEmptyStatus();
 				this.showCloseButton = false;
+				redPlayButton.visible           = false;
+				redPlayButton.includeInLayout   = false;
+				blackPlayButton.visible         = false;
+				blackPlayButton.includeInLayout = false;
 			}
 			else
 			{
@@ -137,9 +141,10 @@
 
 			_updatePlayButtons();
 
-			// By default, make sure that if I play BLACK, the BLACK side is
+			// By default, make sure that if I play, my side is
 			// at the bottom of the board.
-			if ( Global.player.pid == _blackId && _isBlackAtTopSide() )
+			if (   Global.player.pid == _blackId && _isBlackAtTopSide()
+				|| Global.player.pid == _redId && !_isBlackAtTopSide() )
 			{
 				_reverseView();
 			}

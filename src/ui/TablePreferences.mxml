@@ -3,6 +3,7 @@
 	layout="horizontal" width="486" height="314"
 	title="Preferences"
 	initialize="init()"
+	creationComplete="onCreationComplete()"
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);">
 
@@ -27,7 +28,18 @@
 				pieceSet2.load("assets/pieces/2/rking.png");
 				pieceSet3.load("assets/pieces/3/rking.png");
 			}
-			
+
+			private function onCreationComplete() : void
+			{
+				this.title            = resourceManager.getString('localization', 'Preferences');
+				soundPanel.title      = resourceManager.getString('localization', 'Sound');
+				backgroundPanel.title = resourceManager.getString('localization', 'Background');
+				piecesPanel.title     = resourceManager.getString('localization', 'Pieces');
+				previewPanel.title    = resourceManager.getString('localization', 'Preview');
+				okButton.label        = resourceManager.getString('localization', 'OK');
+				cancelButton.label    = resourceManager.getString('localization', 'Cancel');
+			}
+
 			public function applyCurrentPreferences() : void
 			{
 				_bSound = preferences["sound"];
@@ -80,7 +92,8 @@
 	</mx:Script>
 
 	<mx:VBox height="256" verticalGap="15" width="133">
-		<mx:Panel width="127" height="142" title="Sound" layout="vertical" paddingTop="5" paddingLeft="5">
+		<mx:Panel id="soundPanel" title="Sound" layout="vertical"
+				width="127" height="142" paddingTop="5" paddingLeft="5">
 			<mx:HBox verticalAlign="middle" height="40" width="100">
 				<mx:RadioButton id="rbSound" groupName="soundOnOff" label="On" click="_bSound = true;"/>
 				<mx:Image source="{Global.volumeOnImageClass}"/>
@@ -91,12 +104,14 @@
 				<mx:Image source="{Global.volumeOffImageClass}"/>
 			</mx:HBox>
 		</mx:Panel>
-		<mx:Panel layout="vertical" title="Board Color" height="100%" width="126" paddingTop="5" paddingLeft="5">
+		<mx:Panel id="backgroundPanel" title="Background" layout="vertical"
+				height="100%" width="126" paddingTop="5" paddingLeft="5">
 			<mx:ColorPicker id="colorPicker" change="_displayPreview()" width="40" height="40"/>
 		</mx:Panel>
 	</mx:VBox>
 
-	<mx:Panel width="135" height="256" title="Pieces" layout="vertical" verticalGap="10" paddingTop="5" paddingLeft="5">
+	<mx:Panel id="piecesPanel" title="Pieces" layout="vertical"
+			width="135" height="256" verticalGap="10" paddingTop="5" paddingLeft="5">
 		<mx:HBox verticalAlign="middle" width="100" height="55" horizontalGap="15">
 			<mx:RadioButton id="rbPieseSet1" groupName="pieceType" click="onSelectPieceSet(1)"/>
 			<mx:Image id="pieceSet1"/>
@@ -112,7 +127,8 @@
 	</mx:Panel>
 
 	<mx:VBox height="256" width="166">
-		<mx:Panel id="previewPanel" width="162" height="155" title="Preview" layout="vertical" paddingLeft="10" verticalAlign="middle">
+		<mx:Panel id="previewPanel" title="Preview" layout="vertical"
+				width="162" height="155" paddingLeft="10" verticalAlign="middle">
 			<mx:Canvas id="previewCanvas" width="90" height="90">
 				<mx:Image id="previewPieceImage" x="20" y="20"/>
 			</mx:Canvas>
@@ -120,8 +136,8 @@
 		<mx:Spacer height="100%"/>
 		<mx:HBox width="100%">
 			<mx:Spacer width="100%"/>
-			<mx:Button label="OK"  minWidth="70" click="onOK(event)"/>
-			<mx:Button label="Canel"  minWidth="70" click="PopUpManager.removePopUp(this);"/>
+			<mx:Button id="okButton" label="OK"  minWidth="70" click="onOK(event)"/>
+			<mx:Button id="cancelButton" label="Canel"  minWidth="70" click="PopUpManager.removePopUp(this);"/>
 		</mx:HBox>
 	</mx:VBox>
 

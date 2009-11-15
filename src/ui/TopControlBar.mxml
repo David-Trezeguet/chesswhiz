@@ -18,7 +18,7 @@
 		fontFamily="Verdana" fontSize="18" color="#FFFFFF"/>
 	<mx:Spacer width="30" id="spacer1"/>
 	<mx:Button id="preferencesButton"
-				label="{resourceManager.getString('localization', 'preferences')}"
+				label="{resourceManager.getString('localization', 'Preferences')}"
 				icon="{Global.preferencesImageClass}"
 				click="Global.app.changeAppPreferences()"/>
 	<mx:Spacer width="100%" id="spacer2"/>
