@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	horizontalAlign="center">
+
+    <mx:Image id="tableImage" height="22" buttonMode="true" width="22"
+    	toolTip="{resourceManager.getString('localization', 'join_table')}"
+    	source="{data.imageClass}"/>
+
+</mx:HBox>
