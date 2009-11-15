@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
-	width="635" height="495"
+	width="694" height="495"
 	title="{resourceManager.getString('localization', 'Tables')}"
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);"
@@ -8,6 +8,7 @@
 
 <mx:Script>
 	<![CDATA[
+		import mx.events.ListEvent;
 		import mx.managers.PopUpManager;
 		import mx.collections.ArrayCollection;
 
@@ -54,6 +55,8 @@
 
 					tableRow[name] = value;
 				}
+				
+				tableRow["imageClass"] = Global.goNextImageClass;
 				tableListDP.addItem(tableRow);
 			}
 		}
@@ -65,9 +68,7 @@
 
         private function onRefresh(event:Event) : void
         {
-        	if ( this.showCloseButton ) {
-        		PopUpManager.removePopUp(this);
-        	}
+        	PopUpManager.removePopUp(this);
      		Global.app.doViewTables();
         }
 
@@ -75,17 +76,25 @@
         {
  			if (tableListDG.selectedItem)
  			{
-	        	if ( this.showCloseButton ) {
-	        		PopUpManager.removePopUp(this);
-	        	}
+	        	PopUpManager.removePopUp(this);
 				Global.app.doJoinTable(tableListDG.selectedItem.tid);
 			}
         }
 
+		private function onItemClick(event:ListEvent) : void
+		{
+			if (   joinButton.enabled
+				&& event.columnIndex == 6 ) // The Image-clickable column?
+			{
+				this.onJoin(event);
+			}
+		}
+
 	]]>
 </mx:Script>
 
-	<mx:DataGrid id="tableListDG" x="10" y="10" dataProvider="{tableListDP}" height="392">
+	<mx:DataGrid id="tableListDG" x="10" y="10" dataProvider="{tableListDP}" height="392" width="654"
+				itemClick="onItemClick(event);">
 		<mx:columns>
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Table')}"
 				dataField="tid" width="60" sortable="true" sortCompareFunction="sortTid" />
@@ -99,6 +108,8 @@
 				dataField="redid" width="140" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Black_Player')}"
 				dataField="blackid" width="140" />
+            <mx:DataGridColumn headerText=""
+                dataField="imageClass" itemRenderer="ui.RendererDGImage" width="40" />
 		</mx:columns>
 	</mx:DataGrid>
 	<mx:Button id="refreshButton"

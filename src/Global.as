@@ -8,7 +8,7 @@
 	 */
 	public final class Global
 	{
-		public static const VERSION:String    = "0.9.7.2";
+		public static const VERSION:String    = "0.9.7.3";
 
 		/**
 		 * The reference to the global Application.
@@ -111,5 +111,9 @@
 		[Embed(source="assets/go_last.png")]
 		[Bindable]
 		static public var goLastImageClass:Class;
+
+		[Embed(source="assets/key_enter.png")]
+		[Bindable]
+		static public var keyEnterImageClass:Class;
 	}
 }

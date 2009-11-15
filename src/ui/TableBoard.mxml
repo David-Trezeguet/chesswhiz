@@ -353,9 +353,13 @@
 
 			<mx:Panel id="chatPanel" title="Chat" width="100%" height="100%" layout="vertical" verticalGap="0">
 				<mx:TextArea id="chatArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"/>
-				<mx:TextInput id="chatInput" width="100%" height="30"
-					enter="onEnterInput(event)"
-					focusIn="onChatInputFocusIn(event)"/>
+				<mx:HBox width="100%" horizontalGap="0">
+					<mx:TextInput id="chatInput" width="100%"
+						enter="onEnterInput(event)"
+						focusIn="onChatInputFocusIn(event)"/>
+					<mx:Image source="{Global.keyEnterImageClass}" width="22" height="22" buttonMode="true"
+						click="onEnterInput(event)"/>
+				</mx:HBox>
 			</mx:Panel>
 		</mx:VDividedBox>
 	</mx:VBox>
