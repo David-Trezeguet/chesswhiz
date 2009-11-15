@@ -38,14 +38,20 @@
 			resetButton.toolTip       = resourceManager.getString('localization', 'Reset_table');
 		}
 
-		public function display(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
+		public function setPreferences(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
 		{
-			this.title = "Table #" + table.tableId;
 			_table = table;
 			board.setTable(_table);
-			board.drawBoardAndPieces(bgColor, lineColor, pieceSkin);
-			
-			// Clear old state.
+			board.setPreferences(bgColor, lineColor, pieceSkin);
+		}
+
+		/**
+		 * This function is called in the following two cases:
+		 *   (1) An Empty table needs to be created ( table-ID = "").
+		 *   (2) A New table needs to be setup ( table-ID != "").
+		 */
+		public function clearDisplay() : void
+		{
 			_redId = "";
 			redLabel.text = "";
 			_blackId = "";
@@ -53,6 +59,25 @@
 			playersPanel.removeAllPlayers();
 			taMessages.text = "";
 			chatArea.text = "";
+
+			const emptyTimers:GameTimers = new GameTimers();
+			updateTimers( "Red",   emptyTimers );
+			updateTimers( "Black", emptyTimers );
+
+			_updatePlayButtons();
+			board.reset();
+			
+			if ( _table.tableId == "" )
+			{
+				this.title = "";
+				board.displayEmptyStatus();
+				this.showCloseButton = false;
+			}
+			else
+			{
+				this.title = "Table #" + _table.tableId;
+				this.showCloseButton = true;
+			}
 		}
 
 		private function _reverseView() : void

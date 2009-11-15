@@ -56,7 +56,6 @@
 					tableRow[name] = value;
 				}
 				
-				tableRow["imageClass"] = Global.goNextImageClass;
 				tableListDP.addItem(tableRow);
 			}
 		}
@@ -109,7 +108,7 @@
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Black_Player')}"
 				dataField="blackid" width="140" />
             <mx:DataGridColumn headerText=""
-                dataField="imageClass" itemRenderer="ui.RendererDGImage" width="40" />
+                itemRenderer="ui.RendererDGImage" width="40" />
 		</mx:columns>
 	</mx:DataGrid>
 	<mx:Button id="refreshButton"
