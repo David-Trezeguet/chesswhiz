@@ -320,13 +320,13 @@
 	
 		<mx:HBox id="blackBox" width="100%">
 			<mx:HBox id="blackPlayer" width="280" height="28" verticalAlign="middle">
-				<mx:Image id="blackImage" scaleContent="true"/>
+				<mx:Image id="blackImage" source="@Embed(source='../assets/black_player.png')"/>
 				<mx:Button id="blackPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
 				<mx:Label id="blackLabel" fontSize="13"/>
 			</mx:HBox>
 			<mx:Spacer width="100%" />
 			<mx:HBox id="blackTimers" width="197" height="28" verticalAlign="middle">
-				<mx:Image id="blackTimerImage" source="{Global.timerImgClass}"/>
+				<mx:Image id="blackTimerImage" source="@Embed(source='../assets/timer.png')"/>
 				<mx:Label id="blackTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
 				<mx:Label id="blackTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
 				<mx:Label id="blackTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
@@ -337,13 +337,13 @@
 
 		<mx:HBox id="redBox" width="100%">
 			<mx:HBox id="redPlayer" width="280" height="28" verticalAlign="middle">
-				<mx:Image id="redImage" scaleContent="true"/>
+				<mx:Image id="redImage" source="@Embed(source='../assets/red_player.png')"/>
 				<mx:Button id="redPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
 				<mx:Label id="redLabel" fontSize="13"/>
 			</mx:HBox>
 			<mx:Spacer width="100%" />
 			<mx:HBox id="redTimers" width="197" height="28" verticalAlign="middle">
-				<mx:Image id="redTimerImage" source="{Global.timerImgClass}"/>
+				<mx:Image id="redTimerImage" source="@Embed(source='../assets/timer.png')"/>
 				<mx:Label id="redTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
 				<mx:Label id="redTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
 				<mx:Label id="redTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
@@ -352,25 +352,25 @@
 		
 		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#383232, #FFFFFF]">
 			<mx:Image id="startButton" enabled="false" click="onReviewButton('start')"
-				source="{Global.goFirstImageClass}" alpha="1.0"/>
+				source="@Embed(source='../assets/go_first.png')" alpha="1.0"/>
 			<mx:Image id="rewindButton" enabled="false" click="onReviewButton('rewind')"
-				source="{Global.goPreviousImageClass}" alpha="1.0"/>
+				source="@Embed(source='../assets/go_previous.png')" alpha="1.0"/>
 			<mx:Image id="forwardButton" enabled="false" click="onReviewButton('forward')"
-				source="{Global.goNextImageClass}" alpha="1.0"/>
+				source="@Embed(source='../assets/go_next.png')" alpha="1.0"/>
 			<mx:Image id="endButton" enabled="false" click="onReviewButton('end')"
-				source="{Global.goLastImageClass}" alpha="1.0"/>
+				source="@Embed(source='../assets/go_last.png')" alpha="1.0"/>
 			<mx:Spacer width="100%" />
 			<mx:Button id="reverseViewButton" click="_reverseView();"
-				icon="{Global.reverseImageClass}"/>
+				icon="@Embed(source='../assets/reverse.png')"/>
 			<mx:Button id="settingsButton" click="onSettingsButton(event)" 
-				icon="{Global.settingsImageClass}"/>
+				icon="@Embed(source='../assets/settings.png')"/>
 			<mx:Button id="resetButton" click="onResetButton(event)" 
-				icon="{Global.resetImageClass}"/>
+				icon="@Embed(source='../assets/reset.png')"/>
 			<mx:Spacer width="100%" />
 			<mx:Button id="resignButton" label="Resign" click="onResignButton(event)"
-				icon="{Global.whiteFlagImageClass}"/>
+				icon="@Embed(source='../assets/white_flag.png')"/>
 			<mx:Button id="drawButton" label="Draw" click="onDrawButton(event)"
-				icon="{Global.blueFlagImageClass}"/>
+				icon="@Embed(source='../assets/blue_flag.png')"/>
 		</mx:ApplicationControlBar>
 	</mx:VBox>
 
@@ -389,7 +389,7 @@
 					<mx:TextInput id="chatInput" width="100%"
 						enter="onEnterInput(event)"
 						focusIn="onChatInputFocusIn(event)"/>
-					<mx:Image source="{Global.keyEnterImageClass}" width="22" height="22" buttonMode="true"
+					<mx:Image source="@Embed(source='../assets/key_enter.png')" width="22" height="22" buttonMode="true"
 						click="onEnterInput(event)"/>
 				</mx:HBox>
 			</mx:Panel>

@@ -19,23 +19,23 @@
 	<mx:Spacer width="30" id="spacer1"/>
 	<mx:Button id="preferencesButton"
 				label="{resourceManager.getString('localization', 'Preferences')}"
-				icon="{Global.preferencesImageClass}"
+				icon="@Embed(source='../assets/preferences.png')"
 				click="Global.app.changeAppPreferences()"/>
 	<mx:Spacer width="100%" id="spacer2"/>
 	<mx:Button id="newTableButton"
 		label="{resourceManager.getString('localization', 'new_table')}"
-		icon="{Global.newImageClass}"
+		icon="@Embed(source='../assets/new.png')"
 		click="Global.app.doNewTable()"/>
 	<mx:Button id="ViewTablesButton"
 		label="{resourceManager.getString('localization', 'view_tables')}"
-		icon="{Global.listImageClass}"
+		icon="@Embed(source='../assets/list.png')"
 		click="Global.app.doViewTables();"/>
 	<mx:Spacer width="100%" id="spacer3"/>
 	<mx:Label id="playerIdLabel" text="[PLAYERID]"
 		fontFamily="Verdana" fontSize="12" color="0xa09e9e"/>
 	<mx:Button id="logoutButton"
 		label="{resourceManager.getString('localization', 'logout')}"
-		icon="{Global.logoutImageClass}"
+		icon="@Embed(source='../assets/logout.png')"
 		click="Global.app.doLogout()"/>
 	
 </mx:ApplicationControlBar>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
-	width="694" height="495"
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
+	width="694" height="495" verticalGap="10"
 	title="{resourceManager.getString('localization', 'Tables')}"
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);"
-	creationComplete="onCreationComplete();" >
+	creationComplete="onCreationComplete();">
 
 <mx:Script>
 	<![CDATA[
@@ -92,7 +92,7 @@
 	]]>
 </mx:Script>
 
-	<mx:DataGrid id="tableListDG" x="10" y="10" dataProvider="{tableListDP}" height="392" width="654"
+	<mx:DataGrid id="tableListDG" dataProvider="{tableListDP}" height="100%" width="100%"
 				itemClick="onItemClick(event);">
 		<mx:columns>
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Table')}"
@@ -111,11 +111,20 @@
                 itemRenderer="ui.RendererDGImage" width="40" />
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Button id="refreshButton"
-		label="{resourceManager.getString('localization', 'refresh')}" 
-		x="384" y="423" width="95" click="onRefresh(event)"/>
-	<mx:Button id="joinButton"
-		label="{resourceManager.getString('localization', 'join_table')}"
-		x="508" y="423" width="95" click="onJoin(event)"/>
+	<mx:HBox horizontalAlign="right" width="100%" paddingTop="4" paddingBottom="4">
+		<mx:Button id="refreshButton"
+			label="{resourceManager.getString('localization', 'refresh')}"
+			icon="@Embed(source='../assets/reload.png')"
+			click="onRefresh(event)"/>
+		<mx:Spacer width="60"/>
+		<mx:Button id="joinButton"
+			label="{resourceManager.getString('localization', 'join_table')}"
+			icon="@Embed(source='../assets/button_ok.png')"
+			click="onJoin(event)"/>
+		<mx:Button id="cancelButton"
+			label="{resourceManager.getString('localization', 'close')}"
+			icon="@Embed(source='../assets/button_close.png')"
+			click="PopUpManager.removePopUp(this);"/>
+	</mx:HBox>
 
 </mx:TitleWindow>
