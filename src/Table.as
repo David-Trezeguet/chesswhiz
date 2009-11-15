@@ -143,8 +143,9 @@
 			}
 		}
 
-		public function displayChatMessage(pid:String, chatMsg:String) : void {
-			_view.displayChatMessage(pid, chatMsg);
+		public function displayChatMessage(pid:String, msg:String) : void
+		{
+			_view.onBoardMessage(msg, pid);
 		}
 		
 		public function stopGame(reason:String, winner:String) : void
@@ -161,7 +162,7 @@
 		
 		public function drawGame(pid:String) : void
 		{
-			_view.displayMessage(pid + " offering draw");
+			_view.onBoardMessage(pid + " is offering a DRAW.", "***");
 		}
 		
 		public function updateTableSettings(itimes:String, bRated:Boolean) : void
@@ -178,10 +179,10 @@
 				_settings["gametime"]  = fields[0];
 				_settings["movetime"]  = fields[1];
 				_settings["extratime"] = fields[2];
-				_view.displayMessage("Timer: " + itimes);
-				
+				_view.onBoardMessage("Timer: " + itimes, "***");
+
 				_settings["rated"] = bRated;
-				_view.displayMessage("Type: " + (bRated ? "Rated" : "Nonrated"));
+				_view.onBoardMessage("Game-Type: " + (bRated ? "Rated" : "Nonrated"), "***");
 			}
 		}
 
@@ -311,7 +312,7 @@
 		public function processWrongMove(error:String) : void
 		{
 			_rewindLastMove();
-			_view.displayMessage("Server rejected the move: " + error);
+			_view.onBoardMessage("Server rejected the last move: " + error);
 			_view.board.onNewMove();
 		}
 
@@ -585,11 +586,18 @@
 			}
 			_curPref = newPref;
 		}
-		
+
 		public function isPlayerPlaying(playerId:String) : Boolean
 		{
 			return (    (_redPlayer && _redPlayer.pid == playerId)
 					 || (_blackPlayer && _blackPlayer.pid == playerId ) );
+		}
+
+		public function displayPlayerInfo(playerInfo:Object) : void
+		{
+			const infoString:String = playerInfo.pid + " W" + playerInfo.wins
+				+ "D" + playerInfo.draws + "L" + playerInfo.losses;
+			_view.onBoardMessage("*INFO: " + infoString);
 		}
 	}
 }

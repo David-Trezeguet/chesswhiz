@@ -4,7 +4,7 @@
 	layout="horizontal" width="880" height="720"
 	paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="4"
 	showCloseButton="true"
-	initialize="init()"
+	creationComplete="onCreationComplete()"
 	close="Global.app.doCloseTable();">
 
 <mx:Script>
@@ -24,13 +24,14 @@
 		private var _redId:String    = "";
 		private var _blackId:String  = "";
 
-		private function init() : void
+		private function onCreationComplete() : void
 		{
-			infoPanel.title           = resourceManager.getString('localization', 'Information');
-			chatPanel.title           = resourceManager.getString('localization', 'Chat');
+			playersPanel.title        = resourceManager.getString('localization', 'Players');
+			activitiesPanel.title     = resourceManager.getString('localization', 'Activities');
+			messagesPanel.title       = resourceManager.getString('localization', 'Messages');
 			chatInput.text            = resourceManager.getString('localization', 'chat_prompt');
-			resignButton.label        = resourceManager.getString('localization', 'resign');
-			drawButton.label          = resourceManager.getString('localization', 'draw');
+			resignButton.label        = resourceManager.getString('localization', 'Resign');
+			drawButton.label          = resourceManager.getString('localization', 'Draw');
 			redPlayButton.label       = resourceManager.getString('localization', 'Play_RED');
 			blackPlayButton.label     = resourceManager.getString('localization', 'Play_BLACK');
 			reverseViewButton.toolTip = resourceManager.getString('localization', 'Reverse_View');
@@ -57,8 +58,8 @@
 			_blackId = "";
 			blackLabel.text = "";
 			playersPanel.removeAllPlayers();
-			taMessages.text = "";
-			chatArea.text = "";
+			activitiesArea.text = "";
+			messagesArea.text = "";
 
 			const emptyTimers:GameTimers = new GameTimers();
 			updateTimers( "Red",   emptyTimers );
@@ -101,7 +102,7 @@
 		{
 			if ( playersPanel.addPlayer(player.pid, player.score) ) // newly joined?
 			{
-				this.displayMessage(player.pid + " joined");
+				this.onSystemMessage(player.pid + " joined");
 			}
 
 			if ( player.color == "None" )
@@ -151,7 +152,7 @@
 		{
 			if ( playersPanel.removePlayer(playerId) ) // removed from list?
 			{
-				this.displayMessage(playerId + " left");
+				this.onSystemMessage(playerId + " left");
 			}
 
 			if ( playerId == _redId )
@@ -215,9 +216,9 @@
 			}
 		}
 
-		public function displayMessage(msg:String) : void
+		public function onSystemMessage(msg:String) : void
 		{
-			this.taMessages.text += msg + "\n";		
+			activitiesArea.text += msg + "\n";		
 		}
 
 		private function onReviewButton(cmd:String) : void
@@ -225,18 +226,19 @@
 			_table.reviewMove(cmd);
 		}
 
-		public function displayChatMessage(pid:String, chatMsg:String) : void 
+		public function onBoardMessage(msg:String, senderId:String = "") : void 
 		{
-			chatArea.text  += "[" + pid + "] " + chatMsg + "\n";
+			messagesArea.text  += (senderId != "" ? "[" + senderId + "] " : "")
+				+ msg + "\n";
 		}
 
         public function onEnterInput(event:Event) : void
         {
-			const chatMsg:String = StringUtil.trim( chatInput.text );
+			const msg:String = StringUtil.trim( chatInput.text );
 			chatInput.text = "";
 
-			Global.app.doTableChat(chatMsg);
-			this.displayChatMessage(Global.player.pid, chatMsg);
+			Global.app.doTableChat(msg);
+			this.onBoardMessage(msg, Global.player.pid);
         }
 
 		public function onSettingsButton(event:Event) : void
@@ -372,12 +374,12 @@
 	<mx:VBox height="100%" width="100%">
 		<cwui:PlayerListPanel id="playersPanel" title="Players" width="100%" height="160"/>
 		<mx:VDividedBox width="100%" height="100%">
-			<mx:Panel id="infoPanel" title="Information" width="100%" height="230" layout="vertical">
-				<mx:TextArea id="taMessages" width="100%" height="100%" editable="false" />
+			<mx:Panel id="activitiesPanel" title="Activities" width="100%" height="230" layout="vertical">
+				<mx:TextArea id="activitiesArea" width="100%" height="100%" editable="false" />
 			</mx:Panel>
 
-			<mx:Panel id="chatPanel" title="Chat" width="100%" height="100%" layout="vertical" verticalGap="0">
-				<mx:TextArea id="chatArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"/>
+			<mx:Panel id="messagesPanel" title="Messages" width="100%" height="100%" layout="vertical" verticalGap="0">
+				<mx:TextArea id="messagesArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"/>
 				<mx:HBox width="100%" horizontalGap="0">
 					<mx:TextInput id="chatInput" width="100%"
 						enter="onEnterInput(event)"

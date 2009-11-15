@@ -3,6 +3,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import mx.events.ListEvent;
 			import hoxserver.PlayerInfo;
 			import mx.collections.ArrayCollection;
 
@@ -73,10 +74,16 @@
 				return INVALID_INDEX; // "Not found".
 			}
 
+		private function onItemDoubleClick(event:ListEvent) : void
+		{
+			Global.app.doQueryPlayerInfo( playerDataGrid.selectedItem.pid );
+		}
+
 		]]>
 	</mx:Script>
 
-	<mx:DataGrid id="playerDataGrid" dataProvider="{_playerList}" width="100%" height="100%">
+	<mx:DataGrid id="playerDataGrid" dataProvider="{_playerList}" width="100%" height="100%"
+			doubleClickEnabled="true" itemDoubleClick="onItemDoubleClick(event)">
 		<mx:columns>
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Id')}"
 				dataField="pid" width="60"/>

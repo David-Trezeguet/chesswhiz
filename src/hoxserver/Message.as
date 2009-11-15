@@ -146,6 +146,15 @@
 			};
 		}
 
+		public function createQueryPlayerInfoRequest(pid:String, sid:String, oid:String) : void {
+			this.optype = "PLAYER_INFO";
+			this.params = {
+				pid: pid,
+				sid: sid,
+				oid: oid
+			};
+		}
+
 		/**
 		 * Serialize the message into the format to be sent out to the server.
 		 */
@@ -268,6 +277,18 @@
 								score : fields[1] } );
 			}
 			return players;
+		}
+
+		public function parse_PLAYER_INFO() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					pid    : fields[0],
+					score  : fields[1],
+					wins   : fields[2],
+					draws  : fields[3],
+					losses : fields[4]
+				};
 		}
 
 		public function parse_I_TABLE() : Object
