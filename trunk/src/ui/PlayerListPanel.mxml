@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical">
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
+	creationComplete="onCreationComplete()">
 
 	<mx:Script>
 		<![CDATA[
@@ -11,6 +12,11 @@
 
 			[Bindable]
 			private var _playerList:ArrayCollection = new ArrayCollection();
+
+			private function onCreationComplete() : void
+			{
+				playerDataGrid.addEventListener("playerDropdownClick", _onPlayerDropdownClick);
+			}
 
 			/**
 			 * Add a player to the list.
@@ -74,10 +80,32 @@
 				return INVALID_INDEX; // "Not found".
 			}
 
-		private function onItemDoubleClick(event:ListEvent) : void
-		{
-			Global.app.doQueryPlayerInfo( playerDataGrid.selectedItem.pid );
-		}
+			private function onItemDoubleClick(event:ListEvent) : void
+			{
+				Global.app.doQueryPlayerInfo( playerDataGrid.selectedItem.pid );
+			}
+
+			private function _onPlayerDropdownClick(event:Event) : void
+			{
+				var myPopupButton:RendererDGDropdown = event.target as RendererDGDropdown;
+				if ( myPopupButton == null ) // just sanity check!
+				{
+					return;
+				}
+
+				switch (myPopupButton.selectedIndex)
+				{
+					case 0:  /* Info */
+						Global.app.doQueryPlayerInfo( playerDataGrid.selectedItem.pid );
+						break;
+
+					case 1:  /* Invite */
+						break;
+
+					case 2:  /* Message */
+						break;
+				}
+			}
 
 		]]>
 	</mx:Script>
@@ -86,9 +114,11 @@
 			doubleClickEnabled="true" itemDoubleClick="onItemDoubleClick(event)">
 		<mx:columns>
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Id')}"
-				dataField="pid" width="60"/>
+				dataField="pid" width="130"/>
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Rating')}"
-				dataField="rating" width="30"/>
+				dataField="rating"/>
+            <mx:DataGridColumn headerText=""
+                itemRenderer="ui.RendererDGDropdown" width="12" />
 		</mx:columns>
 	</mx:DataGrid>
 

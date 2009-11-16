@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:PopUpButton xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="12" height="18" arrowButtonWidth="12" textAlign="left"
+	creationComplete="onCreationComplete()">
+
+	<mx:Metadata>
+		[Event(name="playerDropdownClick", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.events.MenuEvent;
+        	import mx.controls.Menu;
+
+			public var selectedIndex:int = -1;
+
+			private function onCreationComplete() : void
+			{
+				var myMenu:Menu = new Menu();
+				myMenu.dataProvider =
+					[
+						{ label: resourceManager.getString('localization', 'Info_menu')    }, 
+						{ label: resourceManager.getString('localization', 'Invite_menu')  }, 
+						{ label: resourceManager.getString('localization', 'Message_menu') }
+					];;
+				myMenu.addEventListener("itemClick", _onItemClick);
+				this.popUp = myMenu;
+			}
+
+			private function _onItemClick(event:MenuEvent) : void
+			{
+				//trace("Label = " + event.label + ", index = " + event.index);
+				this.close();
+				this.selectedIndex = event.index;
+				dispatchEvent( new Event("playerDropdownClick", true /* bubble to parent */) );
+			}
+        ]]>
+    </mx:Script>
+
+</mx:PopUpButton>
