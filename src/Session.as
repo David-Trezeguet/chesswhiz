@@ -121,9 +121,9 @@
 			_sendRequest(req);
 		}
 
-		public function sendChatRequest(pid:String, tid:String, msg:String):void {
+		public function sendChatRequest(pid:String, msg:String, tid:String, oid:String = ""):void {
 			var req:Message = new Message();
-			req.createChatRequest(pid, _sid, tid, msg);
+			req.createChatRequest(pid, _sid, msg, tid, oid);
 			_sendRequest(req);
 		}
 

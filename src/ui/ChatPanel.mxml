@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
+	width="400" height="300"
+	showCloseButton="true"
+	title="Chat"
+	creationComplete="onCreationComplete()"
+	close="onClose();">
+
+	<mx:Metadata>
+		[Event(name="newChatMessage", type="flash.events.Event")]
+		[Event(name="closeButton", type="flash.events.Event")]
+	</mx:Metadata>
+
+	<mx:Script>
+		<![CDATA[
+			import mx.utils.StringUtil;
+
+			public var otherPlayerId:String = "";
+			public var newMessage:String    = "";
+
+			private function onCreationComplete() : void
+			{
+				if ( otherPlayerId != "" )
+				{
+					this.title += " (" + otherPlayerId + ")";
+				}
+			}
+
+	        public function onMessageFrom(pid:String, msg:String) : void
+	        {
+	        	_displayMessageOnView(pid, msg);
+	        }
+
+			private function onClose() : void
+			{
+				dispatchEvent( new Event("closeButton", true /* bubble to parent */) );
+			}
+
+			private function onChatInputFocusIn(event:FocusEvent) : void
+			{
+				chatInput.text = "";
+			}
+
+	        public function onEnterInput(event:Event) : void
+	        {
+				this.newMessage = StringUtil.trim( chatInput.text );
+				chatInput.text = "";
+
+				_displayMessageOnView(Global.player.pid, this.newMessage);
+
+				dispatchEvent( new Event("newChatMessage", true /* bubble to parent */) );
+	        }
+
+	        public function _displayMessageOnView(senderId:String, msg:String) : void
+	        {
+				messagesArea.text += "[" + senderId + "] " + msg + "\n";
+	        }
+
+		]]>
+	</mx:Script>
+
+	<mx:TextArea id="messagesArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"/>
+	<mx:HBox width="100%" horizontalGap="0">
+		<mx:TextInput id="chatInput" width="100%"
+			focusIn="onChatInputFocusIn(event)"
+			enter="onEnterInput(event)"/>
+		<mx:Image source="@Embed(source='../assets/key_enter.png')" width="22" height="22" buttonMode="true"
+			click="onEnterInput(event)"/>
+	</mx:HBox>
+
+</mx:TitleWindow>

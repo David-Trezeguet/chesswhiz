@@ -231,10 +231,18 @@
 			_table.reviewMove(cmd);
 		}
 
-		public function onBoardMessage(msg:String, senderId:String = "") : void 
+		/**
+		 * @bPrivate If true, then this message is private.
+		 */
+		public function onBoardMessage(msg:String, senderId:String = "", bPrivate:Boolean = false) : void 
 		{
-			messagesArea.text  += (senderId != "" ? "[" + senderId + "] " : "")
-				+ msg + "\n";
+			var senderTag:String = (senderId != "" ? "[" + senderId + "] " : "");
+			if ( bPrivate )
+			{
+				senderTag += "(*) "; // Just make it look "different"!
+			}
+
+			messagesArea.text  += senderTag + msg + "\n";
 		}
 
         public function onEnterInput(event:Event) : void
@@ -242,7 +250,7 @@
 			const msg:String = StringUtil.trim( chatInput.text );
 			chatInput.text = "";
 
-			Global.app.doTableChat(msg);
+			Global.app.doSendMessage(msg);
 			this.onBoardMessage(msg, Global.player.pid);
         }
 
