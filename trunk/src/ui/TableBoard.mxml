@@ -17,6 +17,15 @@
 		import mx.controls.Image;
 		import hoxserver.*;
 
+		/**
+		 * References:
+		 * ===========
+		 * How to scroll to the bottom of a text area automatically:
+		 *
+		 * http://butterfliesandbugs.wordpress.com/2007/08/20/scrolling-to-the-bottom-of-a-container-or-textarea-automatically/
+		 *
+		 */
+
 		public static const INVALID_INDEX:int = -1;
 
 		private var _table:Table;
@@ -236,13 +245,15 @@
 		 */
 		public function onBoardMessage(msg:String, senderId:String = "", bPrivate:Boolean = false) : void 
 		{
-			var senderTag:String = (senderId != "" ? "[" + senderId + "] " : "");
+			var senderTag:String = senderId;
 			if ( bPrivate )
 			{
-				senderTag += "(*) "; // Just make it look "different"!
+				senderTag = "<font color=\"#3366FF\">" + senderTag + "</font>";
 			}
 
-			messagesArea.text  += senderTag + msg + "\n";
+			messagesArea.htmlText += "<p>"
+				+ (senderId == "" ? "" : "<b>" + senderTag + "</b>: ")
+				+ msg + "</p>";
 		}
 
         public function onEnterInput(event:Event) : void
@@ -388,11 +399,13 @@
 		<cwui:PlayerListPanel id="playersPanel" title="Players" width="100%" height="160"/>
 		<mx:VDividedBox width="100%" height="100%">
 			<mx:Panel id="activitiesPanel" title="Activities" width="100%" height="230" layout="vertical">
-				<mx:TextArea id="activitiesArea" width="100%" height="100%" editable="false" />
+				<mx:TextArea id="activitiesArea" width="100%" height="100%" editable="false"
+					valueCommit="activitiesArea.verticalScrollPosition=activitiesArea.maxVerticalScrollPosition;"/>
 			</mx:Panel>
 
 			<mx:Panel id="messagesPanel" title="Messages" width="100%" height="100%" layout="vertical" verticalGap="0">
-				<mx:TextArea id="messagesArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"/>
+				<mx:TextArea id="messagesArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"
+					valueCommit="messagesArea.verticalScrollPosition=messagesArea.maxVerticalScrollPosition;"/>
 				<mx:HBox width="100%" horizontalGap="0">
 					<mx:TextInput id="chatInput" width="100%"
 						enter="onEnterInput(event)"

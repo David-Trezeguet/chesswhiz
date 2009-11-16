@@ -595,8 +595,8 @@
 
 		public function displayPlayerInfo(playerInfo:Object) : void
 		{
-			const infoString:String = playerInfo.pid + " W" + playerInfo.wins
-				+ "D" + playerInfo.draws + "L" + playerInfo.losses;
+			const infoString:String = playerInfo.pid + " " + playerInfo.score
+				+ " W" + playerInfo.wins + "D" + playerInfo.draws + "L" + playerInfo.losses;
 			_view.onBoardMessage("*INFO: " + infoString);
 		}
 

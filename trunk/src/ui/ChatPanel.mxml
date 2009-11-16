@@ -15,7 +15,18 @@
 		<![CDATA[
 			import mx.utils.StringUtil;
 
+			/**
+			 * References:
+			 * ===========
+			 * How to scroll to the bottom of a text area automatically:
+			 *
+			 * http://butterfliesandbugs.wordpress.com/2007/08/20/scrolling-to-the-bottom-of-a-container-or-textarea-automatically/
+			 *
+			 */
+
 			public var otherPlayerId:String = "";
+			public var inPrivateMode:Boolean = true;
+
 			public var newMessage:String    = "";
 
 			private function onCreationComplete() : void
@@ -53,13 +64,22 @@
 
 	        public function _displayMessageOnView(senderId:String, msg:String) : void
 	        {
-				messagesArea.text += "[" + senderId + "] " + msg + "\n";
+				var senderTag:String = senderId;
+				if ( inPrivateMode )
+				{
+					senderTag = "<font color=\"#3366FF\">" + senderTag + "</font>";
+				}
+
+				messagesArea.htmlText += "<p>"
+					+ (senderId == "" ? "" : "<b>" + senderTag + "</b>: ")
+					+ msg + "</p>";
 	        }
 
 		]]>
 	</mx:Script>
 
-	<mx:TextArea id="messagesArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"/>
+	<mx:TextArea id="messagesArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"
+		valueCommit="messagesArea.verticalScrollPosition=messagesArea.maxVerticalScrollPosition;"/>
 	<mx:HBox width="100%" horizontalGap="0">
 		<mx:TextInput id="chatInput" width="100%"
 			focusIn="onChatInputFocusIn(event)"
