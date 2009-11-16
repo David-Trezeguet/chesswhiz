@@ -97,13 +97,14 @@
 			};
 		}
 
-		public function createChatRequest(pid:String, sid:String, tableId:String, msg:String):void {
+		public function createChatRequest(pid:String, sid:String, msg:String, tableId:String, oid:String):void {
 			this.optype = "MSG";
 			this.params = {
 				pid: pid,
 				sid: sid,
+				msg: msg,
 				tid: tableId,
-				msg: msg
+				oid: oid
 			};
 		}
 

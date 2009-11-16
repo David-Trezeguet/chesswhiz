@@ -13,9 +13,9 @@
 	import mx.managers.PopUpManager;
 	import mx.utils.ObjectUtil;
 	
+	import ui.ChatPanel;
 	import ui.LoginPanel;
 	import ui.PlayerListPanel;
-	import ui.TableBoard;
 	import ui.TableList;
 	import ui.TablePreferences;
 
@@ -23,6 +23,7 @@
 	{
 		private var _mainWindow:Container;
 		private var _playerWindow:PlayerListPanel;
+		private var _chatPanel:ChatPanel = null;
 		private var _moveSound:Sound = new Global.moveSoundClass() as Sound;
 
 		private var _preferences:Object;
@@ -221,10 +222,21 @@
 			}
 		}
 
-		public function doTableChat(msg:String) : void
+		/**
+		 * Handle two types of messages:
+		 *   (1) "Table message (sent to all players at THE table).
+		 *   (2) "Private" message (sent specifically to a player).
+		 *
+		 * @param oid (OPTIONAL) If present, then the message is private
+		 *                       to only the specified player.
+		 */
+		public function doSendMessage(msg:String, oid:String = "") : void
 		{
-			if ( _table.valid() ) {
-				_session.sendChatRequest(_playerId, _table.tableId, msg);
+			if ( oid != "" ) { // Private message.
+				_session.sendChatRequest(_playerId, msg, "" /* table-Id */, oid);
+			}
+			else if ( _table.valid() ) { // Table message.
+				_session.sendChatRequest(_playerId, msg, _table.tableId);
 			}
 		}
 
@@ -278,6 +290,50 @@
 					_preferences[key] = pref[key];
 				}
 				_savePreferencesToLocalSharedObject();
+			}
+		}
+
+		public function popupPrivateChatWindow(otherPlayerId:String) : void
+		{
+			/* Enforce the rule that only one Private Chat Session
+			 * (with one other player) exists at one time.
+			 */
+			if ( _chatPanel )
+			{
+				trace("Private Chat Session has been taken.");
+				return;
+			}
+
+			_chatPanel = new ChatPanel();
+			_chatPanel.otherPlayerId = otherPlayerId;
+			PopUpManager.addPopUp(_chatPanel, _mainWindow, false /* modeless */);
+			PopUpManager.centerPopUp(_chatPanel);
+			_chatPanel.addEventListener("newChatMessage", _newChatMessageEventHandler);
+			_chatPanel.addEventListener("closeButton", _closeButtonEventHandler);
+		}
+
+		/**
+		 * Callback function to handle the "newChatMessage" event generated
+		 * by the 'ChatPanel' window.
+		 */
+		private function _newChatMessageEventHandler(event:Event) : void
+		{
+			if ( _chatPanel )
+			{
+				this.doSendMessage(_chatPanel.newMessage, _chatPanel.otherPlayerId);
+			}
+		}
+
+		/**
+		 * Callback function to handle the "closeButton" event generated
+		 * by the 'ChatPanel' window.
+		 */
+		private function _closeButtonEventHandler(event:Event) : void
+		{
+			if ( _chatPanel != null )
+			{
+				PopUpManager.removePopUp(_chatPanel);
+				_chatPanel = null;
 			}
 		}
 
@@ -502,19 +558,41 @@
 			const msgInfo:Object = event.parse_MSG();
 
 			/* NOTE: There are 2 types of messages:
-			 *  (1) For table messages, "both tid" and "pid" are present.
+			 *  (1) For table messages, both "tid" and "pid" are present.
 			 *  (2) For private messages, "tid" is missing.
 			 */
 			
 			if ( msgInfo.tid == null )  // a private message?
 			{
-				// TODO: Need to handle private messages.
-				trace("[" + msgInfo.pid + "]: sent a private message [" + msgInfo.msg + "]");
+				_processEvent_MSG_private(msgInfo.pid, msgInfo.msg);
 			}
 			else if ( _table.tableId == msgInfo.tid )
 			{
 				_table.displayChatMessage(msgInfo.pid, msgInfo.msg);
 			}
+		}
+
+		/**
+		 * A helper function of _processEvent_MSG() to handle private messages.
+		 *
+		 * @also _processEvent_MSG()
+		 */
+		private function _processEvent_MSG_private(pid:String, msg:String) : void
+		{
+			if ( ! _chatPanel )
+			{
+				this.popupPrivateChatWindow(pid);
+			}
+			else if ( _chatPanel.otherPlayerId != pid )
+			{
+				/* This Player is different from the one I am chatting with!
+				 * Simply display the message on the Table-Board.
+				 */
+				_table.displayChatMessage(pid, msg, true /* Private */);
+				return;
+			}
+
+			_chatPanel.onMessageFrom(pid, msg);
 		}
 
 		private function _processEvent_UPDATE(event:Message) : void

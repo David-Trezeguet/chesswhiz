@@ -93,18 +93,12 @@
 					return;
 				}
 
+				const selectPID:String = playerDataGrid.selectedItem.pid; // Player-ID.
 				switch (myPopupButton.selectedIndex)
 				{
-					case 0:  /* Info */
-						Global.app.doQueryPlayerInfo( playerDataGrid.selectedItem.pid );
-						break;
-
-					case 1:  /* Invite */
-						Global.app.doInvitePlayer( playerDataGrid.selectedItem.pid );
-						break;
-
-					case 2:  /* Message */
-						break;
+					case 0: /* Info */    return Global.app.doQueryPlayerInfo(selectPID);
+					case 1: /* Invite */  return Global.app.doInvitePlayer(selectPID);
+					case 2: /* Message */ return Global.app.popupPrivateChatWindow(selectPID);
 				}
 			}
 

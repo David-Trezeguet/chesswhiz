@@ -143,9 +143,9 @@
 			}
 		}
 
-		public function displayChatMessage(pid:String, msg:String) : void
+		public function displayChatMessage(pid:String, msg:String, bPrivate:Boolean = false) : void
 		{
-			_view.onBoardMessage(msg, pid);
+			_view.onBoardMessage(msg, pid, bPrivate);
 		}
 		
 		public function stopGame(reason:String, winner:String) : void
