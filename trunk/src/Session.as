@@ -138,5 +138,11 @@
 			req.createQueryPlayerInfoRequest(pid, _sid, oid);
 			_sendRequest(req);
 		}
+
+		public function sendInvitePlayerRequest(pid:String, oid:String, tid:String) : void {
+			var req:Message = new Message();
+			req.createInvitePlayerRequest(pid, _sid, oid, tid);
+			_sendRequest(req);
+		}
 	}
 }

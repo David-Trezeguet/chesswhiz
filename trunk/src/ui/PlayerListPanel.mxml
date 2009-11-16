@@ -100,6 +100,7 @@
 						break;
 
 					case 1:  /* Invite */
+						Global.app.doInvitePlayer( playerDataGrid.selectedItem.pid );
 						break;
 
 					case 2:  /* Message */

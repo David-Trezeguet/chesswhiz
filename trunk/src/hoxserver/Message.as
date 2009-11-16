@@ -155,6 +155,16 @@
 			};
 		}
 
+		public function createInvitePlayerRequest(pid:String, sid:String, oid:String, tid:String) : void {
+			this.optype = "INVITE";
+			this.params = {
+				pid: pid,
+				sid: sid,
+				oid: oid,
+				tid: tid   /* The table-ID is optional and can be empty. */
+			};
+		}
+
 		/**
 		 * Serialize the message into the format to be sent out to the server.
 		 */
