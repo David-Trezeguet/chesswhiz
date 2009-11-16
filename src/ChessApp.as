@@ -247,6 +247,11 @@
 			_session.sendQueryPlayerInfoRequest(_playerId, pid);
 		}
 
+		public function doInvitePlayer(pid:String) : void
+		{
+			_session.sendInvitePlayerRequest(_playerId, pid, _table.tableId);
+		}
+
 		public function changeAppPreferences() : void
 		{
 			var preferencesPanel:TablePreferences = new TablePreferences();
