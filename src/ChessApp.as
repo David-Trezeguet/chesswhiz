@@ -305,6 +305,7 @@
 			}
 
 			_chatPanel = new ChatPanel();
+			_chatPanel.showCloseButton = true;
 			_chatPanel.otherPlayerId = otherPlayerId;
 			PopUpManager.addPopUp(_chatPanel, _mainWindow, false /* modeless */);
 			PopUpManager.centerPopUp(_chatPanel);
