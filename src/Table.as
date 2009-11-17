@@ -1,8 +1,5 @@
 ﻿package {
 	import flash.display.*;
-	import flash.events.Event;
-	import flash.events.TimerEvent;
-	import flash.utils.Timer;
 	
 	import hoxserver.*;
 	
@@ -17,11 +14,6 @@
 		private var _redPlayer:PlayerInfo   = null;
 		private var _blackPlayer:PlayerInfo = null;
 
-		private var _redTimes:GameTimers   = new GameTimers();
-		private var _blackTimes:GameTimers = new GameTimers();
-		private var _redClock:Timer        = new Timer(1000 /* 1s interval */);
-		private var _blackClock:Timer      = new Timer(1000 /* 1s interval */);
-
 		private var _inReviewMode:Boolean = false;
 		private var _moveList:Array = [];
 		private var _curMoveIndex:int = -1;
@@ -32,9 +24,6 @@
 		public function Table(tableId:String, preferences:Object, view:TableBoard)
 		{
 			this.tableId = tableId;
-
-			_redClock.addEventListener(TimerEvent.TIMER, _timerHandler);
-			_blackClock.addEventListener(TimerEvent.TIMER, _timerHandler);
 
 			_settings =
 				{
@@ -55,18 +44,10 @@
 
 		public function setSettings(settings:Object) : void { _settings = settings; }
 
-		public function getTimers(color:String) : GameTimers
-		{
-			return ( color == "Red" ? _redTimes : _blackTimes );
-		}
-
 		public function displayEmptyTable() : void
 		{
 			_redPlayer = null;
 			_blackPlayer = null;
-			_redTimes.clearAll();
-			_blackTimes.clearAll();
-			_stopTimers();
 
 			_inReviewMode = false;
 			_moveList = [];
@@ -87,11 +68,10 @@
 		public function newTable(tableInfo:Object) : void
 		{
 			this.displayEmptyTable(); // Reset the previous table, if any.
-			
+
 			// Setup the Table with new table-info.
 
-			_redTimes.initWithTimes(tableInfo.initialtime, tableInfo.redtime);
-			_blackTimes.initWithTimes(tableInfo.initialtime, tableInfo.blacktime);
+			_view.initializeTimers(tableInfo.initialtime, tableInfo.redtime, tableInfo.blacktime);
 
 			if ( tableInfo.redid != "" )
 			{
@@ -158,42 +138,29 @@
 			}
 
 			_view.onGameOverEventFromTable(reason);
-
-			_stopTimers();
 		}
-		
+
 		public function drawGame(pid:String) : void
 		{
 			_view.onBoardMessage(pid + " is offering a DRAW.", "***");
 		}
-		
+
 		public function updateTableSettings(itimes:String, bRated:Boolean) : void
 		{
-			if (_moveList.length == 0)
-			{
-				_redTimes.initWithTimes(itimes, itimes);
-				_blackTimes.initWithTimes(itimes, itimes);
+			_view.initializeTimers(itimes);
 
-				var timer:GameTimers = new GameTimers(itimes);
-				_view.updateTimers("Red", timer);
-				_view.updateTimers("Black", timer);
-				const fields:Array = itimes.split("/");
-				_settings["gametime"]  = fields[0];
-				_settings["movetime"]  = fields[1];
-				_settings["extratime"] = fields[2];
-				_view.onBoardMessage("Timer: " + itimes, "***");
+			const fields:Array = itimes.split("/");
+			_settings["gametime"]  = fields[0];
+			_settings["movetime"]  = fields[1];
+			_settings["extratime"] = fields[2];
+			_view.onBoardMessage("Timer: " + itimes, "***");
 
-				_settings["rated"] = bRated;
-				_view.onBoardMessage("Game-Type: " + (bRated ? "Rated" : "Nonrated"), "***");
-			}
+			_settings["rated"] = bRated;
+			_view.onBoardMessage("Game-Type: " + (bRated ? "Rated" : "Nonrated"), "***");
 		}
 
 		public function resetTable() : void
 		{
-			_stopTimers();
-			_redTimes.resetAll();
-			_blackTimes.resetAll();
-
 			_inReviewMode = false;
 			_moveList = [];
 			_curMoveIndex = -1;
@@ -217,55 +184,6 @@
 			}
 		}
 
-		private function _startTimer() : void
-		{
-			if (_view.board.nextColor() == "Red") { _redClock.start();   }
-			else                                  { _blackClock.start(); }
-		}
-
-		private function _stopTimers() : void
-		{
-			_redClock.stop();
-			_blackClock.stop();
-		}
-
-		/**
-		 * This function is called after each Move is made to reset the MOVE-time.
-		 */
-		private function _resetMoveTimer(lastMoveColor:String) : void
-		{
-			if (lastMoveColor == "Red")
-			{
-				_redClock.stop();
-				_blackTimes.resetMoveTime();
-				_blackClock.start();
-			}
-			else
-			{
-				_blackClock.stop();
-				_redTimes.resetMoveTime();
-				_redClock.start();
-			}
-		}
-
-		private function _timerHandler(event:Event) : void
-		{
-			// NOTE: Let the server determine and handle the "timedout" event!
-
-			const nextColor:String = _view.board.nextColor();
-
-			if (nextColor == "Red")
-			{
-				_redTimes.decrementTime();
-				_view.updateTimers("Red", _redTimes);
-			}
-			else if (nextColor == "Black")
-			{
-				_blackTimes.decrementTime();
-				_view.updateTimers("Black", _blackTimes);
-			}
-		}
-
 		public function playMoveList(moves:Array) : void
 		{
 			for (var i:int = 0; i < moves.length; i++)
@@ -276,7 +194,7 @@
 													parseInt(moves[i].charAt(2)) );
 				var piece:Piece = _view.board.getPieceByPos(curPos);
 				if (piece) {
-					_processMoveEvent(piece, curPos, newPos);
+					_processMoveEvent(piece, curPos, newPos, true /* in Setup mode */);
 		            _view.board.onNewMove();
 				}
 			}
@@ -508,18 +426,14 @@
 			{
 				Global.player.color = "None";
 			}
-
-			if (   _redPlayer && _redPlayer.pid == pid
-				|| _blackPlayer && _blackPlayer.pid == pid )
-			{
-				_stopTimers();
-			}
 		}
 
 		/**
 		 * Function to perform common tasks on each new Move.
+		 *
+		 * @param bSetup If true, then we are setting up an existing table (to view as an observer).
 		 */
-		private function _processMoveEvent(piece:Piece, curPos:Position, newPos:Position) : void
+		private function _processMoveEvent(piece:Piece, curPos:Position, newPos:Position, bSetup:Boolean=false) : void
 		{
 			// Store the new Move in the Move-List.
 			const capturedPiece:Piece = _view.board.getPieceByPos(newPos);
@@ -527,7 +441,7 @@
 				+ ":" + curPos.row + curPos.column + newPos.row + newPos.column
 				+ ":" + (capturedPiece ? capturedPiece.getIndex() : "");
 
-			const nMoves:uint = _moveList.push(move);
+			_moveList.push(move);
 
 			// Update the Piece Map.
 			if ( _inReviewMode ) {
@@ -536,18 +450,7 @@
 				_view.board.movePieceByPos(piece, newPos);
 			}
 
-			_view.onNewMoveFromTable();
-
-			if (nMoves == 2)
-			{
-				_startTimer();
-			}
-
-			// Reset Move-time.
-			if (nMoves > 2)
-			{
-				_resetMoveTimer( piece.getColor() );
-			}
+			_view.onNewMoveFromTable( piece.getColor(), bSetup );
 		}
 
 		public function getSettings() : Object { return _settings; }

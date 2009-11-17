@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	verticalAlign="middle"
+	creationComplete="onCreationComplete();">
+
+	<mx:Script>
+		<![CDATA[
+
+			private var _gameTime:int = 0;
+			private var _moveTime:int = 0;
+			private var _freeTime:int = 0;
+
+			private var _initialGameTime:int = 0;
+			private var _initialMoveTime:int = 0;
+			private var _initialFreeTime:int = 0;
+
+			private var _clock:Timer = new Timer( 1000 /* 1s interval */ );
+
+			private function onCreationComplete() : void
+			{
+				_clock.addEventListener( TimerEvent.TIMER, _timerHandler );
+			}
+
+			/**
+			 * @param initialTimes The initial times string in "GG/MM/EE" format.
+			 * @param currentTimes The current times string in "GG/MM/EE" format.
+			 */
+			public function initWith(initialTimes:String, currentTimes:String = "") : void
+			{
+				var timers:Array = initialTimes.split("/");
+				_initialGameTime = parseInt(timers[0]);
+				_initialMoveTime = parseInt(timers[1]);
+				_initialFreeTime = parseInt(timers[2]);
+
+				if ( currentTimes != "" )
+				{
+					timers = currentTimes.split("/");
+					_gameTime = parseInt( timers[0] );
+					_moveTime = parseInt( timers[1] );
+					_freeTime = parseInt( timers[2] );
+				}
+				else
+				{
+					_gameTime = _initialGameTime;
+					_moveTime = _initialMoveTime;
+					_freeTime = _initialFreeTime;	
+				}
+
+				_updateTimerUI();
+			}
+
+			public function start() : void
+			{
+				_clock.start();
+			}
+
+			public function stop() : void
+			{
+				_clock.stop();
+			}
+
+			/**
+			 * Reset only the MOVE time to the initial value.
+			 */
+			public function resetMoveTime() : void
+			{
+				_moveTime = _initialMoveTime;
+			}
+
+			/**
+			 * Reset all the times to the initial values.
+			 */
+			public function resetToInitial() : void
+			{
+				_gameTime = _initialGameTime;
+				_moveTime = _initialMoveTime;
+				_freeTime = _initialFreeTime;
+
+				_updateTimerUI();
+			}
+
+			/**
+			 * Set the times to all zeros.
+			 */
+			public function resetToZero() : void
+			{
+				_gameTime = _initialGameTime = 0;
+				_moveTime = _initialMoveTime = 0;
+				_freeTime = _initialFreeTime = 0;
+
+				_updateTimerUI();
+			}
+
+			/**
+			 * The timer handler that runs every 1 second.
+			 */
+			private function _timerHandler(event:Event) : void
+			{
+				_decrementTime();
+				_updateTimerUI();
+			}
+
+			private function _decrementTime() : void
+			{
+				if      ( _gameTime > 0 ) { --_gameTime; }
+				else if ( _freeTime > 0 ) { --_freeTime; } // Use the free time if needed.
+
+				if ( _moveTime > 0 ) { --_moveTime; }
+			}
+
+			private function _updateTimerUI() : void
+			{
+				gameLabel.text = _formatTime(_gameTime);
+				moveLabel.text = _formatTime(_moveTime);
+				freeLabel.text = _formatTime(_freeTime);
+			}
+
+			private function _formatTime(seconds:int) : String
+			{
+				var min:int = seconds / 60;;
+				var sec:int = seconds % 60;;
+
+				var time:String = "";
+				if      (min == 0) { time += "00";      }
+				else if (min < 10) { time += "0" + min; }
+				else               { time += min;       }
+
+				time += ":";
+				if      (sec == 0) { time += "00";      }
+				else if (sec < 10) { time += "0" + sec; }
+				else               { time += sec;       }
+
+				return time;
+			}
+
+		]]>
+	</mx:Script>
+
+	<mx:Image source="@Embed(source='../assets/timer.png')"/>
+	<mx:Label id="gameLabel" text="00:00" fontSize="12" fontWeight="bold" color="#2272CD"/>
+	<mx:Label id="moveLabel" text="00:00" fontSize="12" fontWeight="bold"/>
+	<mx:Label id="freeLabel" text="00:00" fontSize="12"/>
+
+</mx:HBox>

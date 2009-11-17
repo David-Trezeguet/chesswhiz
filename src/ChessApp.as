@@ -456,11 +456,11 @@
 
 			if ( _table.tableId != tableInfo.tid )
 			{
-				const initialTimer:Object = GameTimers.parse_times(tableInfo.initialtime);
+				const fields:Array = tableInfo.initialtime.split("/");
 				const settings:Object = {
-						"gametime"  : initialTimer.gametime,
-						"movetime"  : initialTimer.movetime,
-						"extratime" : initialTimer.extratime,
+						"gametime"  : parseInt(fields[0]),
+						"movetime"  : parseInt(fields[1]),
+						"extratime" : parseInt(fields[2]),
 						"rated"     : tableInfo.rated
 					};
 				_table.setTableId( tableInfo.tid );

@@ -42,12 +42,32 @@
 			board.setPreferences(bgColor, lineColor, pieceSkin);
 		}
 
-		public function onNewMoveFromTable() : void
+		public function onNewMoveFromTable( moveColor:String, bSetup:Boolean=false) : void
 		{
 			++_moveCount;
 			if ( _moveCount == 1)
 			{
 				_enableReviewButtons(true);
+			}
+			else if (_moveCount == 2)
+			{
+				if ( moveColor == "Red" ) {  blackClock.start(); }
+				else                      {  redClock.start();   }
+			}
+			else if (_moveCount > 2)
+			{
+				if (moveColor == "Red")
+				{
+					redClock.stop();
+					if ( ! bSetup ) { blackClock.resetMoveTime(); }
+					blackClock.start();
+				}
+				else
+				{
+					blackClock.stop();
+					if ( ! bSetup ) { redClock.resetMoveTime(); }
+					redClock.start();
+				}
 			}
 
 			_updateLeaveButtons();
@@ -57,6 +77,9 @@
 		{
 			_moveCount = 0;
 			_updateLeaveButtons();
+
+			redClock.stop();
+			blackClock.stop();
 
 			_enableReviewButtons(false);
 
@@ -79,9 +102,10 @@
 			activitiesArea.text = "";
 			messagesPanel.clearPanel();
 
-			const emptyTimers:GameTimers = new GameTimers();
-			updateTimers( "Red",   emptyTimers );
-			updateTimers( "Black", emptyTimers );
+			redClock.stop();
+			blackClock.stop();
+			redClock.resetToZero();
+			blackClock.resetToZero();
 
 			_updateLeaveButtons();
 			board.reset();
@@ -112,9 +136,6 @@
 			 */
 			boardBox.setChildIndex( boardBox.getChildAt(2), 0 );
 			boardBox.setChildIndex( boardBox.getChildAt(1), 2 );
-
-			updateTimers( "Red",   _table.getTimers("Red")   );
-			updateTimers( "Black", _table.getTimers("Black") );
 
 			board.reverseView();
 		}
@@ -154,9 +175,6 @@
 					_blackId = player.pid;
 					blackPanel.playerLabel = player.pid + " (" + player.score + ")"
 				}
-
-				const timer:GameTimers = _table.getTimers(player.color);
-				updateTimers(player.color, timer);
 			}
 
 			_updateLeaveButtons();
@@ -201,8 +219,10 @@
 			_moveCount = 0;
 			_updateLeaveButtons();
 
-			updateTimers( "Red",   _table.getTimers("Red")   );
-			updateTimers( "Black", _table.getTimers("Black") );
+			redClock.stop();
+			blackClock.stop();
+			redClock.resetToInitial();
+			blackClock.resetToInitial();
 
 			board.reset();
 		}
@@ -234,21 +254,11 @@
 				blackPanel.showLeaveButton(false);
 			}
 		}
-		
-		public function updateTimers(color:String, timer:GameTimers) : void
+
+		public function initializeTimers(itimes:String, redTimes:String = "", blackTimes:String = "") : void
 		{
-			if (color == "Red")
-			{
-				redTimerGame.text = timer.getTimer("game");
-				redTimerMove.text = timer.getTimer("move");
-				redTimerExtra.text = timer.getTimer("extra");
-			}
-			else
-			{
-				blackTimerGame.text = timer.getTimer("game");
-				blackTimerMove.text = timer.getTimer("move");
-				blackTimerExtra.text = timer.getTimer("extra");
-			}
+			redClock.initWith(itimes, redTimes);
+			blackClock.initWith(itimes, blackTimes);
 		}
 
 		public function onSystemMessage(msg:String) : void
@@ -359,12 +369,7 @@
 				playButtonClick="onPlayButton(event);"
 				leaveButtonClick="onLeaveButton(event);"/>
 			<mx:Spacer width="100%" />
-			<mx:HBox id="blackTimers" width="197" height="28" verticalAlign="middle">
-				<mx:Image id="blackTimerImage" source="@Embed(source='../assets/timer.png')"/>
-				<mx:Label id="blackTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
-				<mx:Label id="blackTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
-				<mx:Label id="blackTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
-			</mx:HBox>
+			<cwui:ClockPanel id="blackClock" width="197" height="28"/>
 		</mx:HBox>
 		
 		<cwui:BoardCanvas id="board" x="10" y="48" width="550" height="550" />
@@ -374,12 +379,7 @@
 				playButtonClick="onPlayButton(event);"
 				leaveButtonClick="onLeaveButton(event);"/>
 			<mx:Spacer width="100%" />
-			<mx:HBox id="redTimers" width="197" height="28" verticalAlign="middle">
-				<mx:Image id="redTimerImage" source="@Embed(source='../assets/timer.png')"/>
-				<mx:Label id="redTimerGame" fontSize="12" text="00:00" fontWeight="bold" color="#2272CD"/>
-				<mx:Label id="redTimerMove" fontSize="12" text="00:00" fontWeight="bold"/>
-				<mx:Label id="redTimerExtra" fontSize="12" text="00:00" fontWeight="normal"/>
-			</mx:HBox>
+			<cwui:ClockPanel id="redClock" width="197" height="28"/>
 		</mx:HBox>
 		
 		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#383232, #FFFFFF]">
