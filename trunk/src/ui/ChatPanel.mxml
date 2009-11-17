@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
 	width="400" height="300"
-	showCloseButton="true"
-	title="Chat"
+	showCloseButton="false"
+	title="{resourceManager.getString('localization', 'Chat')}"
 	creationComplete="onCreationComplete()"
 	close="onClose();">
 
@@ -25,9 +25,21 @@
 			 */
 
 			public var otherPlayerId:String = "";
-			public var inPrivateMode:Boolean = true;
-
 			public var newMessage:String    = "";
+
+			private var __inPrivateMode:Boolean = true;  // The DEFAULT private mode.
+
+			// Set method.
+			public function set privateMode(val:Boolean) : void
+			{
+			    __inPrivateMode = val;
+			}
+
+			// Get method. 
+			public function get privateMode() : Boolean
+			{
+				return __inPrivateMode;
+			}
 
 			private function onCreationComplete() : void
 			{
@@ -35,11 +47,18 @@
 				{
 					this.title += " (" + otherPlayerId + ")";
 				}
+
+				chatInput.text = resourceManager.getString('localization', 'chat_prompt');
 			}
 
-	        public function onMessageFrom(pid:String, msg:String) : void
+	        public function onMessageFrom(pid:String, msg:String, bPrivate:Boolean = false) : void
 	        {
-	        	_displayMessageOnView(pid, msg);
+	        	_displayMessageOnView(pid, msg, bPrivate);
+	        }
+
+	        public function clearPanel() : void
+	        {
+	        	messagesArea.htmlText = "";
 	        }
 
 			private function onClose() : void
@@ -62,10 +81,10 @@
 				dispatchEvent( new Event("newChatMessage", true /* bubble to parent */) );
 	        }
 
-	        public function _displayMessageOnView(senderId:String, msg:String) : void
+	        public function _displayMessageOnView(senderId:String, msg:String, bPrivate:Boolean = false) : void
 	        {
 				var senderTag:String = senderId;
-				if ( inPrivateMode )
+				if ( __inPrivateMode || bPrivate )
 				{
 					senderTag = "<font color=\"#3366FF\">" + senderTag + "</font>";
 				}

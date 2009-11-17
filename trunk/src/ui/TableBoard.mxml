@@ -9,22 +9,11 @@
 
 <mx:Script>
 	<![CDATA[
-		import mx.collections.ArrayCollection;
 		import mx.utils.ObjectUtil;
 		import mx.managers.PopUpManager;
-		import mx.utils.StringUtil;
 		import mx.controls.Label;
 		import mx.controls.Image;
 		import hoxserver.*;
-
-		/**
-		 * References:
-		 * ===========
-		 * How to scroll to the bottom of a text area automatically:
-		 *
-		 * http://butterfliesandbugs.wordpress.com/2007/08/20/scrolling-to-the-bottom-of-a-container-or-textarea-automatically/
-		 *
-		 */
 
 		public static const INVALID_INDEX:int = -1;
 
@@ -38,7 +27,6 @@
 			playersPanel.title        = resourceManager.getString('localization', 'Players');
 			activitiesPanel.title     = resourceManager.getString('localization', 'Activities');
 			messagesPanel.title       = resourceManager.getString('localization', 'Messages');
-			chatInput.text            = resourceManager.getString('localization', 'chat_prompt');
 			resignButton.label        = resourceManager.getString('localization', 'Resign');
 			drawButton.label          = resourceManager.getString('localization', 'Draw');
 			redPlayButton.label       = resourceManager.getString('localization', 'Play_RED');
@@ -68,7 +56,7 @@
 			blackLabel.text = "";
 			playersPanel.removeAllPlayers();
 			activitiesArea.text = "";
-			messagesArea.text = "";
+			messagesPanel.clearPanel();
 
 			const emptyTimers:GameTimers = new GameTimers();
 			updateTimers( "Red",   emptyTimers );
@@ -245,25 +233,14 @@
 		 */
 		public function onBoardMessage(msg:String, senderId:String = "", bPrivate:Boolean = false) : void 
 		{
-			var senderTag:String = senderId;
-			if ( bPrivate )
-			{
-				senderTag = "<font color=\"#3366FF\">" + senderTag + "</font>";
-			}
-
-			messagesArea.htmlText += "<p>"
-				+ (senderId == "" ? "" : "<b>" + senderTag + "</b>: ")
-				+ msg + "</p>";
+			messagesPanel.onMessageFrom(senderId, msg, bPrivate);
 		}
 
-        public function onEnterInput(event:Event) : void
-        {
-			const msg:String = StringUtil.trim( chatInput.text );
-			chatInput.text = "";
-
+		public function onEnterInput(event:Event) : void
+		{
+			const msg:String = messagesPanel.newMessage;
 			Global.app.doSendMessage(msg);
-			this.onBoardMessage(msg, Global.player.pid);
-        }
+		}
 
 		public function onSettingsButton(event:Event) : void
 		{
@@ -325,11 +302,6 @@
 			rewindButton.enabled  = flag;
 			forwardButton.enabled = flag;
 			endButton.enabled     = flag;
-		}
-
-		private function onChatInputFocusIn(event:FocusEvent) : void
-		{
-			chatInput.text = "";
 		}
 
 	]]>
@@ -402,18 +374,9 @@
 				<mx:TextArea id="activitiesArea" width="100%" height="100%" editable="false"
 					valueCommit="activitiesArea.verticalScrollPosition=activitiesArea.maxVerticalScrollPosition;"/>
 			</mx:Panel>
-
-			<mx:Panel id="messagesPanel" title="Messages" width="100%" height="100%" layout="vertical" verticalGap="0">
-				<mx:TextArea id="messagesArea" width="100%" height="100%" editable="false" backgroundColor="#F8F6F1"
-					valueCommit="messagesArea.verticalScrollPosition=messagesArea.maxVerticalScrollPosition;"/>
-				<mx:HBox width="100%" horizontalGap="0">
-					<mx:TextInput id="chatInput" width="100%"
-						enter="onEnterInput(event)"
-						focusIn="onChatInputFocusIn(event)"/>
-					<mx:Image source="@Embed(source='../assets/key_enter.png')" width="22" height="22" buttonMode="true"
-						click="onEnterInput(event)"/>
-				</mx:HBox>
-			</mx:Panel>
+			<cwui:ChatPanel id="messagesPanel" title="Messages" width="100%" height="100%" layout="vertical" verticalGap="0"
+				privateMode="false"
+				newChatMessage="onEnterInput(event)"/>
 		</mx:VDividedBox>
 	</mx:VBox>
 
