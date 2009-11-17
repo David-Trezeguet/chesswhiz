@@ -29,7 +29,7 @@
 				{
 					"gametime"  : 0,
 					"movetime"  : 0,
-					"extratime" : 0,
+					"freetime"  : 0,
 					"rated"     : false
 				};
 
@@ -152,7 +152,7 @@
 			const fields:Array = itimes.split("/");
 			_settings["gametime"]  = fields[0];
 			_settings["movetime"]  = fields[1];
-			_settings["extratime"] = fields[2];
+			_settings["freetime"]  = fields[2];
 			_view.onBoardMessage("Timer: " + itimes, "***");
 
 			_settings["rated"] = bRated;
@@ -459,9 +459,9 @@
 		{
 			var bSettingsChanged:Boolean = false;
 
-			if (    _settings["gametime"]  != newSettings["gametime"]
-				 || _settings["movetime"]  != newSettings["movetime"]
-				 || _settings["extratime"] != newSettings["extratime"] )
+			if (    _settings["gametime"] != newSettings["gametime"]
+				 || _settings["movetime"] != newSettings["movetime"]
+				 || _settings["freetime"] != newSettings["freetime"] )
 			{
 				bSettingsChanged = true;
 			}
@@ -473,7 +473,7 @@
 			if ( bSettingsChanged )
 			{
 				const itimes:String = newSettings["gametime"]
-					+ "/" + newSettings["movetime"] + "/" + newSettings["extratime"];
+					+ "/" + newSettings["movetime"] + "/" + newSettings["freetime"];
 				Global.app.doUpdateTableSettings(itimes, newSettings["rated"]);
 			}
 		}

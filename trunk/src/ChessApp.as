@@ -460,7 +460,7 @@
 				const settings:Object = {
 						"gametime"  : parseInt(fields[0]),
 						"movetime"  : parseInt(fields[1]),
-						"extratime" : parseInt(fields[2]),
+						"freetime"  : parseInt(fields[2]),
 						"rated"     : tableInfo.rated
 					};
 				_table.setTableId( tableInfo.tid );
