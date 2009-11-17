@@ -369,6 +369,7 @@
 				else if (msg.optype == "RESET")       { _processEvent_RESET(msg);       }
 				else if (msg.optype == "PLAYER_INFO") { _processEvent_PLAYER_INFO(msg); }
 				else if (msg.optype == "INVITE")      { _processEvent_INVITE(msg);      }
+				else if (msg.optype == "E_SCORE")     { _processEvent_E_SCORE(msg);     }
 			}
 		}
 
@@ -465,6 +466,15 @@
 				_table.setTableId( tableInfo.tid );
 				_table.setSettings( settings );
 			}
+
+			// Lookup the scores of observers using our internally Player-List.
+			var detailedObversers:Array = [];
+			for each (var oid:String in tableInfo.observers)
+			{
+				const score:String = _playerWindow.lookupPlayerScore(oid);
+				detailedObversers.push( new PlayerInfo(oid, "None", score) );
+			}
+			tableInfo.observers = detailedObversers;
 
 			_table.newTable(tableInfo);
 		}
@@ -632,6 +642,15 @@
 
 			const inviteInfo:Object = event.parse_INVITE();
 			_table.displayInvitation(inviteInfo);
+		}
+
+		private function _processEvent_E_SCORE(event:Message) : void
+		{
+			if ( event.getCode() != 0 ) { return; }
+
+			const scoreInfo:Object = event.parse_E_SCORE();
+			_playerWindow.addPlayer(scoreInfo.pid, scoreInfo.score); // Add = Update.
+			_table.updatePlayerScore(scoreInfo);
 		}
 
 		public function playMoveSound() : void

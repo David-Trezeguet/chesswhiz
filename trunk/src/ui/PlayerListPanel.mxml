@@ -20,6 +20,9 @@
 
 			/**
 			 * Add a player to the list.
+			 * If the player is already in the list, then update the Player
+			 * with the new score.
+			 *
 			 * @return true if the player just joined the list.
 			 */
 			public function addPlayer(pid:String, score:String) : Boolean
@@ -35,7 +38,8 @@
 				else // Already in the list, update the Rating then.
 				{
 					var foundPlayer:Object = _playerList.getItemAt(playerIndex);
-					foundPlayer["Rating"] = score;
+					foundPlayer["rating"] = score;
+					_playerList.itemUpdated(foundPlayer); // Notify the DataGrid of the update.
 				}
 				return (playerIndex == INVALID_INDEX);
 			}
@@ -61,6 +65,21 @@
 			public function removeAllPlayers() : void
 			{
 				_playerList.removeAll();
+			}
+
+			/**
+			 * Lookup a given player's score.
+			 * @return "0" if the player is not found.
+			 */
+			public function lookupPlayerScore(playerId:String) : String
+			{
+				const playerIndex:int = _findPlayerIndexInList(playerId);
+				if ( playerIndex != INVALID_INDEX )  // Found?
+				{
+					var foundPlayer:Object = _playerList.getItemAt(playerIndex);
+					return foundPlayer["rating"];
+				}
+				return "0";
 			}
 
 			/**

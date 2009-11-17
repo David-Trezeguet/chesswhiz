@@ -236,6 +236,17 @@
 			messagesPanel.onMessageFrom(senderId, msg, bPrivate);
 		}
 
+		public function onNewPlayerScore(pid:String, score:String) : void 
+		{
+			if ( _redId == pid ) {
+				redLabel.text = pid + " (" + score + ")";
+			}
+			else if ( _blackId == pid ) {
+				blackLabel.text = pid + " (" + score + ")";
+			}
+			playersPanel.addPlayer(pid, score); // Add = Update.
+		}
+
 		public function onEnterInput(event:Event) : void
 		{
 			const msg:String = messagesPanel.newMessage;
