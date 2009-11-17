@@ -21,6 +21,7 @@
 
 		private var _redId:String    = "";
 		private var _blackId:String  = "";
+		private var _moveCount:uint  = 0;
 
 		private function onCreationComplete() : void
 		{
@@ -29,8 +30,6 @@
 			messagesPanel.title       = resourceManager.getString('localization', 'Messages');
 			resignButton.label        = resourceManager.getString('localization', 'Resign');
 			drawButton.label          = resourceManager.getString('localization', 'Draw');
-			redPlayButton.label       = resourceManager.getString('localization', 'Play_RED');
-			blackPlayButton.label     = resourceManager.getString('localization', 'Play_BLACK');
 			reverseViewButton.toolTip = resourceManager.getString('localization', 'Reverse_View');
 			settingsButton.toolTip    = resourceManager.getString('localization', 'Table_Settings');
 			resetButton.toolTip       = resourceManager.getString('localization', 'Reset_table');
@@ -43,6 +42,27 @@
 			board.setPreferences(bgColor, lineColor, pieceSkin);
 		}
 
+		public function onNewMoveFromTable() : void
+		{
+			++_moveCount;
+			if ( _moveCount == 1)
+			{
+				_enableReviewButtons(true);
+			}
+
+			_updateLeaveButtons();
+		}
+
+		public function onGameOverEventFromTable(reason:String) : void
+		{
+			_moveCount = 0;
+			_updateLeaveButtons();
+
+			_enableReviewButtons(false);
+
+			board.displayStatus("Game Over (" + reason + ")");
+		}
+
 		/**
 		 * This function is called in the following two cases:
 		 *   (1) An Empty table needs to be created ( table-ID = "").
@@ -51,9 +71,10 @@
 		public function clearDisplay() : void
 		{
 			_redId = "";
-			redLabel.text = "";
 			_blackId = "";
-			blackLabel.text = "";
+
+			_moveCount = 0;
+
 			playersPanel.removeAllPlayers();
 			activitiesArea.text = "";
 			messagesPanel.clearPanel();
@@ -62,7 +83,7 @@
 			updateTimers( "Red",   emptyTimers );
 			updateTimers( "Black", emptyTimers );
 
-			_updatePlayButtons();
+			_updateLeaveButtons();
 			board.reset();
 			
 			if ( _table.tableId == "" )
@@ -70,13 +91,15 @@
 				this.title = "";
 				board.displayEmptyStatus();
 				this.showCloseButton = false;
-				redPlayButton.visible           = false;
-				redPlayButton.includeInLayout   = false;
-				blackPlayButton.visible         = false;
-				blackPlayButton.includeInLayout = false;
+				redPanel.visible = false;
+				blackPanel.visible = false;
 			}
 			else
 			{
+				redPanel.visible = true;
+				redPanel.playerLabel = "";
+				blackPanel.visible = true;
+				blackPanel.playerLabel = "";
 				this.title = "Table #" + _table.tableId;
 				this.showCloseButton = true;
 			}
@@ -111,12 +134,12 @@
 				if ( player.pid == _redId )
 				{
 					_redId = "";
-					redLabel.text = "";
+					redPanel.playerLabel = "";
 				}
 				else if ( player.pid == _blackId )
 				{
 					_blackId = "";
-					blackLabel.text = "";
+					blackPanel.playerLabel = "";
 				}
 			}
 			else
@@ -124,22 +147,21 @@
 				if ( player.color == "Red" )
 				{
 					_redId = player.pid;
-					redLabel.text = player.pid + " (" + player.score + ")";
+					redPanel.playerLabel = player.pid + " (" + player.score + ")";
 				}
 				else   /* "Black" */
 				{
 					_blackId = player.pid;
-					blackLabel.text = player.pid + " (" + player.score + ")"
+					blackPanel.playerLabel = player.pid + " (" + player.score + ")"
 				}
 
 				const timer:GameTimers = _table.getTimers(player.color);
 				updateTimers(player.color, timer);
 			}
 
-			_updatePlayButtons();
+			_updateLeaveButtons();
 
-			// By default, make sure that if I play, my side is
-			// at the bottom of the board.
+			// By default, my side is at the bottom of the board.
 			if (   Global.player.pid == _blackId && _isBlackAtTopSide()
 				|| Global.player.pid == _redId && !_isBlackAtTopSide() )
 			{
@@ -152,7 +174,7 @@
 		 */
 		public function onPlayerLeft(playerId:String) : void
 		{
-			if ( playersPanel.removePlayer(playerId) ) // removed from list?
+			if ( playersPanel.removePlayer(playerId) ) // was in the list?
 			{
 				this.onSystemMessage(playerId + " left");
 			}
@@ -160,15 +182,15 @@
 			if ( playerId == _redId )
 			{
 				_redId = "";
-				redLabel.text = "";
+				redPanel.playerLabel = "";
 			}
 			else if ( playerId == _blackId )
 			{
 				_blackId = "";
-				blackLabel.text = "";
+				blackPanel.playerLabel = "";
 			}
 
-			_updatePlayButtons();
+			_updateLeaveButtons();
 		}
 
 		/**
@@ -176,10 +198,11 @@
 		 */
 		public function onReset() : void
 		{
+			_moveCount = 0;
+			_updateLeaveButtons();
+
 			updateTimers( "Red",   _table.getTimers("Red")   );
 			updateTimers( "Black", _table.getTimers("Black") );
-			
-			_updatePlayButtons();
 
 			board.reset();
 		}
@@ -193,13 +216,23 @@
 			return ( boardBox.getChildIndex(blackBox) == 0 );
 		}
 
-		private function _updatePlayButtons() : void
+		private function _updateLeaveButtons() : void
 		{
-			redPlayButton.visible         = (redLabel.text == "");
-			redPlayButton.includeInLayout = (redLabel.text == "");
+			const gameStarted:Boolean = ( _moveCount > 0 );
 
-			blackPlayButton.visible         = (blackLabel.text == "");
-			blackPlayButton.includeInLayout = (blackLabel.text == "");
+			if ( Global.player.pid == _redId  )
+			{
+				redPanel.showLeaveButton( !gameStarted );
+			}
+			else if ( Global.player.pid == _blackId )
+			{
+				blackPanel.showLeaveButton( !gameStarted );
+			}
+			else
+			{
+				redPanel.showLeaveButton(false);
+				blackPanel.showLeaveButton(false);
+			}
 		}
 		
 		public function updateTimers(color:String, timer:GameTimers) : void
@@ -238,12 +271,8 @@
 
 		public function onNewPlayerScore(pid:String, score:String) : void 
 		{
-			if ( _redId == pid ) {
-				redLabel.text = pid + " (" + score + ")";
-			}
-			else if ( _blackId == pid ) {
-				blackLabel.text = pid + " (" + score + ")";
-			}
+			if      ( _redId == pid )   { redPanel.playerLabel = pid + " (" + score + ")"; }
+			else if ( _blackId == pid ) { blackPanel.playerLabel = pid + " (" + score + ")"; }
 			playersPanel.addPlayer(pid, score); // Add = Update.
 		}
 
@@ -281,7 +310,12 @@
 		public function onPlayButton(event:Event) : void
 		{
 			Global.app.doJoinTable( _table.tableId,
-									( event.target == redPlayButton ? "Red" : "Black") );
+									(event.target == redPanel ? "Red" : "Black") );
+		}
+
+		public function onLeaveButton(event:Event) : void
+		{
+			Global.app.doJoinTable( _table.tableId, "None" );
 		}
 
 		/**
@@ -307,7 +341,7 @@
 			board.changePiecesSkin(pieceSkin);
 		}
 
-		public function enableReviewButtons(flag:Boolean) : void 
+		private function _enableReviewButtons(flag:Boolean) : void 
 		{
 			startButton.enabled   = flag;
 			rewindButton.enabled  = flag;
@@ -320,12 +354,10 @@
 
 	<mx:VBox id="boardBox" height="670" width="550" verticalGap="5" horizontalAlign="center">
 	
-		<mx:HBox id="blackBox" width="100%">
-			<mx:HBox id="blackPlayer" width="280" height="28" verticalAlign="middle">
-				<mx:Image id="blackImage" source="@Embed(source='../assets/black_player.png')"/>
-				<mx:Button id="blackPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
-				<mx:Label id="blackLabel" fontSize="13"/>
-			</mx:HBox>
+		<mx:HBox id="blackBox" width="100%" verticalAlign="middle">
+			<cwui:PlayerPanel id="blackPanel" playerColor="Black" height="28"
+				playButtonClick="onPlayButton(event);"
+				leaveButtonClick="onLeaveButton(event);"/>
 			<mx:Spacer width="100%" />
 			<mx:HBox id="blackTimers" width="197" height="28" verticalAlign="middle">
 				<mx:Image id="blackTimerImage" source="@Embed(source='../assets/timer.png')"/>
@@ -337,12 +369,10 @@
 		
 		<cwui:BoardCanvas id="board" x="10" y="48" width="550" height="550" />
 
-		<mx:HBox id="redBox" width="100%">
-			<mx:HBox id="redPlayer" width="280" height="28" verticalAlign="middle">
-				<mx:Image id="redImage" source="@Embed(source='../assets/red_player.png')"/>
-				<mx:Button id="redPlayButton" label="Play" click="onPlayButton(event)"  fontSize="12"/>
-				<mx:Label id="redLabel" fontSize="13"/>
-			</mx:HBox>
+		<mx:HBox id="redBox" width="100%" verticalAlign="middle">
+			<cwui:PlayerPanel id="redPanel" playerColor="Red" height="28"
+				playButtonClick="onPlayButton(event);"
+				leaveButtonClick="onLeaveButton(event);"/>
 			<mx:Spacer width="100%" />
 			<mx:HBox id="redTimers" width="197" height="28" verticalAlign="middle">
 				<mx:Image id="redTimerImage" source="@Embed(source='../assets/timer.png')"/>

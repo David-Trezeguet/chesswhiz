@@ -156,8 +156,9 @@
 				_view.board.disablePieceEvents(Global.player.color);
 				Global.player.color = "None";
 			}
-			
-			_view.board.displayStatus("Game Over (" + reason + ")");
+
+			_view.onGameOverEventFromTable(reason);
+
 			_stopTimers();
 		}
 		
@@ -535,12 +536,9 @@
 				_view.board.movePieceByPos(piece, newPos);
 			}
 
-			// Update the menu.
-			if (nMoves == 1)
-			{
-				_view.enableReviewButtons(true);
-			}
-			else if (nMoves == 2)
+			_view.onNewMoveFromTable();
+
+			if (nMoves == 2)
 			{
 				_startTimer();
 			}

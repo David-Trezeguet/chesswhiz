@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	verticalAlign="middle"
+	creationComplete="onCreationComplete();">
+
+	<mx:Metadata>
+		[Event(name="playButtonClick", type="flash.events.Event")]
+		[Event(name="leaveButtonClick", type="flash.events.Event")]
+	</mx:Metadata>
+
+	<mx:Script>
+		<![CDATA[
+
+			[Embed(source="../assets/red_player.png")]
+			[Bindable]
+			public var redImageClass:Class;
+
+			[Embed(source="../assets/black_player.png")]
+			[Bindable]
+			public var blackImageClass:Class;
+
+			[Embed(source="../assets/button_close.png")]
+			[Bindable]
+			public var leaveImageClass:Class;
+
+			private var __playerColor:String = "Red";
+
+			public function get playerColor() : String { return __playerColor; }
+ 			public function set playerColor(val:String) : void { __playerColor = val; }
+
+			public function get playerLabel() : String { return myLabel.text; }
+
+			public function set playerLabel(val:String) : void
+			{
+				myLabel.text = val;
+				_onLabelChanged();
+			}
+
+			public function showLeaveButton(val:Boolean) : void
+			{
+				if ( val )
+				{
+					leaveButton.visible = true;
+					leaveButton.includeInLayout = true;
+				}
+				else
+				{
+					leaveButton.visible = false;
+					leaveButton.includeInLayout = false;
+					_onLabelChanged();
+				}
+			}
+
+			public function _onLabelChanged() : void
+			{
+				if ( myLabel.text == "" )
+				{
+					playButton.visible = true;
+					playButton.includeInLayout = true;
+				}
+				else
+				{
+					playButton.visible = false;
+					playButton.includeInLayout = false;
+				}
+			}
+
+			/* --------------------- Event handlers -----------------------*/
+
+			private function onCreationComplete() : void
+			{
+			    myImage.source = (__playerColor == "Red" ? redImageClass : blackImageClass);
+			    playButton.label = (__playerColor == "Red" ? resourceManager.getString('localization', 'Play_RED')
+			    										   : resourceManager.getString('localization', 'Play_BLACK'));
+			}
+
+			public function onButtonClicked(type:String) : void
+			{
+				dispatchEvent( new Event(type, true /* bubble to parent */) );
+			}
+
+		]]>
+	</mx:Script>
+
+	<mx:Image id="myImage"/>
+	<mx:Button id="playButton" label="Play" fontSize="12"
+		click="onButtonClicked('playButtonClick')" />
+	<mx:Button id="leaveButton" visible="false" includeInLayout="false"
+		toolTip="{resourceManager.getString('localization', 'Leave')}"
+		click="onButtonClicked('leaveButtonClick')"
+		icon="{leaveImageClass}"/>
+	<mx:Label id="myLabel" fontSize="13"/>
+
+</mx:HBox>
