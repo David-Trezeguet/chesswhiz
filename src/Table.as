@@ -111,9 +111,10 @@
 				}
 			}
 
-			if ( Global.player.color == "None" )
+			// Add the list of observers, if any.
+			for each (var observerInfo:PlayerInfo in tableInfo.observers)
 			{
-				_view.onPlayerJoined( Global.player );
+				_view.onPlayerJoined( observerInfo );
 			}
 		}
 
@@ -606,6 +607,18 @@
 			const inviteString:String = "From [" + inviteInfo.pid + " (" + inviteInfo.score + ")]"
 				+ " @ [" + tableId + "]";
 			_view.onBoardMessage("*INVITE: " + inviteString);
+		}
+
+		public function updatePlayerScore(scoreInfo:Object) : void
+		{
+			if ( _redPlayer && _redPlayer.pid == scoreInfo.pid ) {
+				_redPlayer.score = scoreInfo.score;
+			}
+			else if ( _blackPlayer && _blackPlayer.pid == scoreInfo.pid ) {
+				_blackPlayer.score = scoreInfo.score;
+			}
+
+			_view.onNewPlayerScore(scoreInfo.pid, scoreInfo.score);
 		}
 	}
 }

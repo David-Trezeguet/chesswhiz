@@ -313,9 +313,19 @@
 				};
 		}
 
+		public function parse_E_SCORE() : Object
+		{
+			const fields:Array = params.content.split(';');
+			return {
+					tid    : fields[0],
+					pid    : fields[1],
+					score  : fields[2]
+				};
+		}
+
 		public function parse_I_TABLE() : Object
 		{
-			return _helper_parse_I_TABLE( params.content );
+			return _helper_parse_I_TABLE( params.content, true /* observersRequired */ );
 		}
 
 		public function parse_LIST() : Object
@@ -340,10 +350,15 @@
 		 *   (1) The "I_TABLE" event
 		 *   (2) The "LIST" event (consisting of the "I_TABLE" elements).
 		 */
-		private static function _helper_parse_I_TABLE(inputContent:String) : Object
+		private static function _helper_parse_I_TABLE(inputContent:String, observersRequired:Boolean=false) : Object
 		{
+			// Chop off the ending ";" to avoid having an "empty-string" observer. 
+			if ( inputContent.charAt(inputContent.length-1) == ";" ) {
+				inputContent = inputContent.substr(0, inputContent.length-1);
+			}
+
 			const fields:Array = inputContent.split(';');
-			return {
+			var tableInfo:Object = {
 					tid         : fields[0],
 					group       : fields[1],
 					rated       : (fields[2] == "0"), // NOTE: Strange but true!
@@ -355,6 +370,12 @@
 					blackid     : fields[8],
 					blackscore  : fields[9]
 				};
+
+			if (observersRequired) {
+				tableInfo.observers = fields.slice(10);
+			}
+
+			return tableInfo;
 		}
 	}
 }
