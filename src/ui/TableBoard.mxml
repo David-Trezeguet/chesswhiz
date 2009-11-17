@@ -117,6 +117,8 @@
 				this.showCloseButton = false;
 				redPanel.visible = false;
 				blackPanel.visible = false;
+				redClock.visible = false;
+				blackClock.visible = false;
 			}
 			else
 			{
@@ -124,6 +126,8 @@
 				redPanel.playerLabel = "";
 				blackPanel.visible = true;
 				blackPanel.playerLabel = "";
+				redClock.visible = true;
+				blackClock.visible = true;
 				this.title = "Table #" + _table.tableId;
 				this.showCloseButton = true;
 			}
