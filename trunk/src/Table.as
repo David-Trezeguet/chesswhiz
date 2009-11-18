@@ -222,7 +222,6 @@
 					//////////////////////////////////////////////
 					
 					_processMoveEvent(piece, curPos, newPos, true /* in Setup mode */);
-		           //_view.board.onNewMove();
 				}
 			}
 		}
@@ -233,26 +232,22 @@
 				return;
 			}
 
-			var lastMove:String = _moveList.pop();
-			var fields:Array = lastMove.split(":");
-			var piece:Piece = _view.board.getPieceByIndex(fields[0], fields[1]);
-			var move:String = fields[2];
+			var move:Move = _moveList.pop(); // Get the last Move.
+			var piece:Piece = _view.board.getPieceByIndex(move.color, move.pieceIndex);
 			var capturePiece:Piece = null;
-			if (fields[3] != "") {
-				capturePiece = _view.board.getPieceByIndex((fields[0] == "Red" ? "Black" : "Red"), fields[3]);
+			if (move.capturedIndex != -1) {
+				capturePiece = _view.board.getPieceByIndex((move.color == "Red" ? "Black" : "Red"), move.capturedIndex);
 			}
-			var prevPos:Position = new Position(parseInt(move.charAt(0)), parseInt(move.charAt(1)));
-			var curPos:Position = new Position(parseInt(move.charAt(2)), parseInt(move.charAt(3)));
+			var prevPos:Position = new Position(move.oldRow, move.oldRow);
+			var curPos:Position = new Position(move.newRow, move.newCol);
 			_view.board.rewindPieceByPos(piece, curPos, prevPos, capturePiece);
 
 			// Restore the focus on the previous Move, if any.
-			if (_moveList.length > 1) {
-				lastMove = _moveList[_moveList.length - 1];
-				if (lastMove != "") {
-					fields = lastMove.split(":");
-					piece = _view.board.getPieceByIndex(fields[0], fields[1]);
-					_view.board.setFocusOnPiece(piece);
-				}
+			if (_moveList.length > 1)
+			{
+				move = _moveList[_moveList.length - 1];
+				piece = _view.board.getPieceByIndex(move.color, move.pieceIndex);
+				_view.board.setFocusOnPiece(piece);
 			}
 		}
 
@@ -260,7 +255,6 @@
 		{
 			_rewindLastMove();
 			_view.onBoardMessage("Server rejected the last move: " + error);
-			//_view.board.onNewMove();
 		}
 
 		/**
@@ -275,9 +269,7 @@
 				return;
 			}
 
-			/////////////////
-			const curPos:Position = piece.getPosition();
-
+			// Validate.
 			const pieceInfo:PieceInfo = new PieceInfo(piece.getType(), piece.getColor(), piece.getPosition());
 
 			if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
@@ -288,9 +280,9 @@
 			}
 
 			// Upon reaching here, the Move has been determined to be valid.
+			const curPos:Position = piece.getPosition();
 			_processMoveEvent(piece, curPos, newPos);
 			Global.app.playMoveSound();
-			//_view.board.onNewMove();
 			Global.app.doSendMove(curPos, newPos);
 		}
 
@@ -319,7 +311,6 @@
 				//////////////////////////////////////////////
 				
 				_processMoveEvent(piece, curPos, newPos);
-	            //_view.board.onNewMove();
 			}
 		}
 
@@ -348,61 +339,43 @@
 		private function _applyChangeSet(moveIndex:int) : void
 		{
 			var i:int = 0;
-			var changeSet:Array = [];
 			var focusPiece:Piece = null;
-			var fields:Array;
-			var color:String;
-			var pieceIndex:String;
-			var oldRow:int;
-			var oldCol:int;
-			var newRow:int;
-			var newCol:int;
-			var capturedIndex:String;
+			var move:Move;
 
-			if (moveIndex < _curMoveIndex) {
-				for (i = _curMoveIndex - 1; i >= moveIndex; i--) {
-					fields = _moveList[i].split(":");
-					color = fields[0];
-					pieceIndex = fields[1];
-					oldRow = parseInt(fields[2].charAt(0));
-					oldCol = parseInt(fields[2].charAt(1));
-					newRow = parseInt(fields[2].charAt(2));
-					newCol = parseInt(fields[2].charAt(3));
-					capturedIndex = fields[3];
-					changeSet.push( [color, pieceIndex, oldRow, oldCol, false] );
-					if (capturedIndex != "") {
-						changeSet.push( [ (color == "Red" ? "Black" : "Red"),
-						                  capturedIndex, newRow, newCol, false ] );
+			var changeSet:Array = [];
+
+			if (moveIndex < _curMoveIndex)
+			{
+				for (i = _curMoveIndex - 1; i >= moveIndex; i--)
+				{
+					move = _moveList[i];
+					changeSet.push( [move.color, move.pieceIndex, move.oldRow, move.oldCol, false] );
+					if (move.capturedIndex != -1) {
+						changeSet.push( [ (move.color == "Red" ? "Black" : "Red"),
+						                  move.capturedIndex, move.newRow, move.newCol, false ] );
 					}
 					_curMoveIndex--;
 					if (_curMoveIndex < _moveList.length && _curMoveIndex > 0) {
-						fields = _moveList[_curMoveIndex - 1].split(":");
-						color = fields[0];
-						pieceIndex = fields[1];
-						focusPiece = _view.board.getPieceByIndex(color, pieceIndex);
+						move = _moveList[_curMoveIndex - 1];
+						focusPiece = _view.board.getPieceByIndex(move.color, move.pieceIndex);
 					}
 					else {
 						focusPiece = null;
 					}
 				}
 			}
-			else {
-				for (i = _curMoveIndex; i < moveIndex; i++) {
-					fields = _moveList[i].split(":");
-					color = fields[0];
-					pieceIndex = fields[1];
-					oldRow = parseInt(fields[2].charAt(0));
-					oldCol = parseInt(fields[2].charAt(1));
-					newRow = parseInt(fields[2].charAt(2));
-					newCol = parseInt(fields[2].charAt(3));
-					capturedIndex = fields[3];
-					changeSet.push( [color, pieceIndex, newRow, newCol, false] );
-					if (capturedIndex != "") {
-						changeSet.push( [ (color == "Red" ? "Black" : "Red"),
-						                  capturedIndex, newRow, newCol, true ] );
+			else
+			{
+				for (i = _curMoveIndex; i < moveIndex; i++)
+				{
+					move = _moveList[i];
+					changeSet.push( [move.color, move.pieceIndex, move.newRow, move.newCol, false] );
+					if (move.capturedIndex != -1) {
+						changeSet.push( [ (move.color == "Red" ? "Black" : "Red"),
+						                  move.capturedIndex, move.newRow, move.newCol, true ] );
 					}
 					_curMoveIndex++;
-					focusPiece = _view.board.getPieceByIndex(color, pieceIndex);
+					focusPiece = _view.board.getPieceByIndex(move.color, move.pieceIndex);
 				}
 			}
 			_view.board.reDraw(changeSet, focusPiece);
@@ -472,10 +445,11 @@
 		{
 			// Store the new Move in the Move-List.
 			const capturedPiece:Piece = _view.board.getPieceByPos(newPos);
-			const move:String = piece.getColor() + ":" + piece.getIndex()
-				+ ":" + curPos.row + curPos.column + newPos.row + newPos.column
-				+ ":" + (capturedPiece ? capturedPiece.getIndex() : "");
 
+			const move:Move = new Move( piece.getColor(), piece.getIndex(),
+										curPos.row, curPos.column,
+										newPos.row, newPos.column,
+										(capturedPiece ? capturedPiece.getIndex() : -1) );
 			_moveList.push(move);
 
 			// Update the Piece Map.

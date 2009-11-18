@@ -179,11 +179,6 @@ package
 
 		public function nextColor() : String { return _nextColor; }
 
-		public function onNewMove() : void
-		{
-			_nextColor = (_nextColor == "Red" ? "Black" : "Red");
-		}
-
 		private function _getPiecesOfType(color:String, type:String) : Array
 		{
 			return (color == "Red") ? _redPieceHash[type] : _blackPieceHash[type];
