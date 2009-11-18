@@ -129,7 +129,7 @@
 			_view.onBoardMessage(msg, pid, bPrivate);
 		}
 		
-		public function stopGame(reason:String, winner:String) : void
+		public function stopGame(winner:String, reason:String) : void
 		{
 			if ( Global.player.color != "None" )
 			{
@@ -137,7 +137,7 @@
 				Global.player.color = "None";
 			}
 
-			_view.onGameOverEventFromTable(reason);
+			_view.onGameOverEventFromTable(winner, reason);
 		}
 
 		public function drawGame(pid:String) : void

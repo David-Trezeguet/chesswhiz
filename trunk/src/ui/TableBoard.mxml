@@ -73,7 +73,7 @@
 			_updateLeaveButtons();
 		}
 
-		public function onGameOverEventFromTable(reason:String) : void
+		public function onGameOverEventFromTable(winner:String, reason:String) : void
 		{
 			_moveCount = 0;
 			_updateLeaveButtons();
@@ -83,7 +83,22 @@
 
 			_enableReviewButtons(false);
 
-			board.displayStatus("Game Over (" + reason + ")");
+			/* Display the detailed message on why the Game ended.
+			 * TODO: Need to localize the detailed info-message.
+			 */
+
+			var infoMsg:String = resourceManager.getString('localization', 'Game_Over');
+			board.displayStatus(infoMsg);
+
+			switch ( winner )
+			{
+				case "red_win":   infoMsg += ". " + _redId + " won."; break;
+				case "black_win": infoMsg += ". " + _blackId + " won."; break;
+				case "drawn":     infoMsg += ". Game drawn."; break;
+			}
+			if ( reason != "" ) { infoMsg += " " + reason; }
+
+			this.onBoardMessage(infoMsg, "***");
 		}
 
 		/**
