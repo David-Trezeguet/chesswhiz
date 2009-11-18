@@ -278,7 +278,8 @@
 			return _pieceMap[pos.row][pos.column];
 		}
 
-		public function getPieceByIndex(color:String, index:String) : Piece {
+		public function getPieceByIndex(color:String, index:int) : Piece
+		{
 			return (color == "Red" ? _redPieces[index] : _blackPieces[index]);
 		}
 
@@ -388,20 +389,21 @@
 				return;
 			}
 			var piece:Piece;
-			var captured:Boolean;
+			var bCaptured:Boolean = false;
 			var pos1:Position;
 			var pos2:Position;
 			var color:String;
-			var index:int;
+			var pieceIndex:int = -1;
 
-			for (var i:int = 0; i < changeSet.length; i++) {
+			for (var i:int = 0; i < changeSet.length; i++)
+			{
 				color = changeSet[i][0];
-				index = parseInt(changeSet[i][1]);
-				piece = (color == "Red" ? _redPieces[index] : _blackPieces[index]);
-				captured = changeSet[i][4];
+				pieceIndex = changeSet[i][1];
+				piece = (color == "Red" ? _redPieces[pieceIndex] : _blackPieces[pieceIndex]);
+				bCaptured = changeSet[i][4];
 				pos1 = piece.getPosition();
 				pos2 = new Position(changeSet[i][2], changeSet[i][3]);
-				if (!captured) {
+				if (!bCaptured) {
 					if (piece.isCaptured()) {
 						piece.setPosition(pos2);
 						piece.draw(offset, _cellSize, _pieceSkin);
