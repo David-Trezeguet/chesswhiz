@@ -14,8 +14,19 @@
 		<![CDATA[
 			import mx.managers.PopUpManager;
 
-			public var settings:Object = null;
+			private var __settings:Object = null;
 
+			public function get settings() : Object { return __settings; }
+
+ 			public function set settings(val:Object) : void
+ 			{
+ 				__settings = val;
+				nsGameTime.value      = __settings["gametime"] / 60;
+				nsMoveTime.value      = __settings["movetime"];
+				nsFreeTime.value      = __settings["freetime"];
+				typeCheckBox.selected = __settings["rated"];
+ 			}
+ 
 			private function onCreationComplete() : void
 			{
 				this.title         = resourceManager.getString('localization', 'Table_Settings');
@@ -31,20 +42,12 @@
 				cancelButton.label = resourceManager.getString('localization', 'Cancel');
 			}
 
-			public function applyCurrentSettings() : void
-			{
-				nsGameTime.value      = settings["gametime"] / 60;
-				nsMoveTime.value      = settings["movetime"];
-				nsFreeTime.value      = settings["freetime"];
-				typeCheckBox.selected = settings["rated"];
-			}
-
 			private function onOK(event:Event) : void
 			{
-				settings["gametime"]  = nsGameTime.value * 60;
-				settings["movetime"]  = nsMoveTime.value;
-				settings["freetime"]  = nsFreeTime.value;
-				settings["rated"]     = typeCheckBox.selected;
+				__settings["gametime"]  = nsGameTime.value * 60;
+				__settings["movetime"]  = nsMoveTime.value;
+				__settings["freetime"]  = nsFreeTime.value;
+				__settings["rated"]     = typeCheckBox.selected;
 				PopUpManager.removePopUp(this);
 				dispatchEvent( new Event("newSettings", true /* bubble to parent */) );
 			}

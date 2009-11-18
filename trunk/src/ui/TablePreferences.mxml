@@ -16,7 +16,7 @@
 			import mx.managers.PopUpManager;
 			import mx.containers.Canvas;
 
-			public var preferences:Object = null;
+			private var __preferences:Object = null;
 
 			private var _selectedPieceSet:int = 1;
 			private var _bSound:Boolean = false;
@@ -40,19 +40,25 @@
 				cancelButton.label    = resourceManager.getString('localization', 'Cancel');
 			}
 
-			public function applyCurrentPreferences() : void
-			{
-				_bSound = preferences["sound"];
+			public function get preferences() : Object { return __preferences; }
+
+ 			public function set preferences(val:Object) : void
+ 			{
+ 				__preferences = val;
+
+				// Apply the current values.
+
+				_bSound = __preferences["sound"];
 				if (_bSound)  { rbSound.selected = true; }
 				else          { rbMute.selected  = true; }
 
-				_selectedPieceSet = preferences["pieceskin"];
+				_selectedPieceSet = __preferences["pieceskin"];
 				if      (_selectedPieceSet == 1) { rbPieseSet1.selected = true; }
 				else if (_selectedPieceSet == 2) { rbPieseSet2.selected = true; }
 				else                             { rbPieseSet3.selected = true; }
 
-				colorPicker.selectedColor = preferences["boardcolor"];
-				_lineColor = preferences["linecolor"];
+				colorPicker.selectedColor = __preferences["boardcolor"];
+				_lineColor = __preferences["linecolor"];
 
 				_displayPreview();
 			}
@@ -80,10 +86,10 @@
 
 			private function onOK(event:Event) : void 
 			{
-				preferences["sound"]      = _bSound;
-				preferences["pieceskin"]  = _selectedPieceSet;
-				preferences["boardcolor"] = colorPicker.selectedColor;
-				preferences["linecolor"]  = _lineColor;
+				__preferences["sound"]      = _bSound;
+				__preferences["pieceskin"]  = _selectedPieceSet;
+				__preferences["boardcolor"] = colorPicker.selectedColor;
+				__preferences["linecolor"]  = _lineColor;
 				PopUpManager.removePopUp(this);
 				dispatchEvent( new Event("newPreferences", true /* bubble to parent */) );
 			}
