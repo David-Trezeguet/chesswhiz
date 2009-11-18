@@ -240,7 +240,7 @@
 			}
 		}
 
-		public function doSendMove(piece:Piece, curPos:Position, newPos:Position) : void
+		public function doSendMove(curPos:Position, newPos:Position) : void
 		{
 			if ( _table.valid() ) {
 				_session.sendMoveRequest(_playerId, curPos, newPos, _table.tableId);

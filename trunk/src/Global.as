@@ -8,7 +8,7 @@
 	 */
 	public final class Global
 	{
-		public static const VERSION:String    = "0.9.8.6";
+		public static const VERSION:String    = "0.9.8.7";
 
 		/**
 		 * The reference to the global Application.

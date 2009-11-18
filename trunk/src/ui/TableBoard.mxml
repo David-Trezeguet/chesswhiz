@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:cwui="ui.*"
-	layout="horizontal" width="880" height="720"
+	layout="horizontal" width="830" height="710"
 	paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="4"
 	showCloseButton="true"
 	creationComplete="onCreationComplete()"
@@ -368,7 +368,7 @@
 	]]>
 </mx:Script>
 
-	<mx:VBox id="boardBox" height="670" width="550" verticalGap="5" horizontalAlign="center">
+	<mx:VBox id="boardBox" height="100%" width="500" verticalGap="4" horizontalAlign="left">
 	
 		<mx:HBox id="blackBox" width="100%" verticalAlign="middle">
 			<cwui:PlayerPanel id="blackPanel" playerColor="Black" height="28"
@@ -378,7 +378,7 @@
 			<cwui:ClockPanel id="blackClock" width="197" height="28"/>
 		</mx:HBox>
 		
-		<cwui:BoardCanvas id="board" x="10" y="48" width="550" height="550" />
+		<cwui:BoardCanvas id="board" x="10" y="48" width="500" height="550" />
 
 		<mx:HBox id="redBox" width="100%" verticalAlign="middle">
 			<cwui:PlayerPanel id="redPanel" playerColor="Red" height="28"
@@ -411,8 +411,6 @@
 				icon="@Embed(source='../assets/blue_flag.png')"/>
 		</mx:ApplicationControlBar>
 	</mx:VBox>
-
-	<mx:Spacer width="0" />
 
 	<mx:VBox height="100%" width="100%">
 		<cwui:PlayerListPanel id="playersPanel" title="Players" width="100%" height="160"/>
