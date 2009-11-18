@@ -105,7 +105,7 @@
 			else {
 				const viewPos:Position = _board.getViewPosition(newPos);
 				// Notify the "parent" board of this new Piece Movement.
-				_board.getTable().onLocalPieceMoved(this, this.getPosition(), viewPos);
+				_board.getTable().onLocalPieceMoved(this, viewPos);
 			}
 		}
 		

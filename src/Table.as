@@ -10,6 +10,7 @@
 		public var tableId:String = "";
 
 		private var _view:TableBoard  = null;
+		private var _referee:Referee  = new Referee();
 
 		private var _redPlayer:PlayerInfo   = null;
 		private var _blackPlayer:PlayerInfo = null;
@@ -68,6 +69,13 @@
 		public function newTable(tableInfo:Object) : void
 		{
 			this.displayEmptyTable(); // Reset the previous table, if any.
+			
+			///////////////////
+			
+			// TODO: This "reset" action can be called TWICE!!!!
+			
+			_referee.resetGame();
+			///////////////////
 
 			// Setup the Table with new table-info.
 
@@ -167,6 +175,10 @@
 
 			_view.onReset();
 
+			///////////////////
+			_referee.resetGame();
+			///////////////////
+
 			/* Get the Table in the "ready" state if there are enough players. */
 
 			if ( _redPlayer && _redPlayer.pid == Global.player.pid ) {
@@ -194,8 +206,23 @@
 													parseInt(moves[i].charAt(2)) );
 				var piece:Piece = _view.board.getPieceByPos(curPos);
 				if (piece) {
+					
+					//////////////////////////////////////////////
+					const pieceInfo:PieceInfo = _referee.getPieceInfoByPos(curPos);
+					if ( pieceInfo == null )
+					{
+						trace("Invalid network Move: " + curPos + " -> " + newPos);
+						return;
+					}
+					if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
+					{
+						trace("Cannot process Move Event: Invalid move.");
+						return;	
+					}
+					//////////////////////////////////////////////
+					
 					_processMoveEvent(piece, curPos, newPos, true /* in Setup mode */);
-		            _view.board.onNewMove();
+		           //_view.board.onNewMove();
 				}
 			}
 		}
@@ -233,44 +260,37 @@
 		{
 			_rewindLastMove();
 			_view.onBoardMessage("Server rejected the last move: " + error);
-			_view.board.onNewMove();
+			//_view.board.onNewMove();
 		}
 
 		/**
 		 * Callback function when a local Piece is moved by human. 
 		 */
-		public function onLocalPieceMoved(piece:Piece, curPos:Position, newPos:Position) : void
+		public function onLocalPieceMoved(piece:Piece, newPos:Position) : void
 		{
-			if ( _inReviewMode ) {
+			if ( _inReviewMode )
+			{
 				trace("Piece cannot be moved: In review mode");
 				piece.moveImage();
 				return;
 			}
 
-			if ( piece.getColor() != _view.board.nextColor() ) {
-				trace("Piece cannot be moved: It is not your turn.");
-				piece.moveImage();
-				return;
-			}
+			/////////////////
+			const curPos:Position = piece.getPosition();
 
-			if ( ! _view.board.validateMove(piece, newPos) ) {
+			const pieceInfo:PieceInfo = new PieceInfo(piece.getType(), piece.getColor(), piece.getPosition());
+
+			if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
+			{
 				trace("Piece cannot be moved: Invalid move.");
 				piece.moveImage();
-				return;
+				return;	
 			}
 
-			// Apply the Move and then check if the 'own' King is in danger.
-			// If yes, then undo the Move.
-			_processMoveEvent(piece, curPos, newPos);
-			if ( _view.board.isMyKingBeingChecked(piece.getColor()) ) {
-				trace("Piece cannot be moved: 'Own' King is in danger.");
-				_rewindLastMove();
-				return;
-			}
-			
 			// Upon reaching here, the Move has been determined to be valid.
+			_processMoveEvent(piece, curPos, newPos);
 			Global.app.playMoveSound();
-			_view.board.onNewMove();
+			//_view.board.onNewMove();
 			Global.app.doSendMove(curPos, newPos);
 		}
 
@@ -283,8 +303,23 @@
 			if (piece)
 			{
 				Global.app.playMoveSound();
+				
+				//////////////////////////////////////////////
+				const pieceInfo:PieceInfo = _referee.getPieceInfoByPos(curPos);
+				if ( pieceInfo == null )
+				{
+					trace("Invalid network Move: " + curPos + " -> " + newPos);
+					return;
+				}
+				if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
+				{
+					trace("Cannot process Move Event: Invalid move.");
+					return;	
+				}
+				//////////////////////////////////////////////
+				
 				_processMoveEvent(piece, curPos, newPos);
-	            _view.board.onNewMove();
+	            //_view.board.onNewMove();
 			}
 		}
 
