@@ -60,11 +60,15 @@
 			}
 
 			/**
-			 * Reset only the MOVE time to the initial value.
+			 * Reset the MOVE time to the initial value.
+			 * If the GAME time is already zero, then reset the FREE time as well.
 			 */
 			public function resetMoveTime() : void
 			{
 				_moveTime = _initialMoveTime;
+				if ( _gameTime == 0 ) {
+					_freeTime = _initialFreeTime;
+				}
 			}
 
 			/**
@@ -117,18 +121,12 @@
 
 			private function _formatTime(seconds:int) : String
 			{
-				var min:int = seconds / 60;;
-				var sec:int = seconds % 60;;
+				const min:int = seconds / 60;;
+				const sec:int = seconds % 60;;
 
-				var time:String = "";
-				if      (min == 0) { time += "00";      }
-				else if (min < 10) { time += "0" + min; }
-				else               { time += min;       }
-
-				time += ":";
-				if      (sec == 0) { time += "00";      }
-				else if (sec < 10) { time += "0" + sec; }
-				else               { time += sec;       }
+				var time:String = "" + min + ":";
+				if (sec < 10) { time += "0" + sec; }
+				else          { time += sec;       }
 
 				return time;
 			}

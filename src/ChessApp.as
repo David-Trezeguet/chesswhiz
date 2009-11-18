@@ -270,7 +270,6 @@
 			PopUpManager.addPopUp(preferencesPanel, _mainWindow, true /* modal */);
 			PopUpManager.centerPopUp(preferencesPanel);
 			preferencesPanel.preferences = ObjectUtil.copy(_preferences);
-			preferencesPanel.applyCurrentPreferences();
 			preferencesPanel.addEventListener("newPreferences", newPreferencesEventHandler);
 		}
 

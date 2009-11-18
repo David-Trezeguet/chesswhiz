@@ -154,30 +154,33 @@
 				this.onSystemMessage(player.pid + " joined");
 			}
 
-			if ( player.color == "None" )
+			switch ( player.color )
 			{
-				if ( player.pid == _redId )
+				case  "None":
 				{
-					_redId = "";
-					redPanel.playerLabel = "";
+					if ( player.pid == _redId )
+					{
+						_redId = "";
+						redPanel.playerLabel = "";
+					}
+					else if ( player.pid == _blackId )
+					{
+						_blackId = "";
+						blackPanel.playerLabel = "";
+					}
+					break;
 				}
-				else if ( player.pid == _blackId )
-				{
-					_blackId = "";
-					blackPanel.playerLabel = "";
-				}
-			}
-			else
-			{
-				if ( player.color == "Red" )
+				case "Red":
 				{
 					_redId = player.pid;
 					redPanel.playerLabel = player.pid + " (" + player.score + ")";
+					break;
 				}
-				else   /* "Black" */
+				case "Black":
 				{
 					_blackId = player.pid;
 					blackPanel.playerLabel = player.pid + " (" + player.score + ")"
+					break;
 				}
 			}
 
@@ -302,7 +305,6 @@
 			PopUpManager.addPopUp(settingsPanel, this, true /* modal */);
 			PopUpManager.centerPopUp(settingsPanel);
 			settingsPanel.settings = ObjectUtil.copy( _table.getSettings() );
-			settingsPanel.applyCurrentSettings();
 			settingsPanel.addEventListener("newSettings", newSettingsEventHandler);
 		}
 
