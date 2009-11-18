@@ -358,7 +358,7 @@
 		public function displayStatus(status:String) : void
 		{
 			// TODO: Need to properly center the text.
-			_addTextField(status, this.getX(1), this.getY(4) + 10, 0x33CCFF, 18);
+			_addTextField(status, this.getX(3), this.getY(4) + 10, 0x33CCFF, 18);
 		}
 
 		public function displayEmptyStatus() : void

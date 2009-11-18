@@ -546,7 +546,7 @@
 			const endEvent:Object = event.parse_E_END();
 			if ( _table.tableId == endEvent.tid )
 			{
-				_table.stopGame(endEvent.reason, endEvent.winner);
+				_table.stopGame(endEvent.winner, endEvent.reason);
 			}
 		}
 	
