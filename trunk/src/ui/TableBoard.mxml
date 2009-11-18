@@ -45,11 +45,7 @@
 		public function onNewMoveFromTable( moveColor:String, bSetup:Boolean=false) : void
 		{
 			++_moveCount;
-			if ( _moveCount == 1)
-			{
-				_enableReviewButtons(true);
-			}
-			else if (_moveCount == 2)
+			if (_moveCount == 2)
 			{
 				if ( moveColor == "Red" ) {  blackClock.start(); }
 				else                      {  redClock.start();   }
@@ -80,8 +76,6 @@
 
 			redClock.stop();
 			blackClock.stop();
-
-			_enableReviewButtons(false);
 
 			/* Display the detailed message on why the Game ended.
 			 * TODO: Need to localize the detailed info-message.
@@ -372,14 +366,6 @@
 			board.changePiecesSkin(pieceSkin);
 		}
 
-		private function _enableReviewButtons(flag:Boolean) : void 
-		{
-			startButton.enabled   = flag;
-			rewindButton.enabled  = flag;
-			forwardButton.enabled = flag;
-			endButton.enabled     = flag;
-		}
-
 	]]>
 </mx:Script>
 
@@ -404,13 +390,13 @@
 		</mx:HBox>
 		
 		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#383232, #FFFFFF]">
-			<mx:Image id="startButton" enabled="false" click="onReviewButton('start')"
+			<mx:Image id="startButton" click="onReviewButton('start')"
 				source="@Embed(source='../assets/go_first.png')" alpha="1.0"/>
-			<mx:Image id="rewindButton" enabled="false" click="onReviewButton('rewind')"
+			<mx:Image id="rewindButton" click="onReviewButton('rewind')"
 				source="@Embed(source='../assets/go_previous.png')" alpha="1.0"/>
-			<mx:Image id="forwardButton" enabled="false" click="onReviewButton('forward')"
+			<mx:Image id="forwardButton" click="onReviewButton('forward')"
 				source="@Embed(source='../assets/go_next.png')" alpha="1.0"/>
-			<mx:Image id="endButton" enabled="false" click="onReviewButton('end')"
+			<mx:Image id="endButton" click="onReviewButton('end')"
 				source="@Embed(source='../assets/go_last.png')" alpha="1.0"/>
 			<mx:Spacer width="100%" />
 			<mx:Button id="reverseViewButton" click="_reverseView();"
