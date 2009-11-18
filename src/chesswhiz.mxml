@@ -54,8 +54,8 @@
 
     <cwui:TopControlBar id="topControlBar" dock="true"/>
     <mx:HBox id="appBox" horizontalCenter="0" top="5" verticalAlign="middle">
-    	<cwui:PlayerListPanel id="allPlayersPanel" title="All players" width="220" height="720"/>
-    	<mx:VBox id="mainWindow" width="880" height="720"
+    	<cwui:PlayerListPanel id="allPlayersPanel" title="All players" width="220" height="710"/>
+    	<mx:VBox id="mainWindow" width="830" height="710"
     			verticalAlign="top" horizontalAlign="center">
     		<cwui:TableBoard id="mainBoard"/>
     	</mx:VBox>

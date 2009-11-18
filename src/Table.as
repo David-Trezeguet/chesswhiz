@@ -153,9 +153,9 @@
 			_settings["gametime"]  = fields[0];
 			_settings["movetime"]  = fields[1];
 			_settings["freetime"]  = fields[2];
-			_view.onBoardMessage("Timer: " + itimes, "***");
+			_settings["rated"]     = bRated;
 
-			_settings["rated"] = bRated;
+			_view.onBoardMessage("Timer: " + itimes, "***");
 			_view.onBoardMessage("Game-Type: " + (bRated ? "Rated" : "Nonrated"), "***");
 		}
 
@@ -247,7 +247,7 @@
 				return;
 			}
 
-			if ( Global.player.color != _view.board.nextColor() ) {
+			if ( piece.getColor() != _view.board.nextColor() ) {
 				trace("Piece cannot be moved: It is not your turn.");
 				piece.moveImage();
 				return;
@@ -271,7 +271,7 @@
 			// Upon reaching here, the Move has been determined to be valid.
 			Global.app.playMoveSound();
 			_view.board.onNewMove();
-			Global.app.doSendMove(piece, curPos, newPos);
+			Global.app.doSendMove(curPos, newPos);
 		}
 
 		/**
@@ -457,20 +457,10 @@
 
 		public function updateSettings(newSettings:Object) : void
 		{
-			var bSettingsChanged:Boolean = false;
-
 			if (    _settings["gametime"] != newSettings["gametime"]
 				 || _settings["movetime"] != newSettings["movetime"]
-				 || _settings["freetime"] != newSettings["freetime"] )
-			{
-				bSettingsChanged = true;
-			}
-			else if ( _settings["rated"] != newSettings["rated"] )
-			{
-				bSettingsChanged = true;
-			}
-
-			if ( bSettingsChanged )
+				 || _settings["freetime"] != newSettings["freetime"]
+				 || _settings["rated"]    != newSettings["rated"] )
 			{
 				const itimes:String = newSettings["gametime"]
 					+ "/" + newSettings["movetime"] + "/" + newSettings["freetime"];

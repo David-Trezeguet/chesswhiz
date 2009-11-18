@@ -55,15 +55,15 @@
 			_column = newPos.column;
 		}
 
-		public function draw(offset:int, width:int, height:int, skinIndex:int) : void
+		public function draw(offset:int, size:int, skinIndex:int) : void
 		{
 			var viewPos:Position = _board.getViewPosition(getPosition());
 			if (_skinIndex != skinIndex)
 			{
 				this.changeSkinIndex(skinIndex);
 			}
-			_image.x = (offset + viewPos.column * width) - _imageRadius;
-			_image.y = (offset + viewPos.row * height) - _imageRadius;
+			_image.x = (offset + viewPos.column * size) - _imageRadius;
+			_image.y = (offset + viewPos.row * size) - _imageRadius;
 			_board.addChild(_image);
 		}
 

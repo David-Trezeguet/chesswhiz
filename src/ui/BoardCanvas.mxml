@@ -6,11 +6,9 @@
 	<![CDATA[
 		import mx.controls.Label;
 
-		private const margin:int = 50;
-		private const offset:int = 45;
+		private const offset:int = 50;
 
-		private var _cellWidth:int;
-		private var _cellHeight:int;
+		private var _cellSize:int;
 		private var _redPieces:Array = new Array(16);
 		private var _blackPieces:Array = new Array(16);
 
@@ -26,8 +24,7 @@
 
 		private function init() : void
 		{
-			_cellWidth = (width - 2 * margin)/8;
-			_cellHeight = (height - 2 * margin)/9;
+			_cellSize = (width - 2 * offset)/8;
 
 			// --- Create piece objects.
 
@@ -96,11 +93,11 @@
 			{
 				piece = _redPieces[i];
 				if ( ! piece.isCaptured() ) {
-					piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+					piece.draw(offset, _cellSize, _pieceSkin);
 				}
 				piece = _blackPieces[i];
 				if ( ! piece.isCaptured() ) {
-					piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+					piece.draw(offset, _cellSize, _pieceSkin);
 				}
 			}
 
@@ -123,12 +120,12 @@
 				piece = _redPieces[i];
 				piece.setCapture(false);
 				piece.setPosition( piece.getInitialPosition() );
-				piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+				piece.draw(offset, _cellSize, _pieceSkin);
 
 				piece = _blackPieces[i];
 				piece.setCapture(false);
 				piece.setPosition( piece.getInitialPosition() );
-				piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+				piece.draw(offset, _cellSize, _pieceSkin);
 			}
 
 			if (_lastPieceInFocus)
@@ -151,49 +148,51 @@
 			this.graphics.drawRect(0, 0, this.width, this.height);
 			this.graphics.endFill();
 
-			var i:int;
-			for (i = 0; i < 10; i++)
+			this.graphics.lineStyle(1, _lineColor);
+
+			for (var i:int = 0; i < 10; i++) // Horizontal lines
 			{
-				_drawLine(offset, offset+i*_cellHeight, offset + 8*_cellWidth, offset + i*_cellHeight);
+				_drawLine(offset, offset+i*_cellSize, 8*_cellSize, 0);
 			}
 	
-			for (i = 0; i < 9; i++)
+			for (i = 0; i < 9; i++) // Vertical lines
 			{
 				if (i == 0 || i == 8) {
-					_drawLine(offset + _cellWidth*i, offset, offset + _cellWidth*i, offset + _cellHeight*9);
+					_drawLine(offset + i*_cellSize, offset, 0, _cellSize*9);
 				} else {
-					_drawLine(offset + _cellWidth*i, offset, offset + _cellWidth*i, offset + _cellHeight*4);
-					_drawLine(offset + _cellWidth*i, offset + 5*_cellHeight, offset + _cellWidth*i, offset + _cellHeight*9);
+					_drawLine(offset + i*_cellSize, offset, 0, _cellSize*4);
+					_drawLine(offset + i*_cellSize, offset + 5*_cellSize, 0, _cellSize*4);
 				}
 			}
-	
-			_drawLine(offset + 3*_cellWidth, offset, offset + 5*_cellWidth, offset + _cellHeight*2);
-			_drawLine(offset + 5*_cellWidth, offset, offset + 3*_cellWidth, offset + _cellHeight*2);
-			_drawLine(offset + 3*_cellWidth, offset + 7*_cellHeight, offset + 5*_cellWidth, offset + _cellHeight*9);
-			_drawLine(offset + 5*_cellWidth, offset + 7*_cellHeight, offset + 3*_cellWidth, offset + _cellHeight*9);
+
+			// Diagonal lines to form the Fort (or the Palace).
+			_drawLine(offset + 3*_cellSize, offset, 2*_cellSize, 2*_cellSize);
+			_drawLine(offset + 5*_cellSize, offset, -2*_cellSize, _cellSize*2);
+			_drawLine(offset + 3*_cellSize, offset + 7*_cellSize, 2*_cellSize, 2*_cellSize);
+			_drawLine(offset + 5*_cellSize, offset + 7*_cellSize, -2*_cellSize, 2*_cellSize);
 
 			const offsetLeft:int = offset;
 	        const offsetTop:int = offset;
 			const bDescending:Boolean = (_topColor == "Red");
 			_drawHeaderRow(offsetLeft, offsetTop, bDescending);
-			_drawHeaderRow(offset + _cellWidth*9 + 15, offset, bDescending);
+			_drawHeaderRow(offset + _cellSize*9 + 15, offset, bDescending);
 			_drawHeaderColumn(offsetLeft, offsetTop, bDescending);
-			_drawHeaderColumn(offsetLeft, offsetTop + 10*_cellHeight + 20, bDescending);
+			_drawHeaderColumn(offsetLeft, offsetTop + 10*_cellSize + 20, bDescending);
 		}
 
 		private function _displayPieces() : void
 		{
-			for (var i:int = 0; i < 16; i++) {
-				_redPieces[i].draw(offset, _cellWidth, _cellHeight, _pieceSkin);
-				_blackPieces[i].draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+			for (var i:int = 0; i < 16; i++)
+			{
+				_redPieces[i].draw(offset, _cellSize, _cellSize, _pieceSkin);
+				_blackPieces[i].draw(offset, _cellSize, _cellSize, _pieceSkin);
 			}
 		}
 
-		private function _drawLine(startX:int, startY:int, endX:int, endY:int):void
+		private function _drawLine(startX:int, startY:int, dX:int, dY:int):void
 		{
-			this.graphics.lineStyle(1, _lineColor);
 			this.graphics.moveTo(startX, startY);
-			this.graphics.lineTo(endX, endY);
+			this.graphics.lineTo(startX+dX, startY+dY);
 		}
 
 		private function _drawHeaderRow(offsetLeft:int, offsetTop:int, bDescending:Boolean) : void
@@ -205,7 +204,7 @@
 
 			for (var i:int = 0; i < ROWS; i++)
 			{
-				top = offsetTop + (i * _cellHeight) - 6; 
+				top = offsetTop + (i * _cellSize) - 6; 
 				_addTextField("" + start, left, top, _lineColor, 12);
 				if (bDescending) { start++; }
 				else             { start--; }
@@ -221,7 +220,7 @@
 
 			for (var i:int = 0; i < COLS; i++)
 			{
-				left = offsetLeft + (i * _cellWidth) - 6;
+				left = offsetLeft + (i * _cellSize) - 6;
 				_addTextField(String.fromCharCode(97 + start), left, top, _lineColor, 12);
 				if (bDescending) { start--; }
 				else             { start++; }
@@ -250,7 +249,7 @@
 			var yRow:int;
 			for (var i:int = 0; i < 10; i++)
 			{
-				yRow = offset + _cellHeight * i;
+				yRow = offset + _cellSize * i;
 				if (Math.abs(this.mouseY - yRow) < radius)
 				{
 					pos.row = i;
@@ -261,7 +260,7 @@
 			var xColumn:int;
 			for (i = 0; i < 9; i++)
 			{
-				xColumn = offset + _cellWidth * i;
+				xColumn = offset + _cellSize * i;
 				if (Math.abs(this.mouseX - xColumn) < radius)
 				{
 					pos.column = i;				
@@ -272,8 +271,8 @@
 			return pos;
 		}
 
-		public function getX(col:int) : int { return offset + col * _cellWidth; }
-		public function getY(row:int) : int { return offset + row * _cellHeight; }
+		public function getX(col:int) : int { return offset + col * _cellSize; }
+		public function getY(row:int) : int { return offset + row * _cellSize; }
 
 		public function getPieceByPos(pos:Position):Piece
 		{
@@ -339,7 +338,7 @@
 			if (capturedPiece) {
 				capturedPiece.setCapture(false);
 				capturedPiece.setPosition(curPos);
-				capturedPiece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+				capturedPiece.draw(offset, _cellSize, _pieceSkin);
 				capturedPiece.setFocus();
 				_lastPieceInFocus = capturedPiece;
 			}
@@ -406,13 +405,13 @@
 				if (!captured) {
 					if (piece.isCaptured()) {
 						piece.setPosition(pos2);
-						piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+						piece.draw(offset, _cellSize, _pieceSkin);
 					}
 					else {
 						if (pos1.row != pos2.row || pos1.column != pos2.column) {
 							piece.removeImage();
 							piece.setPosition(pos2);
-							piece.draw(offset, _cellWidth, _cellHeight, _pieceSkin);
+							piece.draw(offset, _cellSize, _pieceSkin);
 						}
 					}
 					piece.setCapture(false);
