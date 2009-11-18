@@ -17,7 +17,7 @@
 	import ui.LoginPanel;
 	import ui.PlayerListPanel;
 	import ui.TableList;
-	import ui.TablePreferences;
+	import ui.AppPreferences;
 
 	public class ChessApp
 	{
@@ -266,7 +266,7 @@
 
 		public function changeAppPreferences() : void
 		{
-			var preferencesPanel:TablePreferences = new TablePreferences();
+			var preferencesPanel:AppPreferences = new AppPreferences();
 			PopUpManager.addPopUp(preferencesPanel, _mainWindow, true /* modal */);
 			PopUpManager.centerPopUp(preferencesPanel);
 			preferencesPanel.preferences = ObjectUtil.copy(_preferences);
@@ -275,11 +275,11 @@
 
 		/**
 		 * Callback function to handle the "newPreferences" event generated
-		 * by the 'TablePreferences' window.
+		 * by the 'AppPreferences' window.
 		 */
 		private function newPreferencesEventHandler(event:Event) : void
 		{
-			var preferencesPanel:TablePreferences = event.target as TablePreferences;
+			var preferencesPanel:AppPreferences = event.target as AppPreferences;
 			if ( preferencesPanel != null )
 			{
 				const pref:Object = preferencesPanel.preferences;
