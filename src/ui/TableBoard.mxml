@@ -284,6 +284,22 @@
 			activitiesArea.text += msg + "\n";		
 		}
 
+		/**
+		 * @bPrivate If true, then this message is private.
+		 */
+		public function onBoardMessage(msg:String, senderId:String = "", bPrivate:Boolean = false) : void 
+		{
+			messagesPanel.onMessageFrom(senderId, msg, bPrivate);
+		}
+
+		/**
+		 * Post an error message to the 'Messages' window.
+		 */
+		public function onErrorMessage(msg:String) : void 
+		{
+			messagesPanel.onMessageFrom("*ERROR*", msg);
+		}
+
 		private function onReviewButton(cmd:String) : void
 		{
 			switch ( cmd )
@@ -293,14 +309,6 @@
 				case "forward": board.DoGameReview_NEXT(); break;
 				case "end":     board.DoGameReview_END(); break;
 			}
-		}
-
-		/**
-		 * @bPrivate If true, then this message is private.
-		 */
-		public function onBoardMessage(msg:String, senderId:String = "", bPrivate:Boolean = false) : void 
-		{
-			messagesPanel.onMessageFrom(senderId, msg, bPrivate);
 		}
 
 		public function onNewPlayerScore(pid:String, score:String) : void 

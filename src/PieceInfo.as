@@ -13,9 +13,9 @@ package
 		{
 			this.type = type;
 			this.color = color;
-			this.position = position;
+			this.position = position.clone();
 
-			_initialPosition = new Position(position.row, position.column);
+			_initialPosition = position.clone();
 		}
 		
 		public function isCaptured():Boolean { return _captured; }

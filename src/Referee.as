@@ -2,6 +2,16 @@ package
 {
 	public class Referee
 	{
+		/**
+		 * Constants for the different Move Types.
+		 */
+		private static const M_HORIZONTAL:uint = 0;
+		private static const M_VERTICAL:uint   = 1;
+		private static const M_DIAGONAL:uint   = 2;
+		private static const M_LSHAPE:uint     = 3;  // The L-shape.
+		private static const M_OTHER:uint      = 4;  // The 'other' type.
+
+
 		private var _nextColor:String = "Red"; // Keep track who moves NEXT.
 
 		private var _redPieces:Array;
@@ -261,21 +271,27 @@ package
 			return numPieces;
 		}		
 
-		private function _isInsideFort(color:String, pos:Position) : Boolean
+		/**
+		 * Check whether a position is inside the Palace (or Fortress).
+		 */
+		private function _isInsidePalace(color:String, pos:Position) : Boolean
 		{
-			if (   color == "Black"
-				&& ((pos.column <= 5 && pos.column >= 3) && (pos.row <= 2 && pos.row >= 0)) )
+			if ( color == "Black" )
 			{
-				return true;
+				return (pos.column <= 5 && pos.column >= 3) && (pos.row <= 2 && pos.row >= 0);
 			}
+			/*      "Red"     */
+			return (pos.column <= 5 && pos.column >= 3) && (pos.row <= 9 && pos.row >= 7);
+		}
 
-			if (   color == "Red"
-				&& ((pos.column <= 5 && pos.column >= 3) && (pos.row <= 9 && pos.row >= 7)))
-			{
-				return true;
-			}
-
-			return false;
+		/**
+		 * Check whether a position is inside the same country
+		 * (i.e., not yet cross the River).
+		 */
+		private function _isInsideCountry(color:String, pos:Position) : Boolean
+		{
+			if ( color == "Black" ) { return (pos.row >=0 && pos.row <= 4); }
+			/*      "Red"       */    return (pos.row >= 5 && pos.row <= 9);
 		}
 
 		/**
@@ -367,154 +383,122 @@ package
 		 */
 		private function _performBasicValidationOfMove(piece:PieceInfo, newPos:Position) : Boolean
 		{
-			var validMove:Boolean = false;
 			const myColor:String = piece.color;
-			const capturedPiece:PieceInfo = this.getPieceInfoByPos(newPos);
+			const curPos:Position = piece.position;
+			const capture:PieceInfo = this.getPieceInfoByPos(newPos);
 
-			if ( capturedPiece && capturedPiece.color == myColor )
+			if (   (newPos.row == curPos.row && newPos.column == curPos.column) // Same position?
+				|| (capture && capture.color == myColor) ) // ... or same side?
 			{
-				trace("Invalid Move: Same side.");
-				return false;
-			}
-		
-			const newRow:int = newPos.row;
-			const newCol:int = newPos.column;
-			const curRow:int = piece.position.row;
-			const curCol:int = piece.position.column;
-
-			if (newRow == curRow && newCol == curCol)
-			{
-				trace("Invalid Move: Same position.");
+				trace("Referee: Move is invalid (Same position or same side).");
 				return false;
 			}
 
-			const startRow:int = piece.getInitialPosition().row;
-			const startCol:int = piece.getInitialPosition().column;
-			const rowDiff:uint      = Math.abs(curRow - newRow);
-			const colDiff:uint      = Math.abs(curCol - newCol);
-			const startRowDiff:uint = Math.abs(startRow - newRow);
-			const startColDiff:uint = Math.abs(startCol - newCol);
+			const rowDiff:uint = Math.abs(curPos.row - newPos.row);
+			const colDiff:uint = Math.abs(curPos.column - newPos.column);
 
 			var verticalDir:int = 0; // 1=forward move, -1=backward move
-			if (curRow > newRow) {
-				verticalDir = (myColor == "Red" ? 1 : -1);
-			} else if (curRow < newRow) {
-				verticalDir = (myColor == "Red" ? -1 : 1);
-			}
-			var horizontalDir:int = 0;
-			if      (curCol > newCol) { horizontalDir = -1; } // left move
-			else if (curCol < newCol) { horizontalDir = 1;  } // right move
-			else                      { horizontalDir = 0;  } // no movement
-		
-			var move:int = 0;   // Move type.
-			if (rowDiff != 0) {
-				if (colDiff != 0) {
-					if ((rowDiff == 1 && colDiff == 2) || (rowDiff == 2 && colDiff == 1)) {
-						move = 3; // L shape move
-					} else if (rowDiff == colDiff) {
-						move = 2; // Diagonal move
-					} else {
-						move = 4; // Steep move
-					}
-				} else {
-					move = 1; // Vertical move
-				}
-			} else {
-				move = 0; // Horizontal move
-			}
+			if      (curPos.row > newPos.row) { verticalDir = (myColor == "Red" ? 1 : -1); }
+			else if (curPos.row < newPos.row) { verticalDir = (myColor == "Red" ? -1 : 1); }
 
-			var curPos:Position = new Position(curRow, curCol);
+			const move:uint = _getMoveType(rowDiff, colDiff);
 			var nIntervened:int = _getIntervenedPiecesCount(curPos, newPos);
 
 			switch ( piece.type )
 			{
 				case "king":
 				{
-					if ((startRowDiff <= 2 && startColDiff <= 2) &&
-						((move == 0 && colDiff == 1) || (move == 1 && rowDiff == 1)))
+					if (   _isInsidePalace(myColor, newPos)
+						&& ((move == M_HORIZONTAL && colDiff == 1) || (move == M_VERTICAL && rowDiff == 1)))
 					{
-						if (_isInsideFort(myColor, newPos)) {
-							validMove = true;
-						}
-					}
-					else if (capturedPiece && capturedPiece.type == "king"
-							&& move == 1 && nIntervened == 0)
-					{
-						/* Flying king ???!!!
-						 * FIXME: Need to fix this. We should not allow King-face-King in the 1st place.
-						 */
-						validMove = true;
+						return true;
 					}
 					break;
 				}
 				case "advisor":
 				{
-					if ((startRowDiff <= 2 && startColDiff <= 2) &&
-						(move == 2 && rowDiff == 1 && colDiff == 1))
+					if (   _isInsidePalace(myColor, newPos)
+						&& (move == M_DIAGONAL && rowDiff == 1))
 					{
-						if (_isInsideFort(myColor, newPos)) {
-							validMove = true;
-						}
+						return true;
 					}
 					break;
 				}
 				case "elephant":
 				{
-					if ((startRowDiff <= 4) &&
-						(move == 2 && rowDiff == 2 && colDiff == 2)  && nIntervened == 0)
+					if (   _isInsideCountry(myColor, newPos)
+						&& (move == M_DIAGONAL && rowDiff == 2 && nIntervened == 0))
 					{
-						validMove = true;
+						return true;
 					}
 					break;
 				}
 				case "horse":
 				{
-					if (move == 3 && nIntervened == 0) {
-						validMove = true;
+					if (move == M_LSHAPE && nIntervened == 0)
+					{
+						return true;
 					}
 					break;
 				} 
 				case "chariot":
 				{
-					if ((move == 0  || move == 1) && nIntervened == 0) {
-						validMove = true;
+					if (    (move == M_HORIZONTAL || move == M_VERTICAL)
+						 && nIntervened == 0 )
+					{
+						return true;
 					}
 					break;
 				}
 				case "cannon":
 				{
-					if (move == 0 || move == 1)
+					if (move == M_HORIZONTAL || move == M_VERTICAL)
 					{
-						if (capturedPiece)
+						if (   (capture && nIntervened == 1)
+						    || (!capture && nIntervened == 0) )
 						{
-							if (nIntervened == 1) {
-								validMove = true;
-							}
-						}
-						else if (nIntervened == 0) {
-							validMove = true;
+							return true;
 						}
 					}
 					break;
 				}
 				case "pawn":
 				{
-					if (   (myColor == "Red"  && newPos.row >= 5) 
-					    || (myColor == "Black" && newPos.row < 5) ) // in own side?
+					if (  _isInsideCountry(myColor, newPos) ) // Within the country?
 					{
-						if (move == 1 && rowDiff == 1 && verticalDir == 1) {
-							validMove = true;
+						if (move == M_VERTICAL && rowDiff == 1 && verticalDir == 1)
+						{
+							return true;
 						}
-					} else { // Pawn is on the other side of the board
-						if ((move == 1 && rowDiff == 1 && verticalDir == 1) || (move == 0 && colDiff == 1)) {
-							validMove = true;
+					}
+					else // Outside the country (alread crossed the River)
+					{
+						if (   (move == M_VERTICAL && rowDiff == 1 && verticalDir == 1)
+							|| (move == M_HORIZONTAL && colDiff == 1) )
+						{
+							return true;
 						}
 					}
 					break;
 				}
 			} /* switch(...) */
 
-			return validMove;
+			return false;  // Invalid Move.
+		}
+
+		private function _getMoveType(rowDiff:uint, colDiff:uint) : uint
+		{
+			var move:uint = M_OTHER;   // Move type.
+
+			if      (rowDiff == 0)       { move = M_HORIZONTAL; }
+			else if (colDiff == 0)       { move = M_VERTICAL;   }
+			else if (rowDiff == colDiff) { move = M_DIAGONAL;   }
+			else if ( (rowDiff == 1 && colDiff == 2) || (rowDiff == 2 && colDiff == 1) )
+			{
+				move = M_LSHAPE;
+			}
+
+			return move;
 		}
 
 		private function _isKingBeingChecked(myColor:String) : Boolean
