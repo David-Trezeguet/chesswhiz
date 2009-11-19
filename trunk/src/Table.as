@@ -256,6 +256,11 @@
 
 			if ( player.pid == Global.player.pid  )
 			{
+				// If I no longer play, disable my pieces.
+				if ( Global.player.color != "None" && player.color == "None" )
+				{
+					_view.board.disablePieceEvents(Global.player.color);
+				}
 				Global.player.color = player.color;
 			}
 
