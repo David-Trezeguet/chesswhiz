@@ -71,43 +71,10 @@ package
 			_resetInternalState();
 		}
 
-		///////////////////////////////////////////////////////////////////////
-		//
-		// The following APIs need to be reviewed.
-		//
-		///////////////////////////////////////////////////////////////////////
-
 		public function getPieceInfoByPos(pos:Position):PieceInfo
 		{
 			return _pieceMap[pos.row][pos.column];
 		}
-
-		public function getPieceInfoByIndex(color:String, index:String) : PieceInfo
-		{
-			return (color == "Red" ? _redPieces[index] : _blackPieces[index]);
-		}
-
-		public function updatePieceMapState(piece:PieceInfo, oldPos:Position, newPos:Position) : void
-		{
-			_pieceMap[newPos.row][newPos.column] = piece;
-			_pieceMap[oldPos.row][oldPos.column] = null;
-		}
-
-		private function _updatePieceMap(piece:PieceInfo, newPos:Position) : void
-		{
-			var capturedPiece:PieceInfo = _pieceMap[newPos.row][newPos.column];
-			var oldPos:Position = piece.position;
-			_pieceMap[newPos.row][newPos.column] = piece;
-			_pieceMap[oldPos.row][oldPos.column] = null;
-			if (capturedPiece)
-			{
-				capturedPiece.setCaptured(true);
-			}
-			piece.position.row = newPos.row;
-			piece.position.column = newPos.column;
-		}
-
-		///////////////////////////////////////////////////////////////////////
 
 		private function _resetInternalState() : void
 		{

@@ -15,8 +15,6 @@
 		import mx.controls.Image;
 		import hoxserver.*;
 
-		public static const INVALID_INDEX:int = -1;
-
 		private var _table:Table;
 
 		private var _redId:String    = "";
@@ -42,8 +40,12 @@
 			board.setPreferences(bgColor, lineColor, pieceSkin);
 		}
 
-		public function onNewMoveFromTable( moveColor:String, bSetup:Boolean=false) : void
+		public function onNewMoveFromTable( moveColor:String,
+											oldPos:Position, newPos:Position, bCapturedMove:Boolean,
+											bSetup:Boolean = false) : void
 		{
+			board.doMove(moveColor, oldPos, newPos, bCapturedMove);
+
 			++_moveCount;
 			if (_moveCount == 2)
 			{
@@ -284,7 +286,13 @@
 
 		private function onReviewButton(cmd:String) : void
 		{
-			_table.reviewMove(cmd);
+			switch ( cmd )
+			{
+				case "start":   board.DoGameReview_BEGIN(); break;
+				case "rewind":  board.DoGameReview_PREV(); break;
+				case "forward": board.DoGameReview_NEXT(); break;
+				case "end":     board.DoGameReview_END(); break;
+			}
 		}
 
 		/**

@@ -6,13 +6,26 @@
 	<![CDATA[
 		import mx.controls.Label;
 
+		/* History index.
+		 * NOTE: Do not change the constants 'values below.
+		 */
+		public static const HISTORY_INDEX_END:int = -2;
+		public static const HISTORY_INDEX_BEGIN:int = -1;
+
+		private var _historyMoves:Array = [];  // All (past) Moves made so far.
+		private var _historyIndex:int = HISTORY_INDEX_END; // Which Move the user is reviewing.
+		////////////////////////////////////////
+
 		private const offset:int = 50;
 
 		private var _cellSize:int;
 		private var _redPieces:Array = new Array(16);
 		private var _blackPieces:Array = new Array(16);
 
-		private var _pieceMap:Array = null;
+		/*************************************************/
+		private var _pieceMap:Array = null;    // A 9x10 piece-map.
+		private var _captureStack:Array = [];  // A stack of captured pieces.
+		/*************************************************/
 
 		private var _table:Table = null;
 		private var _topColor:String = "Black"; // Normal view: Black at the top.
@@ -30,38 +43,38 @@
 
 			var index:int = 0;
 			var color:String = "Red";
-			_redPieces[0]  = new Piece(index++, "chariot",  color, 9, 0, this);
-			_redPieces[1]  = new Piece(index++, "horse",    color, 9, 1, this);
-			_redPieces[2]  = new Piece(index++, "elephant", color, 9, 2, this);
-			_redPieces[3]  = new Piece(index++, "advisor",  color, 9, 3, this);
-			_redPieces[4]  = new Piece(index++, "king",     color, 9, 4, this);
-			_redPieces[5]  = new Piece(index++, "advisor",  color, 9, 5, this);
-			_redPieces[6]  = new Piece(index++, "elephant", color, 9, 6, this);
-			_redPieces[7]  = new Piece(index++, "horse",    color, 9, 7, this);
-			_redPieces[8]  = new Piece(index++, "chariot",  color, 9, 8, this);
-			_redPieces[9]  = new Piece(index++, "cannon",   color, 7, 1, this);
-			_redPieces[10] = new Piece(index++, "cannon",   color, 7, 7, this);
+			_redPieces[0]  = new Piece("chariot",  color, 9, 0, this);
+			_redPieces[1]  = new Piece("horse",    color, 9, 1, this);
+			_redPieces[2]  = new Piece("elephant", color, 9, 2, this);
+			_redPieces[3]  = new Piece("advisor",  color, 9, 3, this);
+			_redPieces[4]  = new Piece("king",     color, 9, 4, this);
+			_redPieces[5]  = new Piece("advisor",  color, 9, 5, this);
+			_redPieces[6]  = new Piece("elephant", color, 9, 6, this);
+			_redPieces[7]  = new Piece("horse",    color, 9, 7, this);
+			_redPieces[8]  = new Piece("chariot",  color, 9, 8, this);
+			_redPieces[9]  = new Piece("cannon",   color, 7, 1, this);
+			_redPieces[10] = new Piece("cannon",   color, 7, 7, this);
 
   			for (var pawn:int = 0; pawn < 5; pawn++) {
-	        	_redPieces[11 + pawn] = new Piece(index++, "pawn", color, 6, 2*pawn, this);
+	        	_redPieces[11 + pawn] = new Piece("pawn", color, 6, 2*pawn, this);
 			}
 			
 			index = 0;
 			color = "Black";
-			_blackPieces[0]  = new Piece(index++, "chariot",  color, 0, 0, this);
-			_blackPieces[1]  = new Piece(index++, "horse",    color, 0, 1, this);
-			_blackPieces[2]  = new Piece(index++, "elephant", color, 0, 2, this);
-			_blackPieces[3]  = new Piece(index++, "advisor",  color, 0, 3, this);
-			_blackPieces[4]  = new Piece(index++, "king",     color, 0, 4, this);
-			_blackPieces[5]  = new Piece(index++, "advisor",  color, 0, 5, this);
-			_blackPieces[6]  = new Piece(index++, "elephant", color, 0, 6, this);
-			_blackPieces[7]  = new Piece(index++, "horse",    color, 0, 7, this);
-			_blackPieces[8]  = new Piece(index++, "chariot",  color, 0, 8, this);
-			_blackPieces[9]  = new Piece(index++, "cannon",   color, 2, 1, this);
-			_blackPieces[10] = new Piece(index++, "cannon",   color, 2, 7, this);
+			_blackPieces[0]  = new Piece("chariot",  color, 0, 0, this);
+			_blackPieces[1]  = new Piece("horse",    color, 0, 1, this);
+			_blackPieces[2]  = new Piece("elephant", color, 0, 2, this);
+			_blackPieces[3]  = new Piece("advisor",  color, 0, 3, this);
+			_blackPieces[4]  = new Piece("king",     color, 0, 4, this);
+			_blackPieces[5]  = new Piece("advisor",  color, 0, 5, this);
+			_blackPieces[6]  = new Piece("elephant", color, 0, 6, this);
+			_blackPieces[7]  = new Piece("horse",    color, 0, 7, this);
+			_blackPieces[8]  = new Piece("chariot",  color, 0, 8, this);
+			_blackPieces[9]  = new Piece("cannon",   color, 2, 1, this);
+			_blackPieces[10] = new Piece("cannon",   color, 2, 7, this);
 	
   			for (pawn = 0; pawn < 5; pawn++) {
-	        	_blackPieces[11 + pawn] = new Piece(index++, "pawn", color, 3, 2*pawn, this);
+	        	_blackPieces[11 + pawn] = new Piece("pawn", color, 3, 2*pawn, this);
 			}
 
  			// --- Initialize the internal state.
@@ -135,6 +148,9 @@
 			}
 
 			_resetInternalState();
+			_captureStack = [];
+		    _historyMoves = [];
+		    _historyIndex = HISTORY_INDEX_END;
 		}
 
 		public function drawBoard(bgColor:uint, lineColor:uint) : void
@@ -273,81 +289,6 @@
 		public function getX(col:int) : int { return offset + col * _cellSize; }
 		public function getY(row:int) : int { return offset + row * _cellSize; }
 
-		public function getPieceByPos(pos:Position):Piece
-		{
-			return _pieceMap[pos.row][pos.column];
-		}
-
-		public function getPieceByIndex(color:String, index:int) : Piece
-		{
-			return (color == "Red" ? _redPieces[index] : _blackPieces[index]);
-		}
-
-		public function updatePieceMapState(piece:Piece, oldPos:Position, newPos:Position) : void
-		{
-			_pieceMap[newPos.row][newPos.column] = piece;
-			_pieceMap[oldPos.row][oldPos.column] = null;
-		}
-
-		private function _updatePieceMap(newPos:Position, piece:Piece) : void
-		{
-			var capturedPiece:Piece = _pieceMap[newPos.row][newPos.column];
-			var oldPos:Position = piece.getPosition();
-			_pieceMap[newPos.row][newPos.column] = piece;
-			_pieceMap[oldPos.row][oldPos.column] = null;
-			if (capturedPiece) {
-				capturedPiece.setCapture(true);
-				capturedPiece.removeImage();
-			}
-			piece.setPosition(newPos);
-		}
-
-		public function setFocusOnPiece(piece:Piece) : void
-		{
-			if (_lastPieceInFocus) {
-				_lastPieceInFocus.clearFocus();
-				_lastPieceInFocus = null;
-			}
-			if (piece) {
-				piece.setFocus();
-				_lastPieceInFocus = piece;
-			}
-		}
-
-		public function movePieceByPos(piece:Piece, newPos:Position) : void
-		{
-			_updatePieceMap(newPos, piece);
-			piece.moveImage();
-
-			if (_lastPieceInFocus) {
-				_lastPieceInFocus.clearFocus();
-			}
-			piece.setFocus();
-			_lastPieceInFocus = piece;
-		}
-
-		public function rewindPieceByPos(piece:Piece, curPos:Position, prevPos:Position, capturedPiece:Piece) : void
-		{
-			_pieceMap[prevPos.row][prevPos.column] = piece;
-			_pieceMap[curPos.row][curPos.column] = capturedPiece;
-			if (_lastPieceInFocus) {
-				_lastPieceInFocus.clearFocus();
-			}
-			piece.setPosition(prevPos);
-			piece.moveImage();
-			if (capturedPiece) {
-				capturedPiece.setCapture(false);
-				capturedPiece.setPosition(curPos);
-				capturedPiece.draw(offset, _cellSize, _pieceSkin);
-				capturedPiece.setFocus();
-				_lastPieceInFocus = capturedPiece;
-			}
-			else {
-				piece.setFocus();
-				_lastPieceInFocus = piece;
-			}
-		}
-
 		public function getViewPosition(pos:Position) : Position
 		{
 			return ( _topColor == "Black" // normal view?
@@ -383,58 +324,6 @@
 			}	
 		}
 
-		public function reDraw(changeSet:Array, focusPiece:Piece) : void
-		{
-			if (changeSet.length == 0) {
-				return;
-			}
-			var piece:Piece;
-			var bCaptured:Boolean = false;
-			var pos1:Position;
-			var pos2:Position;
-			var color:String;
-			var pieceIndex:int = -1;
-
-			for (var i:int = 0; i < changeSet.length; i++)
-			{
-				color = changeSet[i][0];
-				pieceIndex = changeSet[i][1];
-				piece = (color == "Red" ? _redPieces[pieceIndex] : _blackPieces[pieceIndex]);
-				bCaptured = changeSet[i][4];
-				pos1 = piece.getPosition();
-				pos2 = new Position(changeSet[i][2], changeSet[i][3]);
-				if (!bCaptured) {
-					if (piece.isCaptured()) {
-						piece.setPosition(pos2);
-						piece.draw(offset, _cellSize, _pieceSkin);
-					}
-					else {
-						if (pos1.row != pos2.row || pos1.column != pos2.column) {
-							piece.removeImage();
-							piece.setPosition(pos2);
-							piece.draw(offset, _cellSize, _pieceSkin);
-						}
-					}
-					piece.setCapture(false);
-				} else {
-					if (!piece.isCaptured()) {
-						piece.removeImage();
-					}
-					piece.setPosition(pos2);
-					piece.setCapture(true);
-				}
-			}
-
-			if (_lastPieceInFocus) {
-				_lastPieceInFocus.clearFocus();
-				_lastPieceInFocus = null;
-			}
-			if (focusPiece != null) {
-				focusPiece.setFocus();
-				_lastPieceInFocus = focusPiece;
-			}
-		}
-		
 		public function changePiecesSkin(skinIndex:int) : void
 		{
 			_pieceSkin = skinIndex;
@@ -505,6 +394,193 @@
 			for (pawn = 0; pawn < 5; pawn++) {
 	        	_pieceMap[6][2*pawn] = _redPieces[11 + pawn];
 			}
+		}
+
+		/**
+		 * Callback function when a local Piece is moved by human. 
+		 */
+		public function canLocalPieceMoveTo(piece:Piece, newPos:Position) : Boolean
+		{
+			if ( _isBoardInReviewMode() )
+			{
+				trace("Piece cannot be moved: In review mode");
+				return false;
+			}
+
+			// Ask the Table (i.e., its Referee...).
+			return _table.onLocalPieceMoved(piece, newPos);
+		}
+
+		public function doMove(color:String, oldPos:Position, newPos:Position, bCapturedMove:Boolean) : void
+		{
+			
+			// Record the Move.
+			const move:Object =
+				{
+					color    : color,
+					oldRow   : oldPos.row,
+					oldCol   : oldPos.column,
+					newRow   : newPos.row,
+					newCol   : newPos.column,
+					captured : bCapturedMove
+				};
+			_historyMoves.push( move );
+			
+		    /* Do not update the Pieces on Board if we are in the review mode. */
+		    if ( _isBoardInReviewMode() )
+		    {
+		        return;
+		    }
+
+		    /* Ask the core Board to perform the Move. */
+			
+			var piece:Piece = _pieceMap[oldPos.row][oldPos.column];
+			var capture:Piece = _pieceMap[newPos.row][newPos.column];
+
+			_pieceMap[newPos.row][newPos.column] = piece;
+			_pieceMap[oldPos.row][oldPos.column] = null;
+
+			if ( capture != null )
+			{
+				capture.setCapture(true);
+				capture.removeImage();
+				_captureStack.push( capture );
+			}
+
+			piece.setPosition(newPos);
+			piece.moveImage();
+
+			/* Set focus. */
+
+			if (_lastPieceInFocus) {
+				_lastPieceInFocus.clearFocus();
+			}
+			piece.setFocus();
+			_lastPieceInFocus = piece;
+		}
+
+		public function DoGameReview_BEGIN() : Boolean
+		{
+		    while ( this.DoGameReview_PREV() ) { }
+		    return true;
+		}
+
+		public function DoGameReview_PREV() : Boolean
+		{
+		    if ( _historyMoves.length == 0 )
+		    {
+		    	trace("Review-PREV: No Moves made yet.")
+		        return false;
+		    }
+		
+		    if ( _historyIndex == HISTORY_INDEX_END ) // at the END mark?
+		    {
+		        // Get the latest move.
+		        _historyIndex = _historyMoves.length - 1;
+		    }
+		    else if ( _historyIndex == HISTORY_INDEX_BEGIN )
+		    {
+		        trace("Review-PREV: The index is already at BEGIN. Do nothing. END.");
+		        return false;
+		    }
+		
+		    var move:Object = _historyMoves[_historyIndex];
+		
+		    /* Move the piece back from NEW -> ORIGINAL position. */
+		    
+		    var piece:Piece = _pieceMap[move.newRow][move.newCol];
+
+			piece.setPosition( new Position(move.oldRow, move.oldCol) );
+			piece.moveImage();
+			piece.clearFocus();
+
+			_pieceMap[move.oldRow][move.oldCol] = piece;
+			_pieceMap[move.newRow][move.newCol] = null;
+
+			 /* Putback the captured piece, if any. */
+
+			if ( move.captured == true )
+			{
+				// The capture must be at the top of the Move-Stack.
+				var capture:Piece = _captureStack.pop();
+				
+				capture.setCapture(false);
+				capture.draw(offset, _cellSize, _pieceSkin);
+				_pieceMap[move.newRow][move.newCol] = capture;
+			}
+			
+		    /* Highlight the Piece (if any) of the "next-PREV" Move. */
+		
+		    --_historyIndex;
+		    if ( _historyIndex >= 0 )
+		    {
+		        move = _historyMoves[_historyIndex];
+		        piece = _pieceMap[move.newRow][move.newCol];
+				piece.setFocus();
+				_lastPieceInFocus = piece;
+		    }
+
+		    return true;
+		}
+
+		public function DoGameReview_NEXT() : Boolean
+		{
+		    if ( _historyMoves.length == 0 )
+		    {
+		        trace("Review-NEXT: No Moves made yet.")
+		        return false;
+		    }
+
+		    if ( _historyIndex == HISTORY_INDEX_END ) // at the END mark?
+		    {
+		        trace("Review-NEXT: No PREV done. Do nothing. END.");
+		        return false;
+		    }
+
+		    ++_historyIndex;
+
+		    var move:Object = _historyMoves[_historyIndex];
+		
+		    if ( _historyIndex == _historyMoves.length - 1 )
+		    {
+		        _historyIndex = HISTORY_INDEX_END;
+		    }
+
+		    /* Move the piece from ORIGINAL --> NEW position. */
+
+		    var piece:Piece = _pieceMap[move.oldRow][move.oldCol];
+			var capture:Piece = _pieceMap[move.newRow][move.newCol];
+			if ( capture != null )
+			{
+				capture.setCapture(true);
+				capture.removeImage();
+				_captureStack.push( capture );
+			}
+
+			piece.setPosition( new Position(move.newRow, move.newCol) );
+			piece.moveImage();
+
+			_pieceMap[move.newRow][move.newCol] = piece;
+			_pieceMap[move.oldRow][move.oldCol] = null;
+
+			if ( _lastPieceInFocus ) {
+				_lastPieceInFocus.clearFocus();
+			}
+			piece.setFocus();
+			_lastPieceInFocus = piece;
+
+			return true;
+		}
+
+		public function DoGameReview_END() : Boolean
+		{
+		    while ( this.DoGameReview_NEXT() ) { }
+		    return true;
+		}
+
+		private function _isBoardInReviewMode() : Boolean
+		{
+		    return ( _historyIndex != HISTORY_INDEX_END );
 		}
 
 	]]>

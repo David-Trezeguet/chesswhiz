@@ -12,7 +12,6 @@
 	{
 		private const _imageRadius:int = 22; // TODO: Assuming Piece's size = 44 px.
 
-		private var _id:int;
 		private var _type:String;
 		private var _color:String;
 		private var _row:int;
@@ -26,9 +25,8 @@
 		private var _skinIndex:int    = -1;
 		private var _captured:Boolean = false;
 		
-		public function Piece(id:int, type:String, color:String, row:int, column:int, board:BoardCanvas) : void
+		public function Piece(type:String, color:String, row:int, column:int, board:BoardCanvas) : void
 		{
-			_id      = id;
 			_type    = type;
 			_color   = color;
 			_row     = row;
@@ -40,7 +38,6 @@
 			_imageSrc      = (_color == "Red" ? "r" : "b") + _type + ".png";
 		}
 
-		public function getIndex():int { return _id; }
 		public function getColor():String { return _color; }
 		public function getType():String { return _type; }
 		public function isCaptured():Boolean { return _captured; }
@@ -105,7 +102,10 @@
 			else {
 				const viewPos:Position = _board.getViewPosition(newPos);
 				// Notify the "parent" board of this new Piece Movement.
-				_board.getTable().onLocalPieceMoved(this, viewPos);
+				if ( ! _board.canLocalPieceMoveTo(this, viewPos) ) // invalid?
+				{
+					this.moveImage(); // Put the Piece back to its original position.
+				}
 			}
 		}
 		
