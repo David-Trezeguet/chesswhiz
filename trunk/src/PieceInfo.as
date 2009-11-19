@@ -6,26 +6,22 @@ package
 		public var color:String;
 		public var position:Position;
 
-		private var _captured:Boolean = false; // TODO: Need to reconsider the design!
-		private var _initialPosition:Position;  // TODO: Need to reconsider the design!
+		private var _captured:Boolean = false;
 
 		public function PieceInfo(type:String, color:String, position:Position)
 		{
 			this.type = type;
 			this.color = color;
 			this.position = position.clone();
-
-			_initialPosition = position.clone();
 		}
-		
-		public function isCaptured():Boolean { return _captured; }
-		public function setCaptured(val:Boolean):void { _captured = val; }
-		public function getInitialPosition() : Position { return _initialPosition; }
 
-		public function getPosition() : Position
+		public function clone() : PieceInfo
 		{
-			return new Position(position.row, position.column);
+			return new PieceInfo(this.type, this.color, this.position);
 		}
+
+		public function isCaptured():Boolean { return _captured; }
+		public function setCaptured(val:Boolean) : void { _captured = val; }
 
 		public function setPosition(newPosition:Position) : void
 		{
