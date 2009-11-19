@@ -11,18 +11,24 @@ package
 		private static const M_LSHAPE:uint     = 3;  // The L-shape.
 		private static const M_OTHER:uint      = 4;  // The 'other' type.
 
-
-		private var _nextColor:String = "Red"; // Keep track who moves NEXT.
+		private var _nextColor:String; // Keep track who moves NEXT.
 
 		private var _redPieces:Array;
 		private var _blackPieces:Array;
 
-		private var _pieceMap:Array        = null;
-		private var _redPieceHash:Object   = null;
-		private var _blackPieceHash:Object = null;
+		private var _redKing:PieceInfo;
+		private var _blackKing:PieceInfo;
+		private var _pieceMap:Array;
 
 		public function Referee()
 		{
+			this.resetGame();
+		}
+
+		public function resetGame() : void
+		{
+			_nextColor = "Red";
+
 			// --- Create piece objects.
 
 			_redPieces = new Array(16);
@@ -59,34 +65,13 @@ package
 	        	_blackPieces[11 + pawn] = new PieceInfo("pawn", "Black", new Position(3, 2*pawn));
 			}
 
- 			// --- Initialize the internal state.
-			_resetInternalState();
+			// --- Initialize other internal variables.
+			_redKing = _redPieces[4];
+			_blackKing = _blackPieces[4];
+			_initializePieceMap();
 		}
 
-		public function resetGame() : void
-		{
-			for each (var piece:PieceInfo in _redPieces)
-			{
-				piece.setCaptured(false);
-				piece.setPosition( piece.getInitialPosition() );
-			}
-
-			for each (piece in _blackPieces)
-			{
-				piece.setCaptured(false);
-				piece.setPosition( piece.getInitialPosition() );
-			}
-
-			_nextColor = "Red";
-			_resetInternalState();
-		}
-
-		public function getPieceInfoByPos(pos:Position):PieceInfo
-		{
-			return _pieceMap[pos.row][pos.column];
-		}
-
-		private function _resetInternalState() : void
+		private function _initializePieceMap() : void
 		{
 			// --- Initialize piece map.
             _pieceMap = new Array(10);
@@ -130,35 +115,39 @@ package
 			{
 	        	_pieceMap[6][2*pawn] = _redPieces[11 + pawn];
 			}
-
-			// --- Initialize piece hash.
-
-			_redPieceHash = {};
-			_redPieceHash["king"]     = [ _redPieces[4] ];
-			_redPieceHash["chariot"]  = [ _redPieces[0], _redPieces[8] ];
-			_redPieceHash["horse"]    = [ _redPieces[1], _redPieces[7] ];
-			_redPieceHash["elephant"] = [ _redPieces[2], _redPieces[6] ];
-			_redPieceHash["advisor"]  = [ _redPieces[3], _redPieces[5] ];
-			_redPieceHash["cannon"]   = [ _redPieces[9], _redPieces[10] ];
-			_redPieceHash["pawn"]     = [ _redPieces[11], _redPieces[12],
-										  _redPieces[13], _redPieces[14], _redPieces[15] ];
-
-			_blackPieceHash = {};
-			_blackPieceHash["king"]     = [ _blackPieces[4] ];
-			_blackPieceHash["chariot"]  = [ _blackPieces[0], _blackPieces[8] ];
-			_blackPieceHash["horse"]    = [ _blackPieces[1], _blackPieces[7] ];
-			_blackPieceHash["elephant"] = [ _blackPieces[2], _blackPieces[6] ];
-			_blackPieceHash["advisor"]  = [ _blackPieces[3], _blackPieces[5] ];
-			_blackPieceHash["cannon"]   = [ _blackPieces[9], _blackPieces[10] ];
-			_blackPieceHash["pawn"]     = [ _blackPieces[11], _blackPieces[12],
-											_blackPieces[13], _blackPieces[14], _blackPieces[15] ];
 		}
 
 		public function nextColor() : String { return _nextColor; }
 
+		public function findPieceAtPosition(pos:Position) : PieceInfo
+		{
+			var piece:PieceInfo = _pieceMap[pos.row][pos.column];
+			return ( piece ? piece.clone() : null );
+		}
+
 		private function _getPiecesOfType(color:String, type:String) : Array
 		{
-			return (color == "Red") ? _redPieceHash[type] : _blackPieceHash[type];
+			var pieces:Array = [];
+			var piece:PieceInfo;
+			for (var i:int = 0; i < 10; i++)
+			{
+				for (var j:int = 0; j < 9; j++)
+				{
+					piece = _pieceMap[i][j];
+					if ( piece && piece.color == color && piece.type == type )
+					{
+						pieces.push(piece);
+					}
+				}
+			}
+
+			return pieces;
+		}
+
+		private function _getPositionOfKing(color:String) : Position
+		{
+			const king:PieceInfo = (color == "Red" ? _redKing : _blackKing);
+			return king.position.clone();	
 		}
 
 		private function _getIntervenedPiecesCount(curPos:Position, newPos:Position) : int
@@ -301,8 +290,15 @@ package
 		 *     result[0] - true if the Move is valid.
 		 *     result[1] - true if the Move is a capture move.
 		 */
-		public function validateAndRecordMove(piece:PieceInfo, newPos:Position) : Array
+		public function validateAndRecordMove(oldPos:Position, newPos:Position) : Array
 		{
+			var piece:PieceInfo = _pieceMap[oldPos.row][oldPos.column];
+			if ( piece == null )
+			{
+				trace("Referee: Logic Error! Piece is null.");
+				return [false, false];
+			}
+
 			/* Check for 'turn' */
 			if ( piece.color != _nextColor )
 			{
@@ -318,7 +314,6 @@ package
 			/* At this point, the Move is valid.
 			 * Record this move (to validate future Moves).
 			 */
-			const oldPos:Position = piece.getPosition();
 			const capturedPiece:PieceInfo = _recordMove(piece, newPos);
 
 			/* If the Move violates one of the following rules:
@@ -385,7 +380,7 @@ package
 		{
 			const myColor:String = piece.color;
 			const curPos:Position = piece.position;
-			const capture:PieceInfo = this.getPieceInfoByPos(newPos);
+			const capture:PieceInfo = _pieceMap[newPos.row][newPos.column];
 
 			if (   (newPos.row == curPos.row && newPos.column == curPos.column) // Same position?
 				|| (capture && capture.color == myColor) ) // ... or same side?
@@ -503,8 +498,7 @@ package
 
 		private function _isKingBeingChecked(myColor:String) : Boolean
 		{
-			const myKing:Array = _getPiecesOfType(myColor, "king");
-			const myKingPos:Position = myKing[0].getPosition();
+			const myKingPos:Position = _getPositionOfKing(myColor);
 
 			const oppColor:String = (myColor == "Red" ? "Black" : "Red");
 

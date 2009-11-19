@@ -155,21 +155,19 @@
 		{
 			for (var i:int = 0; i < moves.length; i++)
 			{
-				var curPos:Position = new Position( parseInt(moves[i].charAt(1)),
+				var oldPos:Position = new Position( parseInt(moves[i].charAt(1)),
 													parseInt(moves[i].charAt(0)) );
 				var newPos:Position = new Position( parseInt(moves[i].charAt(3)),
 													parseInt(moves[i].charAt(2)) );
 
-				const pieceInfo:PieceInfo = _referee.getPieceInfoByPos(curPos);
+				const pieceInfo:PieceInfo = _referee.findPieceAtPosition(oldPos);
 				if ( pieceInfo == null )
 				{
-					trace("Invalid network Move: " + curPos + " -> " + newPos);
+					_view.onErrorMessage("Invalid network Move: " + oldPos + " -> " + newPos);
 					return;
 				}
 
-				const pieceColor:String = pieceInfo.color;
-
-				const result:Array = _referee.validateAndRecordMove(pieceInfo, newPos);
+				const result:Array = _referee.validateAndRecordMove(oldPos, newPos);
 				if ( ! result[0] )
 				{
 					_view.onErrorMessage("Invalid Network Move.");
@@ -177,7 +175,7 @@
 				}
 
 				const bCapturedMove:Boolean = result[1];
-				_view.onNewMoveFromTable(pieceColor, curPos, newPos, bCapturedMove, true /* in Setup mode */ );
+				_view.onNewMoveFromTable(pieceInfo.color, oldPos, newPos, bCapturedMove, true /* in Setup mode */ );
 			}
 		}
 
@@ -187,7 +185,7 @@
 			 *       validate the Move properly before submiting to the server.
 			 *
 			 */
-			_view.onBoardMessage("Server rejected the last move: " + error);
+			_view.onErrorMessage("Server rejected the last move: " + error);
 		}
 
 		/**
@@ -198,10 +196,7 @@
 		{
 			// Validate.
 			const oldPos:Position = piece.getPosition();
-			const pieceColor:String = piece.getColor();
-			const pieceInfo:PieceInfo = new PieceInfo(piece.getType(), pieceColor, oldPos);
-
-			const result:Array = _referee.validateAndRecordMove(pieceInfo, newPos);
+			const result:Array = _referee.validateAndRecordMove(oldPos, newPos);
 			if ( ! result[0] )
 			{
 				trace("Piece cannot be moved: Invalid move.");
@@ -210,28 +205,26 @@
 
 			// Upon reaching here, the Move has been determined to be valid.
 			const bCapturedMove:Boolean = result[1];
-			_view.onNewMoveFromTable(pieceColor, oldPos, newPos, bCapturedMove);
+			_view.onNewMoveFromTable(piece.getColor(), oldPos, newPos, bCapturedMove);
 			Global.app.playMoveSound();
 
-			Global.app.doSendMove(oldPos, newPos); // TODO: This one delays the pieces' movements!!!!
+			Global.app.doSendMove(oldPos, newPos); // TODO: This one delays the pieces' movements!
 			return true;
 		}
 
 		/**
 		 * Function to handle a Move coming from the remote server. 
 		 */
-		public function handleRemoteMove(curPos:Position, newPos:Position) : void
+		public function handleRemoteMove(oldPos:Position, newPos:Position) : void
 		{
-			const pieceInfo:PieceInfo = _referee.getPieceInfoByPos(curPos);
+			const pieceInfo:PieceInfo = _referee.findPieceAtPosition(oldPos);
 			if ( pieceInfo == null )
 			{
-				trace("Invalid network Move: " + curPos + " -> " + newPos);
+				_view.onErrorMessage("Invalid network Move: " + oldPos + " -> " + newPos);
 				return;
 			}
 
-			const pieceColor:String = pieceInfo.color;
-
-			const result:Array = _referee.validateAndRecordMove(pieceInfo, newPos);
+			const result:Array = _referee.validateAndRecordMove(oldPos, newPos);
 			if ( ! result[0] )
 			{
 				_view.onErrorMessage("Invalid Network Move.");
@@ -239,7 +232,7 @@
 			}
 
 			const bCapturedMove:Boolean = result[1];
-			_view.onNewMoveFromTable(pieceColor, curPos, newPos, bCapturedMove);
+			_view.onNewMoveFromTable(pieceInfo.color, oldPos, newPos, bCapturedMove);
 			Global.app.playMoveSound();
 		}
 
