@@ -172,7 +172,7 @@
 				const result:Array = _referee.validateAndRecordMove(pieceInfo, newPos);
 				if ( ! result[0] )
 				{
-					trace("Cannot process network Move Event: Invalid move.");
+					_view.onErrorMessage("Invalid Network Move.");
 					return;	
 				}
 
@@ -234,7 +234,7 @@
 			const result:Array = _referee.validateAndRecordMove(pieceInfo, newPos);
 			if ( ! result[0] )
 			{
-				trace("Cannot process Move Event: Invalid move.");
+				_view.onErrorMessage("Invalid Network Move.");
 				return;	
 			}
 
