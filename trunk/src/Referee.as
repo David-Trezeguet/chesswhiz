@@ -281,20 +281,22 @@ package
 		/**
 		 * Check whether a give Move is valid. If yes, record the Move. 
 		 *
-		 * @return true if the Move is valid. Otherwise, return false.
+		 * @return an Array of two elements:
+		 *     result[0] - true if the Move is valid.
+		 *     result[1] - true if the Move is a capture move.
 		 */
-		public function validateAndRecordMove(piece:PieceInfo, newPos:Position) : Boolean
+		public function validateAndRecordMove(piece:PieceInfo, newPos:Position) : Array
 		{
 			/* Check for 'turn' */
 			if ( piece.color != _nextColor )
 			{
-				return false;
+				return [false, false];
 			}
 
 			/* Perform a basic validation. */
 			if ( ! _performBasicValidationOfMove(piece, newPos) )
 			{
-				return false;
+				return [false, false];
 			}
 
 			/* At this point, the Move is valid.
@@ -313,13 +315,14 @@ package
 			    /* || _isKingFacingKing() */ )  // FIXME: Need to implement King-facking-King.
 			{
 			    _undoMove(piece, oldPos, capturedPiece);
-			    return false;
+			    return [false, false];
 			}
 
 			/* Set the next-turn. */
 			_nextColor = ( _nextColor == "Red" ? "Black" : "Red" );
 
-			return true; // Finally, it is a valid Move.
+			const bCapturedMove:Boolean = (capturedPiece != null);
+			return [true, bCapturedMove]; // Finally, it is a valid Move.
 		}
 
 		/**

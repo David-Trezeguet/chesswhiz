@@ -413,7 +413,6 @@
 
 		public function doMove(color:String, oldPos:Position, newPos:Position, bCapturedMove:Boolean) : void
 		{
-			
 			// Record the Move.
 			const move:Object =
 				{
@@ -469,7 +468,7 @@
 		{
 		    if ( _historyMoves.length == 0 )
 		    {
-		    	trace("Review-PREV: No Moves made yet.")
+		    	//trace("Review-PREV: No Moves made yet.")
 		        return false;
 		    }
 		
@@ -480,7 +479,7 @@
 		    }
 		    else if ( _historyIndex == HISTORY_INDEX_BEGIN )
 		    {
-		        trace("Review-PREV: The index is already at BEGIN. Do nothing. END.");
+		        //trace("Review-PREV: The index is already at BEGIN. Do nothing. END.");
 		        return false;
 		    }
 		
@@ -527,13 +526,13 @@
 		{
 		    if ( _historyMoves.length == 0 )
 		    {
-		        trace("Review-NEXT: No Moves made yet.")
+		        //trace("Review-NEXT: No Moves made yet.")
 		        return false;
 		    }
 
 		    if ( _historyIndex == HISTORY_INDEX_END ) // at the END mark?
 		    {
-		        trace("Review-NEXT: No PREV done. Do nothing. END.");
+		        //trace("Review-NEXT: No PREV done. Do nothing. END.");
 		        return false;
 		    }
 

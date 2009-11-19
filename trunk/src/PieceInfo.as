@@ -7,7 +7,7 @@ package
 		public var position:Position;
 
 		private var _captured:Boolean = false; // TODO: Need to reconsider the design!
-		public var _initialPosition:Position;  // TODO: Need to reconsider the design!
+		private var _initialPosition:Position;  // TODO: Need to reconsider the design!
 
 		public function PieceInfo(type:String, color:String, position:Position)
 		{
