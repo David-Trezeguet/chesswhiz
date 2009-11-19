@@ -15,10 +15,6 @@
 		private var _redPlayer:PlayerInfo   = null;
 		private var _blackPlayer:PlayerInfo = null;
 
-		private var _inReviewMode:Boolean = false;
-		private var _moveList:Array = [];
-		private var _curMoveIndex:int = -1;
-
 		private var _settings:Object;
 		private var _curPref:Object;
 
@@ -50,10 +46,6 @@
 			_redPlayer = null;
 			_blackPlayer = null;
 
-			_inReviewMode = false;
-			_moveList = [];
-			_curMoveIndex = -1;
-
 			_view.clearDisplay();
 
 			_view.board.disablePieceEvents("Red");
@@ -69,13 +61,9 @@
 		public function newTable(tableInfo:Object) : void
 		{
 			this.displayEmptyTable(); // Reset the previous table, if any.
-			
-			///////////////////
-			
+
 			// TODO: This "reset" action can be called TWICE!!!!
-			
 			_referee.resetGame();
-			///////////////////
 
 			// Setup the Table with new table-info.
 
@@ -103,32 +91,6 @@
 			for each (var observerInfo:PlayerInfo in tableInfo.observers)
 			{
 				_view.onPlayerJoined( observerInfo );
-			}
-		}
-
-		public function reviewMove(cmd:String) : void
-		{
-			if ( !_inReviewMode )
-			{
-				if (_moveList.length > 0 && cmd != "end" && cmd != "forward") {
-					_curMoveIndex = _moveList.length;
-				}
-				else {
-					return;
-				}
-			}
-
-			_processReviewMove(cmd);
-
-			if ( !_inReviewMode )
-			{
-				_inReviewMode = true;
-			}
-			else if (     cmd == "end"
-					  || (cmd == "forward" && _curMoveIndex == _moveList.length) )
-			{
-				_stopReview();
-				_inReviewMode = false;
 			}
 		}
 
@@ -169,15 +131,8 @@
 
 		public function resetTable() : void
 		{
-			_inReviewMode = false;
-			_moveList = [];
-			_curMoveIndex = -1;
-
 			_view.onReset();
-
-			///////////////////
 			_referee.resetGame();
-			///////////////////
 
 			/* Get the Table in the "ready" state if there are enough players. */
 
@@ -204,86 +159,59 @@
 													parseInt(moves[i].charAt(0)) );
 				var newPos:Position = new Position( parseInt(moves[i].charAt(3)),
 													parseInt(moves[i].charAt(2)) );
-				var piece:Piece = _view.board.getPieceByPos(curPos);
-				if (piece) {
-					
-					//////////////////////////////////////////////
-					const pieceInfo:PieceInfo = _referee.getPieceInfoByPos(curPos);
-					if ( pieceInfo == null )
-					{
-						trace("Invalid network Move: " + curPos + " -> " + newPos);
-						return;
-					}
-					if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
-					{
-						trace("Cannot process Move Event: Invalid move.");
-						return;	
-					}
-					//////////////////////////////////////////////
-					
-					_processMoveEvent(piece, curPos, newPos, true /* in Setup mode */);
+
+				const pieceInfo:PieceInfo = _referee.getPieceInfoByPos(curPos);
+				if ( pieceInfo == null )
+				{
+					trace("Invalid network Move: " + curPos + " -> " + newPos);
+					return;
 				}
-			}
-		}
-		
-		private function _rewindLastMove() : void
-		{
-			if (_moveList.length == 0) {
-				return;
-			}
 
-			var move:Move = _moveList.pop(); // Get the last Move.
-			var piece:Piece = _view.board.getPieceByIndex(move.color, move.pieceIndex);
-			var capturePiece:Piece = null;
-			if (move.capturedIndex != -1) {
-				capturePiece = _view.board.getPieceByIndex((move.color == "Red" ? "Black" : "Red"), move.capturedIndex);
-			}
-			var prevPos:Position = new Position(move.oldRow, move.oldRow);
-			var curPos:Position = new Position(move.newRow, move.newCol);
-			_view.board.rewindPieceByPos(piece, curPos, prevPos, capturePiece);
+				const pieceColor:String = pieceInfo.color;
+				const capturedPiece:PieceInfo = _referee.getPieceInfoByPos(newPos); // HACK!
 
-			// Restore the focus on the previous Move, if any.
-			if (_moveList.length > 1)
-			{
-				move = _moveList[_moveList.length - 1];
-				piece = _view.board.getPieceByIndex(move.color, move.pieceIndex);
-				_view.board.setFocusOnPiece(piece);
+				if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
+				{
+					trace("Cannot process Move Event: Invalid move.");
+					return;	
+				}
+
+				_view.onNewMoveFromTable(pieceColor, curPos, newPos, (capturedPiece != null), true /* in Setup mode */ );
 			}
 		}
 
 		public function processWrongMove(error:String) : void
 		{
-			_rewindLastMove();
+			/* NOTE: Not implement the "undo move" because this Client should
+			 *       validate the Move properly before submiting to the server.
+			 *
+			 */
 			_view.onBoardMessage("Server rejected the last move: " + error);
 		}
 
 		/**
-		 * Callback function when a local Piece is moved by human. 
+		 * Callback function to check if a Move made by
+		 * the local (physical) Player is valid. 
 		 */
-		public function onLocalPieceMoved(piece:Piece, newPos:Position) : void
+		public function onLocalPieceMoved(piece:Piece, newPos:Position) : Boolean
 		{
-			if ( _inReviewMode )
-			{
-				trace("Piece cannot be moved: In review mode");
-				piece.moveImage();
-				return;
-			}
-
 			// Validate.
 			const pieceInfo:PieceInfo = new PieceInfo(piece.getType(), piece.getColor(), piece.getPosition());
+			const pieceColor:String = pieceInfo.color;
+			const capturedPiece:PieceInfo = _referee.getPieceInfoByPos(newPos); // HACK!
 
 			if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
 			{
 				trace("Piece cannot be moved: Invalid move.");
-				piece.moveImage();
-				return;	
+				return false;	
 			}
 
 			// Upon reaching here, the Move has been determined to be valid.
-			const curPos:Position = piece.getPosition();
-			_processMoveEvent(piece, curPos, newPos);
+			const oldPos:Position = piece.getPosition();
+			_view.onNewMoveFromTable(pieceColor, oldPos, newPos, (capturedPiece != null));
 			Global.app.playMoveSound();
-			Global.app.doSendMove(curPos, newPos);
+			Global.app.doSendMove(oldPos, newPos); // TODO: This one delays the pieces' movements!!!!
+			return true;
 		}
 
 		/**
@@ -291,104 +219,24 @@
 		 */
 		public function handleRemoteMove(curPos:Position, newPos:Position) : void
 		{
-			const piece:Piece = _view.board.getPieceByPos(curPos);
-			if (piece)
+			const pieceInfo:PieceInfo = _referee.getPieceInfoByPos(curPos);
+			if ( pieceInfo == null )
 			{
-				Global.app.playMoveSound();
-				
-				//////////////////////////////////////////////
-				const pieceInfo:PieceInfo = _referee.getPieceInfoByPos(curPos);
-				if ( pieceInfo == null )
-				{
-					trace("Invalid network Move: " + curPos + " -> " + newPos);
-					return;
-				}
-				if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
-				{
-					trace("Cannot process Move Event: Invalid move.");
-					return;	
-				}
-				//////////////////////////////////////////////
-				
-				_processMoveEvent(piece, curPos, newPos);
-			}
-		}
-
-		private function _processReviewMove(cmd:String) : void
-		{
-			if (_moveList.length == 0) {
+				trace("Invalid network Move: " + curPos + " -> " + newPos);
 				return;
 			}
 
-			var moveIndex:int = 0;
+			const pieceColor:String = pieceInfo.color;
+			const capturedPiece:PieceInfo = _referee.getPieceInfoByPos(newPos); // HACK!
 
-			if      (cmd == "start")  { moveIndex = 0;                 }
-			else if (cmd == "end")    { moveIndex = _moveList.length;  }
-			else if (cmd == "rewind") { moveIndex = _curMoveIndex - 1; }
-			else    /* forward */     { moveIndex = _curMoveIndex + 1; }
-
-			if (    moveIndex < 0 || moveIndex > _moveList.length 
-			     || moveIndex == _curMoveIndex )
+			if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
 			{
-				return;
+				trace("Cannot process Move Event: Invalid move.");
+				return;	
 			}
-
-			_applyChangeSet(moveIndex);
-		}
-
-		private function _applyChangeSet(moveIndex:int) : void
-		{
-			var i:int = 0;
-			var focusPiece:Piece = null;
-			var move:Move;
-
-			var changeSet:Array = [];
-
-			if (moveIndex < _curMoveIndex)
-			{
-				for (i = _curMoveIndex - 1; i >= moveIndex; i--)
-				{
-					move = _moveList[i];
-					changeSet.push( [move.color, move.pieceIndex, move.oldRow, move.oldCol, false] );
-					if (move.capturedIndex != -1) {
-						changeSet.push( [ (move.color == "Red" ? "Black" : "Red"),
-						                  move.capturedIndex, move.newRow, move.newCol, false ] );
-					}
-					_curMoveIndex--;
-					if (_curMoveIndex < _moveList.length && _curMoveIndex > 0) {
-						move = _moveList[_curMoveIndex - 1];
-						focusPiece = _view.board.getPieceByIndex(move.color, move.pieceIndex);
-					}
-					else {
-						focusPiece = null;
-					}
-				}
-			}
-			else
-			{
-				for (i = _curMoveIndex; i < moveIndex; i++)
-				{
-					move = _moveList[i];
-					changeSet.push( [move.color, move.pieceIndex, move.newRow, move.newCol, false] );
-					if (move.capturedIndex != -1) {
-						changeSet.push( [ (move.color == "Red" ? "Black" : "Red"),
-						                  move.capturedIndex, move.newRow, move.newCol, true ] );
-					}
-					_curMoveIndex++;
-					focusPiece = _view.board.getPieceByIndex(move.color, move.pieceIndex);
-				}
-			}
-			_view.board.reDraw(changeSet, focusPiece);
-		}
-
-		private function _stopReview() : void
-		{
-			const moveIndex:int = _moveList.length;
-			if (_curMoveIndex == moveIndex ) {
-				return;
-			}
-			_applyChangeSet(moveIndex);
-			_curMoveIndex = -1;
+			
+			Global.app.playMoveSound();
+			_view.onNewMoveFromTable(pieceColor, curPos, newPos, (capturedPiece != null));
 		}
 
 		/**
@@ -434,32 +282,6 @@
 			{
 				Global.player.color = "None";
 			}
-		}
-
-		/**
-		 * Function to perform common tasks on each new Move.
-		 *
-		 * @param bSetup If true, then we are setting up an existing table (to view as an observer).
-		 */
-		private function _processMoveEvent(piece:Piece, curPos:Position, newPos:Position, bSetup:Boolean=false) : void
-		{
-			// Store the new Move in the Move-List.
-			const capturedPiece:Piece = _view.board.getPieceByPos(newPos);
-
-			const move:Move = new Move( piece.getColor(), piece.getIndex(),
-										curPos.row, curPos.column,
-										newPos.row, newPos.column,
-										(capturedPiece ? capturedPiece.getIndex() : -1) );
-			_moveList.push(move);
-
-			// Update the Piece Map.
-			if ( _inReviewMode ) {
-				_view.board.updatePieceMapState(piece, curPos, newPos);
-			} else {
-				_view.board.movePieceByPos(piece, newPos);
-			}
-
-			_view.onNewMoveFromTable( piece.getColor(), bSetup );
 		}
 
 		public function getSettings() : Object { return _settings; }
