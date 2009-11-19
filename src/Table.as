@@ -168,15 +168,16 @@
 				}
 
 				const pieceColor:String = pieceInfo.color;
-				const capturedPiece:PieceInfo = _referee.getPieceInfoByPos(newPos); // HACK!
 
-				if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
+				const result:Array = _referee.validateAndRecordMove(pieceInfo, newPos);
+				if ( ! result[0] )
 				{
-					trace("Cannot process Move Event: Invalid move.");
+					trace("Cannot process network Move Event: Invalid move.");
 					return;	
 				}
 
-				_view.onNewMoveFromTable(pieceColor, curPos, newPos, (capturedPiece != null), true /* in Setup mode */ );
+				const bCapturedMove:Boolean = result[1];
+				_view.onNewMoveFromTable(pieceColor, curPos, newPos, bCapturedMove, true /* in Setup mode */ );
 			}
 		}
 
@@ -196,20 +197,22 @@
 		public function onLocalPieceMoved(piece:Piece, newPos:Position) : Boolean
 		{
 			// Validate.
-			const pieceInfo:PieceInfo = new PieceInfo(piece.getType(), piece.getColor(), piece.getPosition());
-			const pieceColor:String = pieceInfo.color;
-			const capturedPiece:PieceInfo = _referee.getPieceInfoByPos(newPos); // HACK!
+			const oldPos:Position = piece.getPosition();
+			const pieceColor:String = piece.getColor();
+			const pieceInfo:PieceInfo = new PieceInfo(piece.getType(), pieceColor, oldPos);
 
-			if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
+			const result:Array = _referee.validateAndRecordMove(pieceInfo, newPos);
+			if ( ! result[0] )
 			{
 				trace("Piece cannot be moved: Invalid move.");
 				return false;	
 			}
 
 			// Upon reaching here, the Move has been determined to be valid.
-			const oldPos:Position = piece.getPosition();
-			_view.onNewMoveFromTable(pieceColor, oldPos, newPos, (capturedPiece != null));
+			const bCapturedMove:Boolean = result[1];
+			_view.onNewMoveFromTable(pieceColor, oldPos, newPos, bCapturedMove);
 			Global.app.playMoveSound();
+
 			Global.app.doSendMove(oldPos, newPos); // TODO: This one delays the pieces' movements!!!!
 			return true;
 		}
@@ -227,16 +230,17 @@
 			}
 
 			const pieceColor:String = pieceInfo.color;
-			const capturedPiece:PieceInfo = _referee.getPieceInfoByPos(newPos); // HACK!
 
-			if ( ! _referee.validateAndRecordMove(pieceInfo, newPos) )
+			const result:Array = _referee.validateAndRecordMove(pieceInfo, newPos);
+			if ( ! result[0] )
 			{
 				trace("Cannot process Move Event: Invalid move.");
 				return;	
 			}
-			
+
+			const bCapturedMove:Boolean = result[1];
+			_view.onNewMoveFromTable(pieceColor, curPos, newPos, bCapturedMove);
 			Global.app.playMoveSound();
-			_view.onNewMoveFromTable(pieceColor, curPos, newPos, (capturedPiece != null));
 		}
 
 		/**
