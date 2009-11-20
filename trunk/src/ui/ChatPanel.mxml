@@ -13,6 +13,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Image;
 			import mx.utils.StringUtil;
 
 			/**
@@ -41,6 +42,55 @@
 				return __inPrivateMode;
 			}
 
+			/*****************************************************************
+			 *
+			 * Reference:
+			 * ----------
+			 * http://blog.olivermerk.ca/index.cfm/2007/6/17/Flex-Adding-Icons-to-the-Panel
+			 *
+			 *****************************************************************/
+
+			[Embed(source="../assets/edit_clear.png")]
+			[Bindable]
+			public var clearImageClass:Class;
+
+			private var _clearImage:Image;
+			private var _titleHbox:HBox;
+
+			override protected function createChildren() : void
+			{
+				super.createChildren();
+
+				// Prepare an HBox in which to layout the icons.
+				_clearImage = new Image();
+				_clearImage.source = clearImageClass;
+
+				_titleHbox = new HBox( );
+				_titleHbox.addChild( _clearImage );
+				_clearImage.addEventListener( MouseEvent.CLICK, onClearClick );
+
+				titleBar.addChild( _titleHbox );
+			}
+
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+
+				// Adjust the size so that the HBox can appear!
+				_titleHbox.setActualSize( _titleHbox.getExplicitOrMeasuredWidth(),
+										  _titleHbox.getExplicitOrMeasuredHeight() );
+				const y:int = 4;
+				const x:int = this.width - _titleHbox.width - (showCloseButton ? 40 : 12);
+				_titleHbox.move(x, y);
+			}
+
+			private function onClearClick(event:MouseEvent) : void
+			{
+				this.clearPanel();
+			}
+
+			/*****************************************************************/
+
 			private function onCreationComplete() : void
 			{
 				if ( otherPlayerId != "" )
@@ -49,6 +99,7 @@
 				}
 
 				chatInput.text = resourceManager.getString('localization', 'chat_prompt');
+				_clearImage.toolTip = resourceManager.getString('localization', 'clear_window');
 			}
 
 	        public function onMessageFrom(pid:String, msg:String, bPrivate:Boolean = false) : void
