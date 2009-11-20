@@ -82,7 +82,6 @@
 		}
 
 		public function setTable(table:Table) : void { _table = table; }
-		public function getTable() : Table { return _table; }
 
 		public function setPreferences(bgColor:uint, lineColor:uint, pieceSkin:int) : void
 		{
@@ -186,13 +185,48 @@
 			_drawLine(offset + 3*_cellSize, offset + 7*_cellSize, 2*_cellSize, 2*_cellSize);
 			_drawLine(offset + 5*_cellSize, offset + 7*_cellSize, -2*_cellSize, 2*_cellSize);
 
-			const offsetLeft:int = offset;
-	        const offsetTop:int = offset;
+			// The labels (a-h and 0-9).
 			const bDescending:Boolean = (_topColor == "Red");
-			_drawHeaderRow(offsetLeft, offsetTop, bDescending);
+			_drawHeaderRow(offset, offset, bDescending);
 			_drawHeaderRow(offset + _cellSize*9 + 15, offset, bDescending);
-			_drawHeaderColumn(offsetLeft, offsetTop, bDescending);
-			_drawHeaderColumn(offsetLeft, offsetTop + 10*_cellSize + 20, bDescending);
+			_drawHeaderColumn(offset, offset, bDescending);
+			_drawHeaderColumn(offset, offset + 10*_cellSize + 20, bDescending);
+
+			// Draw the "mirror" lines for Cannons and Pawns.
+			const nSize:uint  = _cellSize / 7; // The "mirror" 's size.
+			const nSpace:uint = 3;             // The "mirror" 's space (how close/far).
+
+    		var mirrors:Array = /* Left sides */
+    			[
+					[ 1, 2 ], [ 7, 2 ],
+					/* [ 0, 3 ], */ [ 2, 3 ], [ 4, 3 ], [ 6, 3 ], [ 8, 3 ],
+					/* [ 0, 6 ], */ [ 2, 6 ], [ 4, 6 ], [ 6, 6 ], [ 8, 6 ],
+					[ 1, 7 ], [ 7, 7 ]
+				];
+			for each (var m:Array in mirrors)
+			{
+				var point:Array = [ offset + m[0]*_cellSize, offset + m[1]*_cellSize ]
+				_drawLine(point[0] - nSpace, point[1] - nSpace, -nSize, 0);
+				_drawLine(point[0] - nSpace, point[1] - nSpace, 0, -nSize);
+				_drawLine(point[0] - nSpace, point[1] + nSpace, -nSize, 0);
+				_drawLine(point[0] - nSpace, point[1] + nSpace, 0, nSize);
+			}
+
+    		mirrors = /* Right sides */
+    			[
+					[ 1, 2 ], [ 7, 2 ],
+					[ 0, 3 ], [ 2, 3 ], [ 4, 3 ], [ 6, 3 ], /* [ 8, 3 ], */
+					[ 0, 6 ], [ 2, 6 ], [ 4, 6 ], [ 6, 6 ], /* [ 8, 6 ], */
+					[ 1, 7 ], [ 7, 7 ]
+				];
+			for each (m in mirrors)
+			{
+				point = [ offset + m[0]*_cellSize, offset + m[1]*_cellSize ]
+				_drawLine(point[0] + nSpace, point[1] - nSpace, nSize, 0);
+				_drawLine(point[0] + nSpace, point[1] - nSpace, 0, -nSize);
+				_drawLine(point[0] + nSpace, point[1] + nSpace, nSize, 0);
+				_drawLine(point[0] + nSpace, point[1] + nSpace, 0, nSize);
+			}
 		}
 
 		private function _displayPieces() : void
