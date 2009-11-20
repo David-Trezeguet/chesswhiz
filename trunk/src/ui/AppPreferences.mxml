@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
-	layout="horizontal" width="486" height="314"
+	layout="vertical" verticalGap="8" paddingBottom="10" paddingTop="10"
 	title="Preferences"
+	titleIcon="@Embed(source='../assets/preferences.png')"
 	initialize="init()"
-	creationComplete="onCreationComplete()"
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);">
 
@@ -19,23 +19,19 @@
 			private var __preferences:Object = null;
 
 			private var _selectedPieceSet:int = 1;
-			private var _bSound:Boolean = false;
-			private var _lineColor:uint = 0;  // TODO: Not adjustable.
 
 			private function init() : void
 			{
 				pieceSet1.load("assets/pieces/1/rking.png");
 				pieceSet2.load("assets/pieces/2/rking.png");
 				pieceSet3.load("assets/pieces/3/rking.png");
-			}
-
-			private function onCreationComplete() : void
-			{
+				
 				this.title            = resourceManager.getString('localization', 'Preferences');
-				soundPanel.title      = resourceManager.getString('localization', 'Sound');
-				backgroundPanel.title = resourceManager.getString('localization', 'Background');
-				piecesPanel.title     = resourceManager.getString('localization', 'Pieces');
-				previewPanel.title    = resourceManager.getString('localization', 'Preview');
+				soundCheckbox.label   = resourceManager.getString('localization', 'Sound');
+				boardPanel.title      = resourceManager.getString('localization', 'Board');
+				backgroundLabel.text  = resourceManager.getString('localization', 'Background') + ":";
+				foregroundLabel.text  = resourceManager.getString('localization', 'Foreground') + ":";
+				piecesLabel.text      = resourceManager.getString('localization', 'Pieces') + ":";
 				okButton.label        = resourceManager.getString('localization', 'OK');
 				cancelButton.label    = resourceManager.getString('localization', 'Cancel');
 			}
@@ -48,48 +44,28 @@
 
 				// Apply the current values.
 
-				_bSound = __preferences["sound"];
-				if (_bSound)  { rbSound.selected = true; }
-				else          { rbMute.selected  = true; }
+				soundCheckbox.selected = __preferences["sound"]
 
 				_selectedPieceSet = __preferences["pieceskin"];
 				if      (_selectedPieceSet == 1) { rbPieseSet1.selected = true; }
 				else if (_selectedPieceSet == 2) { rbPieseSet2.selected = true; }
 				else                             { rbPieseSet3.selected = true; }
 
-				colorPicker.selectedColor = __preferences["boardcolor"];
-				_lineColor = __preferences["linecolor"];
-
-				_displayPreview();
+				bgColorPicker.selectedColor = __preferences["boardcolor"];
+				fgColorPicker.selectedColor = __preferences["linecolor"];
 			}
 
 			private function onSelectPieceSet(setIndex:int) : void
 			{
 				_selectedPieceSet = setIndex;
-				_displayPreview();
-			}
-
-			private function _displayPreview() : void 
-			{
-				const size:int = previewCanvas.width;
-				previewCanvas.graphics.clear();
-				previewCanvas.graphics.beginFill(colorPicker.selectedColor);
-				previewCanvas.graphics.drawRect(0, 0, size, size);
-				previewCanvas.graphics.lineStyle(1, 0xFFFFFF);
-				previewCanvas.graphics.moveTo(size/2, 0);
-				previewCanvas.graphics.lineTo(size/2, size);
-				previewCanvas.graphics.moveTo(0, size/2);
-				previewCanvas.graphics.lineTo(size, size/2);
-
-				previewPieceImage.load("assets/pieces/" + _selectedPieceSet + "/rking.png");
 			}
 
 			private function onOK(event:Event) : void 
 			{
-				__preferences["sound"]      = _bSound;
+				__preferences["sound"]      = soundCheckbox.selected;
 				__preferences["pieceskin"]  = _selectedPieceSet;
-				__preferences["boardcolor"] = colorPicker.selectedColor;
-				__preferences["linecolor"]  = _lineColor;
+				__preferences["boardcolor"] = bgColorPicker.selectedColor;
+				__preferences["linecolor"]  = fgColorPicker.selectedColor;
 				PopUpManager.removePopUp(this);
 				dispatchEvent( new Event("newPreferences", true /* bubble to parent */) );
 			}
@@ -97,57 +73,45 @@
 		]]>
 	</mx:Script>
 
-	<mx:VBox height="256" verticalGap="15" width="133">
-		<mx:Panel id="soundPanel" title="Sound" layout="vertical"
-				width="127" height="142" paddingTop="5" paddingLeft="5">
-			<mx:HBox verticalAlign="middle" height="40" width="100">
-				<mx:RadioButton id="rbSound" groupName="soundOnOff" label="On" click="_bSound = true;"/>
-				<mx:Image source="@Embed(source='../assets/volume_on.png')"/>
-			</mx:HBox>
-			
-			<mx:HBox verticalAlign="middle" width="100" height="40">
-				<mx:RadioButton id="rbMute" groupName="soundOnOff" label="Off" click="_bSound = false;"/>
-				<mx:Image source="@Embed(source='../assets/volume_off.png')"/>
-			</mx:HBox>
-		</mx:Panel>
-		<mx:Panel id="backgroundPanel" title="Background" layout="vertical"
-				height="100%" width="126" paddingTop="5" paddingLeft="5">
-			<mx:ColorPicker id="colorPicker" change="_displayPreview()" width="40" height="40"/>
-		</mx:Panel>
-	</mx:VBox>
+	<mx:Panel id="boardPanel" title="Board" layout="absolute"
+			width="314" height="208" verticalGap="10" paddingTop="5" paddingLeft="5">
 
-	<mx:Panel id="piecesPanel" title="Pieces" layout="vertical"
-			width="135" height="256" verticalGap="10" paddingTop="5" paddingLeft="5">
-		<mx:HBox verticalAlign="middle" width="100" height="55" horizontalGap="15">
-			<mx:RadioButton id="rbPieseSet1" groupName="pieceType" click="onSelectPieceSet(1)"/>
-			<mx:Image id="pieceSet1"/>
+		<mx:HBox y="10" x="10">
+			<mx:Label id="backgroundLabel" text="Background:"/>
+			<mx:ColorPicker id="bgColorPicker"/>
 		</mx:HBox>
-		<mx:HBox verticalAlign="middle" width="100" height="55" horizontalGap="15">
-			<mx:RadioButton id="rbPieseSet2" groupName="pieceType" click="onSelectPieceSet(2)"/>
-			<mx:Image id="pieceSet2"/>
+		<mx:HBox y="10" right="10">
+			<mx:Label id="foregroundLabel" text="Foreground:"/>
+			<mx:ColorPicker id="fgColorPicker"/>
 		</mx:HBox>
-		<mx:HBox verticalAlign="middle" width="100" height="55" horizontalGap="15">
-			<mx:RadioButton id="rbPieseSet3" groupName="pieceType" click="onSelectPieceSet(3)"/>
-			<mx:Image id="pieceSet3"/>
-		</mx:HBox>
+
+		<mx:RadioButton id="rbPieseSet1" groupName="pieceType" click="onSelectPieceSet(1)" y="141" x="56"/>
+		<mx:RadioButton id="rbPieseSet2" groupName="pieceType" click="onSelectPieceSet(2)" y="141" x="137"/>
+		<mx:RadioButton id="rbPieseSet3" groupName="pieceType" click="onSelectPieceSet(3)" y="141" x="226"/>
+
+		<mx:Canvas id="pieceCanvas" height="70" left="10" right="10" y="66"
+				borderStyle="solid" borderThickness="2"
+				backgroundColor="{bgColorPicker.selectedColor}" borderColor="{fgColorPicker.selectedColor}">
+			<mx:HRule x="0" width="100%" verticalCenter="0" strokeColor="{fgColorPicker.selectedColor}" strokeWidth="1"/>
+			<mx:VRule x="51" y="0" height="100%" strokeColor="{fgColorPicker.selectedColor}" strokeWidth="1"/>
+			<mx:VRule x="133" y="0" height="100%" strokeColor="{fgColorPicker.selectedColor}" strokeWidth="1"/>
+			<mx:VRule x="221.5" y="0" height="100%" strokeColor="{fgColorPicker.selectedColor}" strokeWidth="1"/>
+			<mx:Image id="pieceSet1" x="29" verticalCenter="0"/>
+			<mx:Image id="pieceSet2" x="114" verticalCenter="0"/>
+			<mx:Image id="pieceSet3" x="201" verticalCenter="-2"/>
+		</mx:Canvas>
+		<mx:Label x="10" y="44" text="Pieces:" id="piecesLabel"/>
 	</mx:Panel>
 
-	<mx:VBox height="256" width="166">
-		<mx:Panel id="previewPanel" title="Preview" layout="vertical"
-				width="162" height="155" paddingLeft="10" verticalAlign="middle">
-			<mx:Canvas id="previewCanvas" width="90" height="90">
-				<mx:Image id="previewPieceImage" x="20" y="20"/>
-			</mx:Canvas>
-		</mx:Panel>
-		<mx:Spacer height="100%"/>
-		<mx:HBox width="100%" horizontalAlign="right">
-			<mx:Button id="cancelButton" label="Canel" minWidth="70"
-				icon="@Embed(source='../assets/button_cancel.png')"
-				click="PopUpManager.removePopUp(this);"/>
-			<mx:Button id="okButton" label="OK"  minWidth="70"
-				icon="@Embed(source='../assets/button_ok.png')"
-				click="onOK(event)"/>
-		</mx:HBox>
-	</mx:VBox>
+	<mx:CheckBox label="Sound" id="soundCheckbox" paddingTop="10"/>
+	<mx:HRule width="100%"/>
+	<mx:HBox width="100%" horizontalAlign="right">
+		<mx:Button id="cancelButton" label="Canel" minWidth="70"
+			icon="@Embed(source='../assets/button_cancel.png')"
+			click="PopUpManager.removePopUp(this);"/>
+		<mx:Button id="okButton" label="OK"  minWidth="70"
+			icon="@Embed(source='../assets/button_ok.png')"
+			click="onOK(event)"/>
+	</mx:HBox>
 
 </mx:TitleWindow>

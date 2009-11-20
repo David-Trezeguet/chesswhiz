@@ -29,6 +29,7 @@
 				passwordItem.label = resourceManager.getString('localization', 'password');
 				loginButton.label = resourceManager.getString('localization', 'login');
 				guestLoginButton.label = resourceManager.getString('localization', 'guest_login');
+				helpText.htmlText = resourceManager.getString('localization', 'login_help')
 			}
 
 			private function creationCompleteHandler() : void
@@ -142,7 +143,7 @@
 		</mx:FormItem>
 	</mx:Form>
 	<mx:VBox height="90%" width="100%">
-		<mx:Text height="100%" width="100%" paddingLeft="20" paddingRight="0" paddingTop="20">
+		<mx:Text id="helpText" height="100%" width="100%" paddingLeft="20" paddingRight="0" paddingTop="20">
             <mx:htmlText>
                 <![CDATA[<br/>
 To continue, you must be a registered user, or you can login as <font color="#008800"><b>Guest</b></font>.

@@ -2,6 +2,7 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
 	width="694" height="495" verticalGap="10"
 	title="{resourceManager.getString('localization', 'Tables')}"
+	titleIcon="@Embed(source='../assets/list.png')"
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);"
 	creationComplete="onCreationComplete();">

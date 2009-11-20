@@ -2,9 +2,10 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 	layout="vertical" verticalGap="10"
 	title="Table Settings"
+	titleIcon="@Embed(source='../assets/settings.png')"
 	showCloseButton="true"
 	close="PopUpManager.removePopUp(this);" 
-	creationComplete="onCreationComplete()">
+	initialize="init()">
 
 	<mx:Metadata>
 		[Event(name="newSettings", type="flash.events.Event")]
@@ -27,7 +28,7 @@
 				typeCheckBox.selected = __settings["rated"];
  			}
  
-			private function onCreationComplete() : void
+			private function init() : void
 			{
 				this.title         = resourceManager.getString('localization', 'Table_Settings');
 				typeCheckBox.label = resourceManager.getString('localization', 'Rated_Game');
@@ -55,7 +56,7 @@
 		]]>
 	</mx:Script>
 
-	<mx:CheckBox id="typeCheckBox" label="Rated Game"/>
+	<mx:CheckBox id="typeCheckBox" label="Rated Game" selected="true"/>
 
 	<mx:Panel id="timersPanel" title="Timers" width="100%" layout="horizontal"
 			paddingLeft="8" paddingTop="8" height="100%" paddingRight="8" paddingBottom="8" horizontalGap="6">

@@ -303,8 +303,10 @@
 
 		public function updatePreferences(newPref:Object) : void
 		{
-			if (_curPref["boardcolor"] != newPref["boardcolor"]) {
-				_view.redrawBoard(newPref["boardcolor"], _curPref["linecolor"]);
+			if (   _curPref["boardcolor"] != newPref["boardcolor"]
+				|| _curPref["linecolor"] != newPref["linecolor"] )
+			{
+				_view.redrawBoard(newPref["boardcolor"], newPref["linecolor"]);
 			}
 			if (_curPref["pieceskin"] != newPref["pieceskin"]) {
 				_view.changePieceSkin(newPref["pieceskin"]);
