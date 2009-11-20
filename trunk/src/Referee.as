@@ -150,9 +150,12 @@ package
 			return king.position.clone();	
 		}
 
-		private function _getIntervenedPiecesCount(curPos:Position, newPos:Position) : int
+		/**
+		 * @return The number of pieces between the two given positions.
+		 */
+		private function _getIntervenedCount(curPos:Position, newPos:Position) : uint
 		{
-			var numPieces:int = 0;   // The number intervened pieces.
+			var numPieces:uint = 0;   // The number intervened pieces.
 			const newRow:int = newPos.row;
 			const newCol:int = newPos.column;
 			const curRow:int = curPos.row;
@@ -160,30 +163,15 @@ package
 			const rowDiff:uint = Math.abs(curRow - newRow);
 			const colDiff:uint = Math.abs(curCol - newCol);
 
-			var move:int = 0; // Move Type.
-			if (rowDiff != 0) {
-				if (colDiff != 0) {
-					if ((rowDiff == 1 && colDiff == 2) || (rowDiff == 2 && colDiff == 1)) {
-						move = 3; // L shape move
-					} else if (rowDiff == colDiff) {
-						move = 2; // Diagonal move
-					} else {
-						move = 4; // Steep move
-					}
-				} else {
-					move = 1; // Vertical move
-				}
-			} else {
-				move = 0; // Horizontal move
-			}
-
 			const startCol:int = (curCol > newCol ? newCol : curCol);
 			const startRow:int = (curRow > newRow ? newRow : curRow);
 
 			var i:int = 0;
+
+			const move:uint = _getMoveType(rowDiff, colDiff);
 			switch ( move )
 			{
-				case 0:  // Horizontal move
+				case M_HORIZONTAL:
 				{
 					for (i = 1; i < colDiff; i++) {
 						if (_pieceMap[curRow][startCol + i] != null) {
@@ -192,7 +180,7 @@ package
 					}
 					break;
 				}
-				case 1:  // Vertical move
+				case M_VERTICAL:
 				{
 					for (i = 1; i < rowDiff; i++) {
 						if (_pieceMap[startRow + i][curCol] != null) {
@@ -201,7 +189,7 @@ package
 					}
 					break;
 				}
-				case 2:  // Diagonal move
+				case M_DIAGONAL:
 				{
 					if (curRow < newRow) {
 						for (i = 1; i < rowDiff; i++) {
@@ -230,7 +218,7 @@ package
 					}
 					break;
 				}
-				case 3:  // L shape move
+				case M_LSHAPE:
 				{
 					if (rowDiff == 1 && colDiff == 2) {
 						if (curCol > newCol) {
@@ -316,14 +304,14 @@ package
 			 */
 			const capturedPiece:PieceInfo = _recordMove(piece, newPos);
 
-			/* If the Move violates one of the following rules:
-			 *   (1) Its own King is checked.
-			 *   (2) There is a KING-facing-KING situation
-			 *
+			/* If the Move violates one rule, which says that
+			 * "Your own King should not be checked after your Move.",
 			 * then it is invalid and must be undone.
+			 *
+			 * NOTE: For the case of "King-facing-King", it has been taken
+			 *       care of inside the "King" basic validation.
 			 */
-			if (   _isKingBeingChecked( piece.color )
-			    /* || _isKingFacingKing() */ )  // FIXME: Need to implement King-facking-King.
+			if ( _isKingBeingChecked( piece.color ) )
 			{
 			    _undoMove(piece, oldPos, capturedPiece);
 			    return [false, false];
@@ -392,12 +380,8 @@ package
 			const rowDiff:uint = Math.abs(curPos.row - newPos.row);
 			const colDiff:uint = Math.abs(curPos.column - newPos.column);
 
-			var verticalDir:int = 0; // 1=forward move, -1=backward move
-			if      (curPos.row > newPos.row) { verticalDir = (myColor == "Red" ? 1 : -1); }
-			else if (curPos.row < newPos.row) { verticalDir = (myColor == "Red" ? -1 : 1); }
-
 			const move:uint = _getMoveType(rowDiff, colDiff);
-			var nIntervened:int = _getIntervenedPiecesCount(curPos, newPos);
+			const nIntervened:uint = _getIntervenedCount(curPos, newPos);
 
 			switch ( piece.type )
 			{
@@ -405,6 +389,11 @@ package
 				{
 					if (   _isInsidePalace(myColor, newPos)
 						&& ((move == M_HORIZONTAL && colDiff == 1) || (move == M_VERTICAL && rowDiff == 1)))
+					{
+						return true;
+					}
+					if (  capture && capture.type == "king"	/* Flying king */
+						&& move == M_VERTICAL && nIntervened == 0 )
 					{
 						return true;
 					}
@@ -459,16 +448,19 @@ package
 				}
 				case "pawn":
 				{
+					// Make sure the Move is never a "backward" move.
+					const bFoward:Boolean = (  (myColor == "Red"   && newPos.row < curPos.row)
+											|| (myColor == "Black" && newPos.row > curPos.row) ); 
 					if (  _isInsideCountry(myColor, newPos) ) // Within the country?
 					{
-						if (move == M_VERTICAL && rowDiff == 1 && verticalDir == 1)
+						if (move == M_VERTICAL && rowDiff == 1 && bFoward)
 						{
 							return true;
 						}
 					}
 					else // Outside the country (alread crossed the River)
 					{
-						if (   (move == M_VERTICAL && rowDiff == 1 && verticalDir == 1)
+						if (   (move == M_VERTICAL && rowDiff == 1 && bFoward)
 							|| (move == M_HORIZONTAL && colDiff == 1) )
 						{
 							return true;
@@ -496,29 +488,30 @@ package
 			return move;
 		}
 
+		/**
+		 * This function performs that check to see of any of my opponent pieces
+		 * can capture my own King.
+		 */
 		private function _isKingBeingChecked(myColor:String) : Boolean
 		{
 			const myKingPos:Position = _getPositionOfKing(myColor);
 
-			const oppColor:String = (myColor == "Red" ? "Black" : "Red");
+			const oppPieces:Array = (myColor == "Red" ? _blackPieces : _redPieces);
 
-			// FIXME: Missing "pawn" type!!!
-			const types:Array = ["cannon", "horse", "chariot", "king"];
-
-			for each (var type:String in types)
+			for each (var oPiece:PieceInfo in oppPieces)
 			{
-				var oppPieces:Array = _getPiecesOfType(oppColor, type);
-				for each (var oPiece:PieceInfo in oppPieces)
+				if (   oPiece.isCaptured()
+					|| oPiece.type == "elephant" || oPiece.type == "advisor" )
 				{
-					if ( oPiece && !oPiece.isCaptured() )
-					{
-						if ( _performBasicValidationOfMove(oPiece, myKingPos ) )
-						{
-							return true;
-						}
-					}
+					continue;
+				}
+
+				if ( _performBasicValidationOfMove(oPiece, myKingPos) )
+				{
+					return true;
 				}
 			}
+			
 			return false;
 		}
 
