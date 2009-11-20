@@ -134,12 +134,12 @@
 		</mx:FormItem>
 
 		<mx:FormItem direction="horizontal" paddingTop="15" width="100%">
-			<mx:Button id="loginButton" label="'login'"
-				enabled="{formIsValid}"
-				click="onLogin(event)" />
-			<mx:Spacer width="100%" />
 			<mx:Button id="guestLoginButton" label="'guest_login'" 
-				click="onGuestLogin(event)" />
+				click="onGuestLogin(event)"  tabEnabled="false"/>
+			<mx:Spacer width="100%" />
+			<mx:Button id="loginButton" label="'login'"
+				icon="@Embed(source='../assets/button_ok.png')" emphasized="true"
+				click="onLogin(event)" />
 		</mx:FormItem>
 	</mx:Form>
 	<mx:VBox height="90%" width="100%">
