@@ -13,6 +13,8 @@
 		import mx.managers.PopUpManager;
 		import mx.collections.ArrayCollection;
 
+		private static const COLUMN_IMAGE_ENTER:int = 6;
+
 		public var joinActionEnabled:Boolean = true;
 
 		[Bindable]
@@ -83,8 +85,8 @@
 
 		private function onItemClick(event:ListEvent) : void
 		{
-			if (   joinButton.enabled
-				&& event.columnIndex == 6 ) // The Image-clickable column?
+			if (   joinActionEnabled
+				&& event.columnIndex == COLUMN_IMAGE_ENTER )
 			{
 				this.onJoin(event);
 			}

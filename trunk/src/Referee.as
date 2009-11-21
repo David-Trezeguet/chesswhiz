@@ -11,7 +11,8 @@ package
 		private static const M_LSHAPE:uint     = 3;  // The L-shape.
 		private static const M_OTHER:uint      = 4;  // The 'other' type.
 
-		private var _nextColor:String; // Keep track who moves NEXT.
+		private var _nextColor:String = "None"; // Keep track who moves NEXT.
+		private var _nMoves :uint = 0; // The number of moves.
 
 		private var _redPieces:Array;
 		private var _blackPieces:Array;
@@ -25,9 +26,22 @@ package
 			this.resetGame();
 		}
 
+		/**
+		 * Reset the Game back to the initial state.
+		 *
+		 * @note This function is optimized so that it will not reset TWICE
+		 *       so that outside callers can call it multiple times with much
+		 *       performance penalty.
+		 */
 		public function resetGame() : void
 		{
+			if ( _nextColor == "Red" && _nMoves == 0 )
+			{
+				return; // Already in the initial state. 
+			}
+
 			_nextColor = "Red";
+			_nMoves = 0;
 
 			// --- Create piece objects.
 
@@ -123,25 +137,6 @@ package
 		{
 			var piece:PieceInfo = _pieceMap[pos.row][pos.column];
 			return ( piece ? piece.clone() : null );
-		}
-
-		private function _getPiecesOfType(color:String, type:String) : Array
-		{
-			var pieces:Array = [];
-			var piece:PieceInfo;
-			for (var i:int = 0; i < 10; i++)
-			{
-				for (var j:int = 0; j < 9; j++)
-				{
-					piece = _pieceMap[i][j];
-					if ( piece && piece.color == color && piece.type == type )
-					{
-						pieces.push(piece);
-					}
-				}
-			}
-
-			return pieces;
 		}
 
 		private function _getPositionOfKing(color:String) : Position
@@ -319,6 +314,7 @@ package
 
 			/* Set the next-turn. */
 			_nextColor = ( _nextColor == "Red" ? "Black" : "Red" );
+			++_nMoves;
 
 			const bCapturedMove:Boolean = (capturedPiece != null);
 			return [true, bCapturedMove]; // Finally, it is a valid Move.

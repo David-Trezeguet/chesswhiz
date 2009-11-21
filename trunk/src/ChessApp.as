@@ -2,7 +2,6 @@
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.NetStatusEvent;
-	import flash.media.Sound;
 	import flash.net.SharedObject;
 	import flash.net.SharedObjectFlushStatus;
 	
@@ -24,7 +23,6 @@
 		private var _mainWindow:Container;
 		private var _playerWindow:PlayerListPanel;
 		private var _chatPanel:ChatPanel = null;
-		private var _moveSound:Sound = new Global.moveSoundClass() as Sound;
 
 		private var _preferences:Object;
 		private var _sharedObject:SharedObject;
@@ -395,7 +393,7 @@
 				Application.application.currentState = "";
 				Application.application.setPlayerLabel( loginInfo.pid + " (" + loginInfo.score + ")" );
 				
-				_table.displayEmptyTable();
+				_table.setupEmptyTable();
 				doViewTables(); // By default, get the List of Tables.
 			}
 			else
@@ -453,18 +451,14 @@
 
 			const tableInfo:Object = event.parse_I_TABLE();
 
-			if ( _table.tableId != tableInfo.tid )
-			{
-				const fields:Array = tableInfo.initialtime.split("/");
-				const settings:Object = {
-						"gametime"  : parseInt(fields[0]),
-						"movetime"  : parseInt(fields[1]),
-						"freetime"  : parseInt(fields[2]),
-						"rated"     : tableInfo.rated
-					};
-				_table.setTableId( tableInfo.tid );
-				_table.setSettings( settings );
-			}
+			const fields:Array = tableInfo.initialtime.split("/");
+			const settings:Object =
+				{
+					"gametime"  : parseInt(fields[0]),
+					"movetime"  : parseInt(fields[1]),
+					"freetime"  : parseInt(fields[2]),
+					"rated"     : tableInfo.rated
+				};
 
 			// Lookup the scores of observers using our internally Player-List.
 			var detailedObversers:Array = [];
@@ -475,7 +469,7 @@
 			}
 			tableInfo.observers = detailedObversers;
 
-			_table.newTable(tableInfo);
+			_table.setupNewTable(tableInfo, settings);
 		}
 
 		private function _processEvent_E_JOIN(event:Message) : void
@@ -501,15 +495,14 @@
 				const moveInfo:Object = event.parse_MOVE();
 				if ( _table.tableId == moveInfo.tid )
 				{
-					_table.handleRemoteMove( new Position(moveInfo.fromRow, moveInfo.fromCol),
-									  		 new Position(moveInfo.toRow, moveInfo.toCol) );
+					_table.handleNetworkMove( new Position(moveInfo.fromRow, moveInfo.fromCol),
+											  new Position(moveInfo.toRow, moveInfo.toCol) );
 				}
 			}
 			else
 			{
-				// TODO: We must avoid handling wrong Move by fixing the way
-				//       we validate Move to get it right in the first place
-				//       before the Move is sent to the server.
+				// This should not occur because we always validate the Move
+				// before it is sent to the server.
 				_table.processWrongMove(event.getContent());
 			}
 	    }
@@ -531,10 +524,9 @@
 			if ( _table.tableId == leaveInfo.tid )
 			{
 				_table.leaveTable(leaveInfo.pid);
-				if (    _playerId == leaveInfo.pid )
+				if ( _playerId == leaveInfo.pid )
 				{
-					_table.setTableId("");
-					_table.displayEmptyTable();
+					_table.closeCurrentTable();
 				}
 			}
 		}
@@ -650,13 +642,6 @@
 			const scoreInfo:Object = event.parse_E_SCORE();
 			_playerWindow.addPlayer(scoreInfo.pid, scoreInfo.score); // Add = Update.
 			_table.updatePlayerScore(scoreInfo);
-		}
-
-		public function playMoveSound() : void
-		{
-			if (_preferences["sound"]) {
-				_moveSound.play();
-			}
 		}
 	}
 }

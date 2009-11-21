@@ -1,5 +1,6 @@
 ﻿package {
 	import flash.display.*;
+	import flash.media.Sound;
 	
 	import hoxserver.*;
 	
@@ -17,6 +18,7 @@
 
 		private var _settings:Object;
 		private var _curPref:Object;
+		private var _moveSound:Sound = new Global.moveSoundClass() as Sound;
 
 		public function Table(tableId:String, preferences:Object, view:TableBoard)
 		{
@@ -39,9 +41,7 @@
 		public function valid() : Boolean { return tableId != ""; }
 		public function setTableId(id:String) : void { tableId = id; }
 
-		public function setSettings(settings:Object) : void { _settings = settings; }
-
-		public function displayEmptyTable() : void
+		private function _displayEmptyTable() : void
 		{
 			_redPlayer = null;
 			_blackPlayer = null;
@@ -52,17 +52,37 @@
 			_view.board.disablePieceEvents("Black");
 		}
 
+		public function closeCurrentTable() : void
+		{
+			if ( this.tableId != "" )
+			{
+				this.tableId = "";
+				_displayEmptyTable();
+				_referee.resetGame();
+			}
+		}
+
+		/**
+		 * This is a special function to make sure that the Table is
+		 * in the "empty" state. It should be called after a successful login.
+		 */
+		public function setupEmptyTable() : void
+		{
+			this.tableId = "";
+			_displayEmptyTable();
+		}
+
 		/**
 		 * This function is called when the server returns the Table-Info as
 		 * the response to one of the two requests sent by the local Player:
 		 *     (1) Open a new Table.
 		 *     (2) Join an existing Table.
 		 */
-		public function newTable(tableInfo:Object) : void
+		public function setupNewTable(tableInfo:Object, settings:Object) : void
 		{
-			this.displayEmptyTable(); // Reset the previous table, if any.
-
-			// TODO: This "reset" action can be called TWICE!!!!
+			this.tableId = tableInfo.tid;
+			_settings = settings;
+			_displayEmptyTable();
 			_referee.resetGame();
 
 			// Setup the Table with new table-info.
@@ -153,12 +173,13 @@
 
 		public function playMoveList(moves:Array) : void
 		{
+			var oldPos:Position;
+			var newPos:Position;
+
 			for (var i:int = 0; i < moves.length; i++)
 			{
-				var oldPos:Position = new Position( parseInt(moves[i].charAt(1)),
-													parseInt(moves[i].charAt(0)) );
-				var newPos:Position = new Position( parseInt(moves[i].charAt(3)),
-													parseInt(moves[i].charAt(2)) );
+				oldPos = new Position( parseInt(moves[i].charAt(1)), parseInt(moves[i].charAt(0)) );
+				newPos = new Position( parseInt(moves[i].charAt(3)), parseInt(moves[i].charAt(2)) );
 
 				const pieceInfo:PieceInfo = _referee.findPieceAtPosition(oldPos);
 				if ( pieceInfo == null )
@@ -183,7 +204,6 @@
 		{
 			/* NOTE: Not implement the "undo move" because this Client should
 			 *       validate the Move properly before submiting to the server.
-			 *
 			 */
 			_view.onErrorMessage("Server rejected the last move: " + error);
 		}
@@ -206,7 +226,7 @@
 			// Upon reaching here, the Move has been determined to be valid.
 			const bCapturedMove:Boolean = result[1];
 			_view.onNewMoveFromTable(piece.getColor(), oldPos, newPos, bCapturedMove);
-			Global.app.playMoveSound();
+			_playMoveSound();
 
 			Global.app.doSendMove(oldPos, newPos); // TODO: This one delays the pieces' movements!
 			return true;
@@ -215,7 +235,7 @@
 		/**
 		 * Function to handle a Move coming from the remote server. 
 		 */
-		public function handleRemoteMove(oldPos:Position, newPos:Position) : void
+		public function handleNetworkMove(oldPos:Position, newPos:Position) : void
 		{
 			const pieceInfo:PieceInfo = _referee.findPieceAtPosition(oldPos);
 			if ( pieceInfo == null )
@@ -233,7 +253,7 @@
 
 			const bCapturedMove:Boolean = result[1];
 			_view.onNewMoveFromTable(pieceInfo.color, oldPos, newPos, bCapturedMove);
-			Global.app.playMoveSound();
+			_playMoveSound();
 		}
 
 		/**
@@ -345,6 +365,14 @@
 			}
 
 			_view.onNewPlayerScore(scoreInfo.pid, scoreInfo.score);
+		}
+
+		private function _playMoveSound() : void
+		{
+			if ( _curPref["sound"] )
+			{
+				_moveSound.play();
+			}
 		}
 	}
 }
