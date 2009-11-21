@@ -40,9 +40,9 @@
 			Global.app = new ChessApp(mainWindow, allPlayersPanel);
 		}
 
-		public function setPlayerLabel(playerLabel:String) : void
+		public function setPlayerLabel(pid:String, score:String) : void
 		{
-			topControlBar.playerIdLabel.text = playerLabel;
+			topControlBar.playerIdLabel.text = pid + " (" + score + ")";
 		}
 
 	]]>

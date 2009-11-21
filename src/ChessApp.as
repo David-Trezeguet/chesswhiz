@@ -391,7 +391,7 @@
 				_loginFailReason = "";
 				
 				Application.application.currentState = "";
-				Application.application.setPlayerLabel( loginInfo.pid + " (" + loginInfo.score + ")" );
+				Application.application.setPlayerLabel( loginInfo.pid, loginInfo.score );
 				
 				_table.setupEmptyTable();
 				doViewTables(); // By default, get the List of Tables.
@@ -642,6 +642,10 @@
 			const scoreInfo:Object = event.parse_E_SCORE();
 			_playerWindow.addPlayer(scoreInfo.pid, scoreInfo.score); // Add = Update.
 			_table.updatePlayerScore(scoreInfo);
+			if ( _playerId == scoreInfo.pid )
+			{
+				Application.application.setPlayerLabel( _playerId, scoreInfo.score );
+			}
 		}
 	}
 }

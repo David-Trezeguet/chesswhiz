@@ -4,8 +4,7 @@
 	title="{resourceManager.getString('localization', 'Tables')}"
 	titleIcon="@Embed(source='../assets/list.png')"
 	showCloseButton="true"
-	close="PopUpManager.removePopUp(this);"
-	creationComplete="onCreationComplete();">
+	close="PopUpManager.removePopUp(this);">
 
 <mx:Script>
 	<![CDATA[
@@ -15,15 +14,11 @@
 
 		private static const COLUMN_IMAGE_ENTER:int = 6;
 
+		[Bindable]
 		public var joinActionEnabled:Boolean = true;
 
 		[Bindable]
 		private var tableListDP:ArrayCollection = new ArrayCollection();
-
-		private function onCreationComplete() : void
-		{
-			joinButton.enabled = joinActionEnabled;
-		}
 
 		public function setTableList(tables:Object) : void
 		{
@@ -40,23 +35,23 @@
 			for each (var table:Object in tables)
 			{
 				var tableRow:Object = {};
-				for each (var name:String in colNames)
+				for each (var key:String in colNames)
 				{
-					value = table[name];
-					if (name == "redid") {
+					value = table[key];
+					if (key == "redid") {
 						value = ( value == "" ? "*" : value + " (" + table["redscore"] + ")" );
 					}
-					else if (name == "blackid") {
+					else if (key == "blackid") {
 						value = ( value == "" ? "*" : value + " (" + table["blackscore"] + ")" );
 					}
-					else if (name == "group") {
+					else if (key == "group") {
 						value = (value == "0" ? "Public" : "Private");
 					}
-					else if (name == "rated") {
-						value = (table[name] /* Boolean */ ? "Rated" : "Unrated");
+					else if (key == "rated") {
+						value = (table[key] /* Boolean */ ? "Rated" : "Unrated");
 					}
 
-					tableRow[name] = value;
+					tableRow[key] = value;
 				}
 				
 				tableListDP.addItem(tableRow);
@@ -101,16 +96,16 @@
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Table')}"
 				dataField="tid" width="60" sortable="true" sortCompareFunction="sortTid" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Group')}"
-				dataField="group" width="70" />
+				dataField="group" width="60" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Type')}"
-				dataField="rated" width="80" />
+				dataField="rated" width="70" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Timer')}"
-				dataField="initialtime" />
+				dataField="initialtime" width="90" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Red_Player')}"
 				dataField="redid" width="140" />
 			<mx:DataGridColumn headerText="{resourceManager.getString('localization', 'Black_Player')}"
 				dataField="blackid" width="140" />
-            <mx:DataGridColumn headerText=""
+            <mx:DataGridColumn headerText="" visible="{joinActionEnabled}"
                 itemRenderer="ui.RendererDGImage" width="40" />
 		</mx:columns>
 	</mx:DataGrid>
@@ -120,7 +115,7 @@
 			icon="@Embed(source='../assets/refresh.png')"
 			click="onRefresh(event)"/>
 		<mx:Spacer width="60"/>
-		<mx:Button id="joinButton"
+		<mx:Button id="joinButton" enabled="{joinActionEnabled}"
 			label="{resourceManager.getString('localization', 'join_table')}"
 			icon="@Embed(source='../assets/button_ok.png')"
 			click="onJoin(event)"/>
