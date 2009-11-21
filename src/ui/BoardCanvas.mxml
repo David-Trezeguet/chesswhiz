@@ -9,8 +9,8 @@
 		/* History index.
 		 * NOTE: Do not change the constants 'values below.
 		 */
-		public static const HISTORY_INDEX_END:int = -2;
-		public static const HISTORY_INDEX_BEGIN:int = -1;
+		private static const HISTORY_INDEX_END:int = -2;
+		private static const HISTORY_INDEX_BEGIN:int = -1;
 
 		private var _historyMoves:Array = [];  // All (past) Moves made so far.
 		private var _historyIndex:int = HISTORY_INDEX_END; // Which Move the user is reviewing.
