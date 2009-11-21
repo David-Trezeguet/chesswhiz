@@ -20,6 +20,7 @@
 		private var _redId:String    = "";
 		private var _blackId:String  = "";
 		private var _moveCount:uint  = 0;
+		private var _gameOver:Boolean = false;
 
 		private function onCreationComplete() : void
 		{
@@ -68,13 +69,14 @@
 				}
 			}
 
-			_updateLeaveButtons();
+			_updateCommandButtons();
 		}
 
 		public function onGameOverEventFromTable(winner:String, reason:String) : void
 		{
-			_moveCount = 0;
-			_updateLeaveButtons();
+			//_moveCount = 0;
+			_gameOver = true;
+			_updateCommandButtons();
 
 			redClock.stop();
 			blackClock.stop();
@@ -108,6 +110,7 @@
 			_blackId = "";
 
 			_moveCount = 0;
+			_gameOver = false;
 
 			playersPanel.removeAllPlayers();
 			activitiesArea.text = "";
@@ -118,7 +121,7 @@
 			redClock.resetToZero();
 			blackClock.resetToZero();
 
-			_updateLeaveButtons();
+			_updateCommandButtons();
 			board.reset();
 			
 			if ( _table.tableId == "" )
@@ -195,7 +198,7 @@
 				}
 			}
 
-			_updateLeaveButtons();
+			_updateCommandButtons();
 
 			// By default, my side is at the bottom of the board.
 			if (   Global.player.pid == _blackId && _isBlackAtTopSide()
@@ -226,7 +229,7 @@
 				blackPanel.playerLabel = "";
 			}
 
-			_updateLeaveButtons();
+			_updateCommandButtons();
 		}
 
 		/**
@@ -235,7 +238,8 @@
 		public function onReset() : void
 		{
 			_moveCount = 0;
-			_updateLeaveButtons();
+			_gameOver = false;
+			_updateCommandButtons();
 
 			redClock.stop();
 			blackClock.stop();
@@ -254,9 +258,10 @@
 			return ( boardBox.getChildIndex(blackBox) == 0 );
 		}
 
-		private function _updateLeaveButtons() : void
+		private function _updateCommandButtons() : void
 		{
-			const gameStarted:Boolean = ( _moveCount > 0 );
+			const gameStarted:Boolean = ( !_gameOver && _moveCount > 0 );
+			const bIPlay:Boolean = (Global.player.pid == _redId || Global.player.pid == _blackId);
 
 			if ( Global.player.pid == _redId  )
 			{
@@ -271,6 +276,29 @@
 				redPanel.showLeaveButton(false);
 				blackPanel.showLeaveButton(false);
 			}
+
+			if ( _table.tableId == "" )
+			{
+				settingsButton.enabled = false;
+			 	resignButton.enabled = false;
+			 	drawButton.enabled = false;
+			}
+			else
+			{
+				settingsButton.enabled = true;
+				 if ( bIPlay && gameStarted )
+				 {
+				 	resignButton.enabled = true;
+				 	drawButton.enabled = true;
+				 }
+				 else
+				 {
+				 	resignButton.enabled = false;
+				 	drawButton.enabled = false;
+				 }
+			}
+
+			resetButton.enabled = (bIPlay && _moveCount > 0);
 		}
 
 		public function initializeTimers(itimes:String, redTimes:String = "", blackTimes:String = "") : void
