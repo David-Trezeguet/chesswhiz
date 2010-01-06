@@ -68,5 +68,72 @@ package
 			return 0;
         }
 
+	    /**
+	     * A helper to escape invalid characters:
+	     *  + Percent    ("%") => "%25"
+	     *  + Ampersand  ("&") => "%26"
+	     *  + Semi-colon (";") => "%3B" 
+	     */
+		public static function escapeURL(value:String) : String
+		{
+		    var sResult:String = "";
+		    var aChar:String;
+		    for (var i:int = 0; i < value.length; ++i)
+		    {
+		        aChar = value.charAt(i);
+		        switch ( aChar )
+		        {
+		            case '%': sResult += "%25"; break;
+		            case '&': sResult += "%26"; break;
+		            case ';': sResult += "%3B"; break;
+		            default:  sResult += aChar; break;
+		        }
+		    }
+		    return sResult;
+		}
+
+	    /**
+	     * A helper to unescape invalid characters:
+	     *  + "%25" => Percent    ("%")
+	     *  + "%26" => Ampersand  ("&")
+	     *  + "%3B" => Semi-colon (";")
+	     */
+		public static function unescapeURL(value:String) : String
+		{
+		    var sResult:String = "";
+		    var aChar:String;
+		    var token:String;
+		    for (var i:int = 0; i < value.length; ++i)
+		    {
+		        aChar = value.charAt(i);
+		        if ( aChar != '%' )
+		        {
+		            sResult += aChar;
+		            continue;
+		        }
+		        token = aChar; // Reset.
+		        
+		        if ( ++i == value.length )
+		        {
+		            sResult += token;
+		            break;
+		        }
+		        token += value.charAt(i);
+
+		        if ( ++i == value.length )
+		        {
+		            sResult += token;
+		            break;
+		        }
+		        token += value.charAt(i);
+
+		        if      ( token == "%25" ) { sResult += '%';   }
+		        else if ( token == "%26" ) { sResult += '&';   }
+		        else if ( token == "%3B" ) { sResult += ';';   }
+		        else                       { sResult += token; }
+		    }
+
+		    return sResult;
+		}
 	}
 }

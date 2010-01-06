@@ -122,7 +122,7 @@ package hoxserver
 			this.params = {
 				pid: pid,
 				sid: sid,
-				msg: msg,
+				msg: Util.escapeURL(msg),
 				tid: tableId,
 				oid: oid
 			};
@@ -280,7 +280,7 @@ package hoxserver
 			const fields:Array = params.content.split(';');
 			return {
 					pid  : fields[0],
-					msg  : fields[1],
+					msg  : Util.unescapeURL(fields[1]),
 					tid  : this.getTableId()
 				};
 		}
