@@ -59,7 +59,6 @@ package
 		}
 
 		public function getColor():String { return _color; }
-		public function getType():String { return _type; }
 		public function isCaptured():Boolean { return _captured; }
 		public function getPosition():Position { return new Position(_row, _column); }
 		public function getInitialPosition():Position { return new Position(_initialRow, _initialColumn); }
@@ -74,11 +73,11 @@ package
 
 		public function draw(offset:int, size:int, skinIndex:int) : void
 		{
-			var viewPos:Position = _board.getViewPosition(getPosition());
 			if (_skinIndex != skinIndex)
 			{
 				this.changeSkinIndex(skinIndex);
 			}
+			var viewPos:Position = _board.getViewPosition(getPosition());
 			_image.x = (offset + viewPos.column * size) - _imageRadius;
 			_image.y = (offset + viewPos.row * size) - _imageRadius;
 			_board.addChild(_image);
@@ -117,7 +116,7 @@ package
 			_image.stopDrag();
 			var newPos:Position = _board.getNearestCell(evt.stageX, evt.stageY, 30);
 			if (newPos.row == -1) {
-				moveImage();
+				this.moveImage();
 			}
 			else {
 				const viewPos:Position = _board.getViewPosition(newPos);
@@ -136,9 +135,7 @@ package
 						                                  10       /* blurX */,
 						                                  10       /* blurY */,
 						                                  2        /* strength */,
-						                                  BitmapFilterQuality.HIGH,
-						                                  false   /* inner */,
-						                                  false   /* knockout */ );
+						                                  BitmapFilterQuality.HIGH );
 			_image.filters = [glowFilter];
 		}
 
