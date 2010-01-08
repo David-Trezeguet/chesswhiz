@@ -154,8 +154,8 @@
 
 		public function drawBoard(bgColor:uint, lineColor:uint) : void
 		{
-			_bgColor        = bgColor;
-			_lineColor      = lineColor;
+			_bgColor    = bgColor;
+			_lineColor  = lineColor;
 
 			this.graphics.lineStyle(2, _lineColor);
 			this.graphics.beginFill(_bgColor);
@@ -226,15 +226,6 @@
 				_drawLine(point[0] + nSpace, point[1] - nSpace, 0, -nSize);
 				_drawLine(point[0] + nSpace, point[1] + nSpace, nSize, 0);
 				_drawLine(point[0] + nSpace, point[1] + nSpace, 0, nSize);
-			}
-		}
-
-		private function _displayPieces() : void
-		{
-			for (var i:int = 0; i < 16; i++)
-			{
-				_redPieces[i].draw(offset, _cellSize, _cellSize, _pieceSkin);
-				_blackPieces[i].draw(offset, _cellSize, _cellSize, _pieceSkin);
 			}
 		}
 
@@ -492,13 +483,13 @@
 			_lastPieceInFocus = piece;
 		}
 
-		public function DoGameReview_BEGIN() : Boolean
+		public function doGameReview_BEGIN() : Boolean
 		{
-		    while ( this.DoGameReview_PREV() ) { }
+		    while ( this.doGameReview_PREV() ) { }
 		    return true;
 		}
 
-		public function DoGameReview_PREV() : Boolean
+		public function doGameReview_PREV() : Boolean
 		{
 		    if ( _historyMoves.length == 0 )
 		    {
@@ -556,7 +547,7 @@
 		    return true;
 		}
 
-		public function DoGameReview_NEXT() : Boolean
+		public function doGameReview_NEXT() : Boolean
 		{
 		    if ( _historyMoves.length == 0 )
 		    {
@@ -605,9 +596,9 @@
 			return true;
 		}
 
-		public function DoGameReview_END() : Boolean
+		public function doGameReview_END() : Boolean
 		{
-		    while ( this.DoGameReview_NEXT() ) { }
+		    while ( this.doGameReview_NEXT() ) { }
 		    return true;
 		}
 
