@@ -31,10 +31,8 @@ package
 			this.column = column;
 		}
 
-		public function clone() : Position
-		{
-			return new Position(row, column);
-		}
+		public function clone() : Position { return new Position(row, column); }
+		public function valid() : Boolean { return (row >= 0 && column >= 0); }
 
 		public function toString() : String
 		{
