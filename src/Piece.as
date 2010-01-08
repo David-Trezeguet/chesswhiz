@@ -95,13 +95,16 @@ package
 		public function enableEvents() : void
 		{
 			_image.addEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
-			_image.addEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
 		}
 
 		public function disableEvents() : void
 		{
 			_image.removeEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
-			_image.removeEventListener(MouseEvent.MOUSE_UP, _stopDragHandler);
+		}
+
+		public function stopDragMode() : void
+		{
+			_image.stopDrag();
 		}
 
 		private function _startDragHandler(evt:MouseEvent) : void 
@@ -109,23 +112,7 @@ package
 			var maxDepth:int = _board.numChildren - 1;
 			_board.setChildIndex(_image, maxDepth);
 			_image.startDrag();
-		}
-
-		private function _stopDragHandler(evt:MouseEvent) : void 
-		{
-			_image.stopDrag();
-			var newPos:Position = _board.getNearestCell(evt.stageX, evt.stageY, 30);
-			if (newPos.row == -1) {
-				this.moveImage();
-			}
-			else {
-				const viewPos:Position = _board.getViewPosition(newPos);
-				// Notify the "parent" board of this new Piece Movement.
-				if ( ! _board.canLocalPieceMoveTo(this, viewPos) ) // invalid?
-				{
-					this.moveImage(); // Put the Piece back to its original position.
-				}
-			}
+			_board.onPieceDragStart(this);
 		}
 		
 		public function setFocus() : void

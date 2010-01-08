@@ -4,6 +4,7 @@
 	
 <mx:Script>
 	<![CDATA[
+		import mx.controls.Image;
 		import mx.controls.Label;
 
 		/* History index.
@@ -34,6 +35,11 @@
 		private var _pieceSkin:int = 1;
 		private var _bgColor:uint;
 		private var _lineColor:uint;
+
+		// --- Piece movement variables.
+		private var _dragHighlightImage:Image = new Image();
+		private var _dragPiece:Piece = null;
+		private var _dragHighlightPos:Position = new Position(-1, -1);
 
 		private function init() : void
 		{
@@ -79,6 +85,62 @@
 
  			// --- Initialize the internal state.
 			_resetInternalState();
+
+			this.addEventListener(MouseEvent.MOUSE_MOVE, _mouseMoveHandler);
+			this.addEventListener(MouseEvent.MOUSE_UP, _mouseUpHandler);
+			_dragHighlightImage.load("assets/pieces/highlight_50x50.png");
+		}
+
+		public function onPieceDragStart(piece:Piece) : void
+		{
+			_dragPiece = piece;
+		}
+
+		private function _mouseMoveHandler(evt:MouseEvent) : void 
+		{
+			if ( ! _dragPiece ) return;
+
+			_dragHighlightPos = _getNearestCell();
+			if (_dragHighlightPos.valid())
+			{
+				_eraseHighlight();
+				_drawHighlight(_dragHighlightPos);
+			}
+		}
+
+		private function _mouseUpHandler(evt:MouseEvent) : void 
+		{
+			if ( ! _dragPiece ) return;
+
+			_dragPiece.stopDragMode();
+			if ( ! _dragHighlightPos.valid() ) {
+				_dragPiece.moveImage();
+			}
+			else {
+				const viewPos:Position = this.getViewPosition(_dragHighlightPos);
+				if ( ! _canLocalPieceMoveTo(_dragPiece, viewPos) ) // invalid?
+				{
+					_dragPiece.moveImage(); // Move back to the original position.
+				}
+			}
+
+			_eraseHighlight();
+			_dragPiece = null;
+		}
+
+		private function _drawHighlight(viewPos:Position) : void 
+		{
+			const imageRadius:int = _dragHighlightImage.contentWidth/2;
+			_dragHighlightImage.x = (offset + viewPos.column * _cellSize)  - imageRadius;
+			_dragHighlightImage.y = (offset + viewPos.row * _cellSize) - imageRadius;
+			this.addChild(_dragHighlightImage);
+		}
+
+		private function _eraseHighlight() : void 
+		{
+			if (_dragHighlightImage.parent) {
+				this.removeChild(_dragHighlightImage);
+			}
 		}
 
 		public function setTable(table:Table) : void { _table = table; }
@@ -281,16 +343,16 @@
 			this.addChild(label);
 		}
 
-		public function getNearestCell(x:int, y:int, radius:int):Position
+		private function _getNearestCell():Position
 		{
-			trace("x: " + x + " y: " + y + ", mouse x: " + this.mouseX + " y: " + this.mouseY);
+			const tolerance:int = 30;  // NOTE: Hard-coded!
 			var pos:Position = new Position(-1, -1);
 
 			var yRow:int;
 			for (var i:int = 0; i < 10; i++)
 			{
 				yRow = offset + _cellSize * i;
-				if (Math.abs(this.mouseY - yRow) < radius)
+				if (Math.abs(this.mouseY - yRow) < tolerance)
 				{
 					pos.row = i;
 					break;
@@ -301,7 +363,7 @@
 			for (i = 0; i < 9; i++)
 			{
 				xColumn = offset + _cellSize * i;
-				if (Math.abs(this.mouseX - xColumn) < radius)
+				if (Math.abs(this.mouseX - xColumn) < tolerance)
 				{
 					pos.column = i;				
 					break;
@@ -421,10 +483,7 @@
 			}
 		}
 
-		/**
-		 * Callback function when a local Piece is moved by human. 
-		 */
-		public function canLocalPieceMoveTo(piece:Piece, newPos:Position) : Boolean
+		private function _canLocalPieceMoveTo(piece:Piece, newPos:Position) : Boolean
 		{
 			if ( _isBoardInReviewMode() )
 			{
