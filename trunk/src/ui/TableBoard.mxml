@@ -332,10 +332,10 @@
 		{
 			switch ( cmd )
 			{
-				case "start":   board.DoGameReview_BEGIN(); break;
-				case "rewind":  board.DoGameReview_PREV(); break;
-				case "forward": board.DoGameReview_NEXT(); break;
-				case "end":     board.DoGameReview_END(); break;
+				case "start":   board.doGameReview_BEGIN(); break;
+				case "rewind":  board.doGameReview_PREV(); break;
+				case "forward": board.doGameReview_NEXT(); break;
+				case "end":     board.doGameReview_END(); break;
 			}
 		}
 
