@@ -25,14 +25,20 @@ package
 		public var row:int;
 		public var column:int;
 
-		public function Position(row:int, column:int)
+		public function Position(row:int = -1, column:int = -1)
 		{
 			this.row = row;
 			this.column = column;
 		}
 
 		public function clone() : Position { return new Position(row, column); }
+		public function reset() : void { row = column = -1; }
 		public function valid() : Boolean { return (row >= 0 && column >= 0); }
+
+		public function equalTo(other:Position) : Boolean
+		{
+			return (row == other.row && column == other.column);
+		}
 
 		public function toString() : String
 		{
