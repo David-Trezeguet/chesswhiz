@@ -102,19 +102,20 @@ package
 			_image.removeEventListener(MouseEvent.MOUSE_DOWN, _startDragHandler);
 		}
 
-		public function stopDragMode() : void
+		public function startDragMode() : void
 		{
-			_image.stopDrag();
+			// Make sure the drag image is at the TOP!
+			_board.setChildIndex(_image, _board.numChildren-1);
+			_image.startDrag();
 		}
+
+		public function stopDragMode() : void { _image.stopDrag(); }
 
 		private function _startDragHandler(evt:MouseEvent) : void 
 		{
-			var maxDepth:int = _board.numChildren - 1;
-			_board.setChildIndex(_image, maxDepth);
-			_image.startDrag();
 			_board.onPieceDragStart(this);
 		}
-		
+
 		public function setFocus() : void
 		{
             const glowFilter:GlowFilter = new GlowFilter( 0x33CCFF /* color */,

@@ -7,7 +7,16 @@
 		import mx.controls.Image;
 		import mx.controls.Label;
 
-		/* History index.
+		/**
+		 * Constants for the different Move Modes.
+		 */
+		private static const MOVE_MODE_DRAG_N_DROP:int = 0;
+		private static const MOVE_MODE_CLICK_N_CLICK:int = 1;
+
+		private static const HIGHLIGHT_IMAGE_SRC:String = "assets/pieces/highlight_50x50.png";
+
+		/**
+		 * History index.
 		 * NOTE: Do not change the constants 'values below.
 		 */
 		private static const HISTORY_INDEX_END:int = -2;
@@ -37,9 +46,12 @@
 		private var _lineColor:uint;
 
 		// --- Piece movement variables.
-		private var _dragHighlightImage:Image = new Image();
+		private var _moveMode:int = MOVE_MODE_DRAG_N_DROP;
 		private var _dragPiece:Piece = null;
-		private var _dragHighlightPos:Position = new Position(-1, -1);
+		private var _dragHighlightImage:Image = new Image();
+		private var _dragStartImage:Image     = new Image();
+		private var _dragHighlightPos:Position = new Position();
+		private var _dragStartPos:Position     = new Position();
 
 		private function init() : void
 		{
@@ -83,36 +95,18 @@
 	        	_blackPieces[11 + pawn] = new Piece("pawn", color, 3, 2*pawn, this);
 			}
 
- 			// --- Initialize the internal state.
 			_resetInternalState();
 
+			this.addEventListener(MouseEvent.MOUSE_DOWN, _mouseDownHandler);
 			this.addEventListener(MouseEvent.MOUSE_MOVE, _mouseMoveHandler);
 			this.addEventListener(MouseEvent.MOUSE_UP, _mouseUpHandler);
-			_dragHighlightImage.load("assets/pieces/highlight_50x50.png");
+
+			_dragHighlightImage.load(HIGHLIGHT_IMAGE_SRC);
+			_dragStartImage.load(HIGHLIGHT_IMAGE_SRC);
 		}
 
-		public function onPieceDragStart(piece:Piece) : void
-		{
-			_dragPiece = piece;
-		}
-
-		private function _mouseMoveHandler(evt:MouseEvent) : void 
-		{
-			if ( ! _dragPiece ) return;
-
-			_dragHighlightPos = _getNearestCell();
-			if (_dragHighlightPos.valid())
-			{
-				_eraseHighlight();
-				_drawHighlight(_dragHighlightPos);
-			}
-		}
-
-		private function _mouseUpHandler(evt:MouseEvent) : void 
-		{
-			if ( ! _dragPiece ) return;
-
-			_dragPiece.stopDragMode();
+		private function _tryCurrentMoveByMouse() : void
+		{	
 			if ( ! _dragHighlightPos.valid() ) {
 				_dragPiece.moveImage();
 			}
@@ -123,23 +117,101 @@
 					_dragPiece.moveImage(); // Move back to the original position.
 				}
 			}
-
-			_eraseHighlight();
+			_eraseHighlight(_dragHighlightImage);
+			_dragHighlightPos.reset();
 			_dragPiece = null;
+			if ( _moveMode == MOVE_MODE_CLICK_N_CLICK )
+			{
+				_eraseHighlight(_dragStartImage);
+				_dragStartPos.reset();
+			}
 		}
 
-		private function _drawHighlight(viewPos:Position) : void 
+		private function _mouseDownHandler(evt:MouseEvent) : void
 		{
-			const imageRadius:int = _dragHighlightImage.contentWidth/2;
-			_dragHighlightImage.x = (offset + viewPos.column * _cellSize)  - imageRadius;
-			_dragHighlightImage.y = (offset + viewPos.row * _cellSize) - imageRadius;
-			this.addChild(_dragHighlightImage);
+			if ( _moveMode == MOVE_MODE_CLICK_N_CLICK )
+			{		
+				if (   _dragPiece
+				    && _dragHighlightPos.valid() && !_dragHighlightPos.equalTo(_dragStartPos) )
+				{
+					_tryCurrentMoveByMouse();
+				}
+			}
 		}
 
-		private function _eraseHighlight() : void 
+		public function onPieceDragStart(piece:Piece) : void
 		{
-			if (_dragHighlightImage.parent) {
-				this.removeChild(_dragHighlightImage);
+			if ( _moveMode == MOVE_MODE_DRAG_N_DROP )
+			{
+				_dragPiece = piece;
+				_dragPiece.startDragMode();
+			}
+			else /* MOVE_MODE_CLICK_N_CLICK */
+			{
+				if (   _dragPiece == null 
+				    || (_dragPiece != piece && _dragPiece.getColor() == piece.getColor()) )
+				{
+					// Set the "START" click.
+					_dragPiece = piece;
+					_dragStartPos = _dragPiece.getPosition();
+					_eraseHighlight(_dragStartImage);
+					_drawHighlight(_dragStartImage, _dragStartPos);
+				}
+				else
+				{
+					_tryCurrentMoveByMouse();
+				}
+			}
+		}
+
+		private function _mouseMoveHandler(evt:MouseEvent) : void 
+		{
+			if ( ! _dragPiece ) return;
+
+			if ( _moveMode == MOVE_MODE_DRAG_N_DROP )
+			{
+				_dragHighlightPos = _getNearestCell();
+				if (_dragHighlightPos.valid())
+				{
+					_eraseHighlight(_dragHighlightImage);
+					_drawHighlight(_dragHighlightImage, _dragHighlightPos);
+				}
+			}
+			else /* MOVE_MODE_CLICK_N_CLICK */
+			{
+				_eraseHighlight(_dragHighlightImage);
+				_dragHighlightPos = _getNearestCell();
+				if ( _dragHighlightPos.valid() && !_dragHighlightPos.equalTo(_dragStartPos) )
+				{
+					_drawHighlight(_dragHighlightImage, _dragHighlightPos);
+				}
+			}
+		}
+
+		private function _mouseUpHandler(evt:MouseEvent) : void 
+		{
+			if ( _moveMode == MOVE_MODE_DRAG_N_DROP )
+			{
+				if ( ! _dragPiece ) return;
+
+				_dragPiece.stopDragMode();
+				_tryCurrentMoveByMouse();
+			}
+		}
+
+		private function _drawHighlight(image:Image, viewPos:Position) : void 
+		{
+			const imageRadius:int = image.contentWidth/2;
+			image.x = (offset + viewPos.column * _cellSize)  - imageRadius;
+			image.y = (offset + viewPos.row * _cellSize) - imageRadius;
+			// NOTE: Add at the BOTTOM (index = 0) to avoid catching mouse events.
+			this.addChildAt(image, 0);
+		}
+
+		private function _eraseHighlight(image:Image) : void 
+		{
+			if (image.parent) {
+				this.removeChild(image);
 			}
 		}
 
@@ -346,7 +418,7 @@
 		private function _getNearestCell():Position
 		{
 			const tolerance:int = 30;  // NOTE: Hard-coded!
-			var pos:Position = new Position(-1, -1);
+			var pos:Position = new Position();
 
 			var yRow:int;
 			for (var i:int = 0; i < 10; i++)
