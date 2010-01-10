@@ -9,6 +9,7 @@
 
 		/**
 		 * Constants for the different Move Modes.
+		 * NOTE: Do not change the constants 'values below.
 		 */
 		private static const MOVE_MODE_DRAG_N_DROP:int = 0;
 		private static const MOVE_MODE_CLICK_N_CLICK:int = 1;
@@ -217,11 +218,12 @@
 
 		public function setTable(table:Table) : void { _table = table; }
 
-		public function setPreferences(bgColor:uint, lineColor:uint, pieceSkin:int) : void
+		public function setPreferences(bgColor:uint, lineColor:uint, pieceSkin:int, moveMode:int) : void
 		{
 			_bgColor   = bgColor;
 			_lineColor = lineColor;
 			_pieceSkin = pieceSkin;
+			_moveMode  = moveMode;
 		}
 
 		public function reverseView() : void
@@ -503,6 +505,11 @@
 			if (_lastPieceInFocus) {
 				_lastPieceInFocus.setFocus();
 			}
+		}
+
+		public function changeMoveMode(moveMode:int) : void
+		{
+			_moveMode = moveMode;
 		}
 
 		/* =================================================================

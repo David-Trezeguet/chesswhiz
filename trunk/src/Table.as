@@ -56,7 +56,8 @@ package
 			_curPref  = preferences;
 
 			_view = view;
-			_view.setPreferences(this, _curPref["boardcolor"], _curPref["linecolor"], _curPref["pieceskin"]);
+			_view.setPreferences(this, _curPref["boardcolor"], _curPref["linecolor"],
+				                 _curPref["pieceskin"], _curPref["movemode"]);
 		}
 
 		public function valid() : Boolean { return tableId != ""; }
@@ -351,6 +352,9 @@ package
 			}
 			if (_curPref["pieceskin"] != newPref["pieceskin"]) {
 				_view.changePieceSkin(newPref["pieceskin"]);
+			}
+			if (_curPref["movemode"] != newPref["movemode"]) {
+				_view.changeMoveMode(newPref["movemode"]);
 			}
 			_curPref = newPref;
 		}
