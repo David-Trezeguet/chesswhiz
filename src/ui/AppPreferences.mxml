@@ -19,6 +19,7 @@
 			private var __preferences:Object = null;
 
 			private var _selectedPieceSet:int = 1;
+			private var _selectedMoveMode:int = 0; // Default = "Drag-N-Drop". 
 
 			private function init() : void
 			{
@@ -28,6 +29,9 @@
 				
 				this.title            = resourceManager.getString('localization', 'Preferences');
 				soundCheckbox.label   = resourceManager.getString('localization', 'Sound');
+				moveModePanel.title   = resourceManager.getString('localization', 'Move_Mode');
+				dragNdropRadio.label  = resourceManager.getString('localization', 'Drag_N_Drop');
+				clickNclickRadio.label= resourceManager.getString('localization', 'Click_N_Click');
 				boardPanel.title      = resourceManager.getString('localization', 'Board');
 				backgroundLabel.text  = resourceManager.getString('localization', 'Background') + ":";
 				foregroundLabel.text  = resourceManager.getString('localization', 'Foreground') + ":";
@@ -46,6 +50,10 @@
 
 				soundCheckbox.selected = __preferences["sound"]
 
+				_selectedMoveMode = __preferences["movemode"];
+				if   (_selectedMoveMode == 0) { dragNdropRadio.selected   = true; }
+				else                          { clickNclickRadio.selected = true; }
+
 				_selectedPieceSet = __preferences["pieceskin"];
 				if      (_selectedPieceSet == 1) { rbPieseSet1.selected = true; }
 				else if (_selectedPieceSet == 2) { rbPieseSet2.selected = true; }
@@ -53,6 +61,11 @@
 
 				bgColorPicker.selectedColor = __preferences["boardcolor"];
 				fgColorPicker.selectedColor = __preferences["linecolor"];
+			}
+
+			private function onSelectMoveMode(modeIndex:int) : void
+			{
+				_selectedMoveMode = modeIndex;
 			}
 
 			private function onSelectPieceSet(setIndex:int) : void
@@ -63,6 +76,7 @@
 			private function onOK(event:Event) : void 
 			{
 				__preferences["sound"]      = soundCheckbox.selected;
+				__preferences["movemode"]   = _selectedMoveMode;
 				__preferences["pieceskin"]  = _selectedPieceSet;
 				__preferences["boardcolor"] = bgColorPicker.selectedColor;
 				__preferences["linecolor"]  = fgColorPicker.selectedColor;
@@ -72,6 +86,15 @@
 
 		]]>
 	</mx:Script>
+
+	<mx:CheckBox label="Sound" id="soundCheckbox" paddingTop="10"/>
+
+	<mx:Panel id="moveModePanel" layout="horizontal" title="Move Mode" width="314" horizontalAlign="left">
+		<mx:RadioButton id="dragNdropRadio" groupName="moveMode" label="Drag and Drop" paddingRight="10"
+			click="onSelectMoveMode(0)"/>
+		<mx:RadioButton id="clickNclickRadio" groupName="moveMode" label="Click and Click"
+			click="onSelectMoveMode(1)"/>
+	</mx:Panel>
 
 	<mx:Panel id="boardPanel" title="Board" layout="absolute"
 			width="314" height="208" verticalGap="10" paddingTop="5" paddingLeft="5">
@@ -103,7 +126,6 @@
 		<mx:Label x="10" y="44" text="Pieces:" id="piecesLabel"/>
 	</mx:Panel>
 
-	<mx:CheckBox label="Sound" id="soundCheckbox" paddingTop="10"/>
 	<mx:HRule width="100%"/>
 	<mx:HBox width="100%" horizontalAlign="right">
 		<mx:Button id="cancelButton" label="Canel" minWidth="70"

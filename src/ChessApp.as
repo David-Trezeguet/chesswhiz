@@ -64,7 +64,8 @@ package
 					"pieceskin"  : 1,
 					"boardcolor" : 0x333333,
 					"linecolor"  : 0xa09e9e,
-					"sound"      : true
+					"sound"      : true,
+					"movemode"   : 0
 				};
 			_loadPreferencesFromLocalSharedObject();
 
@@ -79,12 +80,13 @@ package
 		{
 			try {
 				_sharedObject = SharedObject.getLocal("flashchess");
-				if (_sharedObject.data.persist == 0xFFDDF1)
+				if (_sharedObject.data.persist == 0xFFDDF2)
 				{
 					_preferences["pieceskin"]  = _sharedObject.data.pieceskin;
 					_preferences["boardcolor"] = _sharedObject.data.boardcolor;
 					_preferences["linecolor"]  = _sharedObject.data.linecolor;
 					_preferences["sound"]      = _sharedObject.data.sound;
+					_preferences["movemode"]   = _sharedObject.data.movemode;
 				}
 			}
 			catch (error:Error) {
@@ -94,11 +96,12 @@ package
 
 		private function _savePreferencesToLocalSharedObject() : void
 		{
-			_sharedObject.data.persist    = 0xFFDDF1; // "Present" flag.
+			_sharedObject.data.persist    = 0xFFDDF2; // "Present" flag.
 			_sharedObject.data.pieceskin  = _preferences["pieceskin"];
 			_sharedObject.data.boardcolor = _preferences["boardcolor"];
 			_sharedObject.data.linecolor  = _preferences["linecolor"];
 			_sharedObject.data.sound      = _preferences["sound"];
+			_sharedObject.data.movemode   = _preferences["movemode"];
 
 			var flushStatus:String = null;
             try {

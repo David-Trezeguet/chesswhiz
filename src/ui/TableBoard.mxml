@@ -34,11 +34,11 @@
 			resetButton.toolTip       = resourceManager.getString('localization', 'Reset_table');
 		}
 
-		public function setPreferences(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int) : void
+		public function setPreferences(table:Table, bgColor:uint, lineColor:uint, pieceSkin:int, moveMode:int) : void
 		{
 			_table = table;
 			board.setTable(_table);
-			board.setPreferences(bgColor, lineColor, pieceSkin);
+			board.setPreferences(bgColor, lineColor, pieceSkin, moveMode);
 		}
 
 		public function onNewMoveFromTable( moveColor:String,
@@ -408,6 +408,11 @@
 		public function changePieceSkin(pieceSkin:int) : void 
 		{
 			board.changePiecesSkin(pieceSkin);
+		}
+
+		public function changeMoveMode(moveMode:int) : void 
+		{
+			board.changeMoveMode(moveMode);
 		}
 
 	]]>
