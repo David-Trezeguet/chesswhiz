@@ -7,14 +7,16 @@
 		import mx.controls.Image;
 		import mx.controls.Label;
 
+		[Embed(source="assets/pieces/highlight_50x50.png")]
+		[Bindable]
+		private var _highlightImageClass:Class;
+
 		/**
 		 * Constants for the different Move Modes.
 		 * NOTE: Do not change the constants 'values below.
 		 */
 		private static const MOVE_MODE_DRAG_N_DROP:int = 0;
 		private static const MOVE_MODE_CLICK_N_CLICK:int = 1;
-
-		private static const HIGHLIGHT_IMAGE_SRC:String = "assets/pieces/highlight_50x50.png";
 
 		/**
 		 * History index.
@@ -102,8 +104,8 @@
 			this.addEventListener(MouseEvent.MOUSE_MOVE, _mouseMoveHandler);
 			this.addEventListener(MouseEvent.MOUSE_UP, _mouseUpHandler);
 
-			_dragHighlightImage.load(HIGHLIGHT_IMAGE_SRC);
-			_dragStartImage.load(HIGHLIGHT_IMAGE_SRC);
+			_dragHighlightImage.source = _highlightImageClass;
+			_dragStartImage.source = _highlightImageClass;
 		}
 
 		private function _tryCurrentMoveByMouse() : void
@@ -202,11 +204,15 @@
 
 		private function _drawHighlight(image:Image, viewPos:Position) : void 
 		{
+			/* NOTE: Add at the BOTTOM (index = 0) to avoid catching mouse events.
+			 *       Also, "add" the image FIRST so that the "contentWidth" can be
+			 *       set correctly (due to how the "embeded" assets are handled in Flex).
+			 */
+			this.addChildAt(image, 0);
+
 			const imageRadius:int = image.contentWidth/2;
 			image.x = (offset + viewPos.column * _cellSize)  - imageRadius;
 			image.y = (offset + viewPos.row * _cellSize) - imageRadius;
-			// NOTE: Add at the BOTTOM (index = 0) to avoid catching mouse events.
-			this.addChildAt(image, 0);
 		}
 
 		private function _eraseHighlight(image:Image) : void 
