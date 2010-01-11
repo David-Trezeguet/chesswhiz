@@ -438,7 +438,7 @@
 			<cwui:ClockPanel id="redClock" width="197" height="28"/>
 		</mx:HBox>
 		
-		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#383232, #FFFFFF]">
+		<mx:ApplicationControlBar width="100%" fillAlphas="[1.0, 1.0]" fillColors="[#383232, #FFFFFF]" horizontalGap="2">
 			<mx:Image id="startButton" click="onReviewButton('start')"
 				source="@Embed(source='../assets/go_first.png')" alpha="1.0"/>
 			<mx:Image id="rewindButton" click="onReviewButton('rewind')"
