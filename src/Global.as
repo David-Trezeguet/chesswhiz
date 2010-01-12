@@ -28,7 +28,7 @@ package
 	 */
 	public final class Global
 	{
-		public static const VERSION:String = "1.0.1";
+		public static const VERSION:String = "1.1.0";
 
 		/**
 		 * The reference to the global Application.
