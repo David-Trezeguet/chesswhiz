@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright 2009-2010           <chesswhiz@playxiangqi.com>              *
+ *  Copyright 2009-2010 Bharatendra Boddu <bharathendra@yahoo.com>         *
  *                      Huy Phan  <huyphan@playxiangqi.com>                *
  *                                                                         * 
  *  This file is part of ChessWhiz.                                        *
@@ -28,7 +28,7 @@ package
 	 */
 	public final class Global
 	{
-		public static const VERSION:String = "1.1.0";
+		public static const VERSION:String = "1.1.1";
 
 		/**
 		 * The reference to the global Application.
