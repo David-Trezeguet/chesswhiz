@@ -23,7 +23,7 @@
 
 			private function init() : void
 			{
-				this.title = "ChessWhiz-" + Global.VERSION;
+				this.title = Global.LOGIN_VERSION;
 				formHeading.label = resourceManager.getString('localization', 'login_prompt');
 				usernameItem.label = resourceManager.getString('localization', 'username');
 				passwordItem.label = resourceManager.getString('localization', 'password');
