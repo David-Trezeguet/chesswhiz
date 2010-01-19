@@ -23,7 +23,6 @@ package
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
 	import flash.net.Socket;
-	import flash.system.Security;
 	
 	import hoxserver.*;
 
@@ -37,7 +36,7 @@ package
 
 		public function Session()
 		{
-			Security.allowDomain("games.playxiangqi.com");
+			// Empty.
 		}
 
 		public function getSid() : String { return _sid; }
