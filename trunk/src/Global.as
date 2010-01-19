@@ -28,7 +28,7 @@ package
 	 */
 	public final class Global
 	{
-		public static const VERSION:String = "1.1.1";
+		public static const VERSION:String = "1.1.2";
 
 		/**
 		 * The reference to the global Application.
@@ -43,7 +43,7 @@ package
 		/**
 		 * The internal name known only to the PlayXiangqi server.
 		 */
-		public static const INAME:String = "FLASHCHESS";
+		public static const INAME:String = "ChessWhiz";
 
 		/**
 		 * The 'version' that is sent to the PlayXiangqi server during the login phase.

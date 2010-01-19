@@ -20,11 +20,12 @@
 
 package
 {
-	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.NetStatusEvent;
+	import flash.events.ProgressEvent;
 	import flash.net.SharedObject;
 	import flash.net.SharedObjectFlushStatus;
+	import flash.net.Socket;
 	
 	import hoxserver.*;
 	
@@ -33,11 +34,11 @@ package
 	import mx.managers.PopUpManager;
 	import mx.utils.ObjectUtil;
 	
+	import ui.AppPreferences;
 	import ui.ChatPanel;
 	import ui.LoginPanel;
 	import ui.PlayerListPanel;
 	import ui.TableList;
-	import ui.AppPreferences;
 
 	public class ChessApp
 	{
@@ -362,9 +363,16 @@ package
 		/**
 		 * @note There can be multiple messages/events in the response body
 		 */
-		public function handleServerEvent(event:DataEvent) : void
+		public function handleServerEvent(event:ProgressEvent) : void
 		{
-			const messages:Array = event.data.split("op");
+			var socket:Socket = event.target as Socket;
+			if ( socket == null )
+			{
+				trace("Error: Unexpected target, which is not a 'Socket' type.");
+				return;
+			}
+			const data:String = socket.readUTFBytes(socket.bytesAvailable);
+			const messages:Array = data.split("op");
 
 			for (var i:int = 0; i < messages.length; i++)
 			{

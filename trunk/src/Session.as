@@ -20,9 +20,9 @@
 
 package
 {
-	import flash.events.DataEvent;
 	import flash.events.Event;
-	import flash.net.XMLSocket;
+	import flash.events.ProgressEvent;
+	import flash.net.Socket;
 	import flash.system.Security;
 	
 	import hoxserver.*;
@@ -32,7 +32,7 @@ package
 		private const _hostName:String = "games.playxiangqi.com";
 		private const _port:int        = 80;
 
-		private var _socket:XMLSocket  = null;
+		private var _socket:Socket      = null;
 		private var _sid:String         = "";   // The session-ID.
 
 		public function Session()
@@ -45,7 +45,7 @@ package
 
 		public function open() : void
 		{
-			_socket = new XMLSocket(); // Default connection timeout = 20 sec.
+			_socket = new Socket(); // Default connection timeout = 20 sec.
 
 			_socket.addEventListener(Event.CONNECT, function(status:Boolean):void {
 				if (status) { Global.app.processSocketConnectEvent(); }
@@ -54,7 +54,7 @@ package
 			_socket.addEventListener(Event.CLOSE, function(status:Boolean):void {
 				Global.app.processSocketCloseEvent();
             });
-			_socket.addEventListener(DataEvent.DATA, function(event:DataEvent):void {
+			_socket.addEventListener(ProgressEvent.SOCKET_DATA, function(event:ProgressEvent):void {
 				Global.app.handleServerEvent(event);
 		    });
 
@@ -74,7 +74,8 @@ package
 			const reqMsg:String = req.getMessage();
 			if (_socket.connected) {
 				trace("Sending: " + reqMsg);
-				_socket.send(reqMsg);
+				_socket.writeUTFBytes(reqMsg);
+				_socket.flush();
 			}
 			else {
 			   trace("Session: Fail to send request. Connection lost.");
