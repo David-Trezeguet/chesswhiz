@@ -74,12 +74,16 @@
 
 		public function onGameOverEventFromTable(winner:String, reason:String) : void
 		{
-			//_moveCount = 0;
 			_gameOver = true;
 			_updateCommandButtons();
 
 			redClock.stop();
 			blackClock.stop();
+
+			if ( Global.player.color != "None" )
+			{
+				board.disablePieceEvents(Global.player.color);
+			}
 
 			/* Display the detailed message on why the Game ended.
 			 * TODO: Need to localize the detailed info-message.
@@ -123,7 +127,9 @@
 
 			_updateCommandButtons();
 			board.reset();
-			
+			board.disablePieceEvents("Red");
+			board.disablePieceEvents("Black");
+
 			if ( _table.tableId == "" )
 			{
 				this.title = "";
@@ -168,6 +174,10 @@
 				this.onSystemMessage(player.pid + " joined");
 			}
 
+			var myOldColor:String = "None";
+			if      ( Global.player.pid == _redId )   { myOldColor = "Red";   }
+			else if ( Global.player.pid == _blackId ) { myOldColor = "Black"; }
+
 			switch ( player.color )
 			{
 				case  "None":
@@ -198,6 +208,20 @@
 				}
 			}
 
+			// Stop the game if I was playing and now there are not enough players.
+			if (   myOldColor != "None"
+			    && (_redId == "" || _blackId == "") )
+			{
+				board.disablePieceEvents(myOldColor);
+			}
+			// Start the Game if there are enough players.
+			else if (   player.color != "None"
+				     && Global.player.color != "None"
+				     && ( _redId != "" && _blackId != "" ) )
+			{
+				board.enablePieceEvents(Global.player.color);
+			}
+
 			_updateCommandButtons();
 
 			// By default, my side is at the bottom of the board.
@@ -218,6 +242,10 @@
 				this.onSystemMessage(playerId + " left");
 			}
 
+			var myOldColor:String = "None";
+			if      ( Global.player.pid == _redId )   { myOldColor = "Red";   }
+			else if ( Global.player.pid == _blackId ) { myOldColor = "Black"; }
+
 			if ( playerId == _redId )
 			{
 				_redId = "";
@@ -227,6 +255,13 @@
 			{
 				_blackId = "";
 				blackPanel.playerLabel = "";
+			}
+
+			// Stop the game if I was playing and now there are not enough players.
+			if (   myOldColor != "None"
+			    && (_redId == "" || _blackId == "") )
+			{
+				board.disablePieceEvents(myOldColor);
 			}
 
 			_updateCommandButtons();
@@ -240,6 +275,12 @@
 			_moveCount = 0;
 			_gameOver = false;
 			_updateCommandButtons();
+
+			if (   Global.player.color != "None" 
+				&& ( _redId != "" && _blackId != "" ) )
+			{
+				board.enablePieceEvents(Global.player.color);
+			}
 
 			redClock.stop();
 			blackClock.stop();
