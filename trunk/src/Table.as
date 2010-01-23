@@ -67,11 +67,7 @@ package
 		{
 			_redPlayer = null;
 			_blackPlayer = null;
-
 			_view.clearDisplay();
-
-			_view.board.disablePieceEvents("Red");
-			_view.board.disablePieceEvents("Black");
 		}
 
 		public function closeCurrentTable() : void
@@ -114,19 +110,19 @@ package
 			if ( tableInfo.redid != "" )
 			{
 				_redPlayer = new PlayerInfo(tableInfo.redid, "Red", tableInfo.redscore);
-				_view.onPlayerJoined(_redPlayer);
 				if ( Global.player.pid == tableInfo.redid ) {
 					Global.player.color = "Red";
 				}
+				_view.onPlayerJoined(_redPlayer);
 			}
 
 			if ( tableInfo.blackid != "" )
 			{
 				_blackPlayer = new PlayerInfo(tableInfo.blackid, "Black", tableInfo.blackscore);
-				_view.onPlayerJoined(_blackPlayer);
 				if ( Global.player.pid == tableInfo.blackid ) {
 					Global.player.color = "Black";
 				}
+				_view.onPlayerJoined(_blackPlayer);
 			}
 
 			// Add the list of observers, if any.
@@ -143,12 +139,6 @@ package
 		
 		public function stopGame(winner:String, reason:String) : void
 		{
-			if ( Global.player.color != "None" )
-			{
-				_view.board.disablePieceEvents(Global.player.color);
-				Global.player.color = "None";
-			}
-
 			_view.onGameOverEventFromTable(winner, reason);
 		}
 
@@ -173,11 +163,6 @@ package
 
 		public function resetTable() : void
 		{
-			_view.onReset();
-			_referee.resetGame();
-
-			/* Get the Table in the "ready" state if there are enough players. */
-
 			if ( _redPlayer && _redPlayer.pid == Global.player.pid ) {
 				Global.player.color = "Red";
 			} else if ( _blackPlayer && _blackPlayer.pid == Global.player.pid ) {
@@ -186,11 +171,8 @@ package
 				Global.player.color = "None";
 			}
 
-			if (   Global.player.color != "None" 
-				&& ( _redPlayer && _blackPlayer ) )
-			{
-				_view.board.enablePieceEvents(Global.player.color);
-			}
+			_view.onReset();
+			_referee.resetGame();
 		}
 
 		public function playMoveList(moves:Array) : void
@@ -298,24 +280,10 @@ package
 
 			if ( player.pid == Global.player.pid  )
 			{
-				// If I no longer play, disable my pieces.
-				if ( Global.player.color != "None" && player.color == "None" )
-				{
-					_view.board.disablePieceEvents(Global.player.color);
-				}
 				Global.player.color = player.color;
 			}
 
 			_view.onPlayerJoined(player);
-
-			/* Start the Game if there are enough players. */
-
-			if (   player.color != "None"
-				&& Global.player.color != "None"
-				&& ( _redPlayer && _blackPlayer ) )
-			{
-				_view.board.enablePieceEvents(Global.player.color);
-			}
 		}
 
 		public function leaveTable(pid:String) : void
