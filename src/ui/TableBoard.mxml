@@ -89,9 +89,9 @@
 			 * TODO: Need to localize the detailed info-message.
 			 */
 
-			var infoMsg:String = resourceManager.getString('localization', 'Game_Over');
-			board.displayStatus(infoMsg);
+			board.displayGameOverStatus();
 
+			var infoMsg:String = resourceManager.getString('localization', 'Game_Over');
 			switch ( winner )
 			{
 				case "red_win":   infoMsg += ". " + _redId + " won."; break;
@@ -339,7 +339,7 @@
 				 }
 			}
 
-			resetButton.enabled = (bIPlay && _moveCount > 0);
+			resetButton.enabled = (bIPlay && (_gameOver || _moveCount < 2) );
 		}
 
 		public function initializeTimers(itimes:String, redTimes:String = "", blackTimes:String = "") : void
@@ -377,7 +377,9 @@
 				case "rewind":  board.doGameReview_PREV(); break;
 				case "forward": board.doGameReview_NEXT(); break;
 				case "end":     board.doGameReview_END(); break;
+				default: return;
 			}
+			board.updateReplayStatus(_gameOver);
 		}
 
 		public function onNewPlayerScore(pid:String, score:String) : void 
