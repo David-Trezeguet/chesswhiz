@@ -44,6 +44,7 @@
 		private var _topColor:String = "Black"; // Normal view: Black at the top.
 
 		private var _lastPieceInFocus:Piece = null;
+		private var _statusLabel:Label = new Label();
 		private var _pieceSkin:int = 1;
 		private var _bgColor:uint;
 		private var _lineColor:uint;
@@ -106,6 +107,16 @@
 
 			_dragHighlightImage.source = _highlightImageClass;
 			_dragStartImage.source = _highlightImageClass;
+
+			// Create the status-Label for this Board.
+			_statusLabel.width = offset + 8 * _cellSize;
+			_statusLabel.x = offset;
+			_statusLabel.y = this.getY(4) + 8;
+			_statusLabel.text = "Table-Status";
+			_statusLabel.setStyle("color", 0x33CCFF);
+			_statusLabel.setStyle("fontFamily", "Verdana");
+			_statusLabel.setStyle("fontSize", 24);
+			_statusLabel.setStyle("textAlign", "center");
 		}
 
 		private function _tryCurrentMoveByMouse() : void
@@ -236,8 +247,7 @@
 		{
 			_topColor = (_topColor == "Red" ? "Black" : "Red");
 
-			// Clear the old board.
-			this.graphics.clear();
+			this.graphics.clear();    // Clear the old board.
 			this.removeAllChildren();
 
 			drawBoard(_bgColor, _lineColor);
@@ -262,8 +272,7 @@
 
 		public function reset() : void
 		{
-			// Clear the old board.
-			this.graphics.clear();
+			this.graphics.clear();    // Clear the old board.
 			this.removeAllChildren();
 
 			drawBoard(_bgColor, _lineColor);
@@ -463,16 +472,16 @@
 					: new Position( Math.abs(pos.row - 9), Math.abs(pos.column - 8) ) );
 		}
 
-		public function displayStatus(status:String) : void
+		public function displayGameOverStatus() : void
 		{
-			// TODO: Need to properly center the text.
-			_addTextField(status, this.getX(3), this.getY(4) + 10, 0x33CCFF, 18);
+			_statusLabel.text = resourceManager.getString('localization', 'Game_Over');
+			_addStatusLabel();
 		}
 
 		public function displayEmptyStatus() : void
 		{
-			// TODO: Need to properly center the text.
-			_addTextField("Empty Table", this.getX(3), this.getY(4) + 10, 0x33CCFF, 24);
+			_statusLabel.text = resourceManager.getString('localization', 'Empty_Table');
+			_addStatusLabel();
 		}
 
 		public function enablePieceEvents(color:String) : void
@@ -627,10 +636,9 @@
 			_lastPieceInFocus = piece;
 		}
 
-		public function doGameReview_BEGIN() : Boolean
+		public function doGameReview_BEGIN() : void
 		{
 		    while ( this.doGameReview_PREV() ) { }
-		    return true;
 		}
 
 		public function doGameReview_PREV() : Boolean
@@ -740,15 +748,37 @@
 			return true;
 		}
 
-		public function doGameReview_END() : Boolean
+		public function doGameReview_END() : void
 		{
 		    while ( this.doGameReview_NEXT() ) { }
-		    return true;
+		}
+
+		public function updateReplayStatus(gameOver:Boolean) : void
+		{
+		    if  (_isBoardInReviewMode() ) {
+		    	_statusLabel.text = resourceManager.getString('localization', 'Replay')
+		    	+ " " + (_historyIndex+1) + "/" + _historyMoves.length;
+		    	_addStatusLabel();
+		    } else if (gameOver) {
+		    	this.displayGameOverStatus();
+		    } else {
+		    	_removeStatusLabel();
+		    }
 		}
 
 		private function _isBoardInReviewMode() : Boolean
 		{
 		    return ( _historyIndex != HISTORY_INDEX_END );
+		}
+
+		private function _removeStatusLabel() : void
+		{
+		    if (_statusLabel.parent) _statusLabel.parent.removeChild(_statusLabel);
+		}
+
+		private function _addStatusLabel() : void
+		{
+		    if (!_statusLabel.parent) this.addChild(_statusLabel);
 		}
 
 	]]>
